@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Allow: /product-images/
+Allow: /cache/
+Allow: /favicon.ico
+
+Sitemap: https://autogearke.com/sitemap.xml
