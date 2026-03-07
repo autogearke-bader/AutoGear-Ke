@@ -1,0 +1,26 @@
+# General rules for all crawlers
+User-agent: *
+Allow: /
+Allow: /product-images/
+Allow: /cache/
+Allow: /favicon.ico
+
+# Standard method to block AI training (replaces the failed Content-Signal)
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: GPTBot
+Disallow: /
+
+# Specifically block aggressive bots
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+# Correct link to your PHP-generated sitemap
+Sitemap: https://autogearke.com/sitemap.php

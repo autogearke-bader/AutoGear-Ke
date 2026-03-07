@@ -1,0 +1,25 @@
+RewriteEngine On
+
+# Enable PHP execution for .xml files
+AddType application/x-httpd-php .xml
+
+# =============================================================================
+# Security Headers
+# =============================================================================
+Header always set X-Frame-Options "SAMEORIGIN"
+Header always set X-XSS-Protection "1; mode=block"
+Header always set X-Content-Type-Options "nosniff"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+# Content Security Policy - Allow Quill editor, Tailwind CSS, Cloudflare Insights, Google Tag Manager, Google Analytics, and external resources
+Header always set Content-Security-Policy "default-src 'self' blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://cdn.quilljs.com https://static.cloudflareinsights.com https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; img-src 'self' data: https: blob:; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.quilljs.com; connect-src 'self' https: blob:; frame-src 'self' https:;"
+
+# Rewrite product-images to img.php
+RewriteRule ^product-images/(.*)$ img.php?name=$1 [L]
+
+# Rewrite return-policy to return-policy.html
+RewriteRule ^return-policy/?$ return-policy.html [L]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.html [L]
