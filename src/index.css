@@ -1,0 +1,227 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* CSS Root Enforcement - Dark Mode Always */
+:root {
+  color-scheme: dark only;
+}
+
+html, body {
+  background-color: #020617 !important;
+  color: #f8fafc !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Force dark backgrounds on all mobile inputs */
+input, textarea, select {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #1e293b !important;
+}
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+
+  /* Brand Colors - Hardcoded for consistent premium dark theme */
+  --color-brand-bg: #020617;
+  --color-brand-surface: #0f172a;
+
+  --utility-scrollbar-hide-scrollbars: none;
+  --utility-scrollbar-hide-scrollbar-width: none;
+  --utility-scrollbar-hide-ms-overflow-style: none;
+}
+
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Custom font styling */
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Scrollbar hide utilities */
+::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Logo glow effect */
+.logo-glow {
+  filter: drop-shadow(0 0 10px rgba(37, 99, 235, 0.5));
+}
+
+/* TikTok Brand Glitch Effect */
+.tiktok-glitch {
+  transition: all 0.3s ease;
+}
+
+.tiktok-glitch:hover {
+  filter: drop-shadow(2px 0px 0px #fd2e53) drop-shadow(-2px 0px 0px #00f2ea);
+  transform: scale(1.1) translateY(-2px);
+}
+
+/* Marquee Animation */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marquee-reverse {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 25s linear infinite;
+}
+
+.animate-marquee-reverse {
+  display: flex;
+  width: max-content;
+  animation: marquee-reverse 25s linear infinite;
+}
+
+.animate-marquee:hover,
+.animate-marquee-reverse:hover {
+  animation-play-state: paused;
+}
+
+.marquee-container {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Gradient Fade Masks */
+.fade-mask-left,
+.fade-mask-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 60px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.fade-mask-left {
+  left: 0;
+  background: linear-gradient(to right, #020617 0%, transparent 100%);
+}
+
+.fade-mask-right {
+  right: 0;
+  background: linear-gradient(to left, #020617 0%, transparent 100%);
+}
+
+/* Quill Editor Dark Theme */
+.ql-toolbar.ql-snow {
+  border-color: #1e293b !important;
+  background: #0f172a;
+}
+
+.ql-container.ql-snow {
+  border-color: #1e293b !important;
+  background: #0f172a;
+}
+
+.ql-snow .ql-stroke {
+  stroke: #94a3b8;
+}
+
+.ql-snow .ql-fill {
+  fill: #94a3b8;
+}
+
+.ql-snow .ql-picker {
+  color: #94a3b8;
+}
+
+.ql-snow.ql-toolbar button:hover .ql-stroke,
+.ql-snow .ql-toolbar button:hover .ql-stroke {
+  stroke: #3b82f6;
+}
+
+.ql-snow.ql-toolbar button:hover .ql-fill,
+.ql-snow .ql-toolbar button:hover .ql-fill {
+  fill: #3b82f6;
+}
+
+.ql-snow.ql-toolbar button:hover .ql-picker,
+.ql-snow .ql-toolbar button:hover .ql-picker {
+  color: #3b82f6;
+}
+
+.ql-snow.ql-toolbar button.ql-active .ql-stroke,
+.ql-snow .ql-toolbar button.ql-active .ql-stroke {
+  stroke: #3b82f6;
+}
+
+.ql-editor {
+  color: #f1f5f9;
+  min-height: 200px;
+}
+
+.ql-editor h1,
+.ql-editor h2,
+.ql-editor h3,
+.ql-editor p,
+.ql-editor span,
+.ql-editor li {
+  color: #f1f5f9 !important;
+}
+
+.ql-editor.ql-blank::before {
+  color: #64748b;
+  font-style: normal;
+}
+
+/* Product Description Styling */
+.product-description {
+  color: #f1f5f9 !important;
+  line-height: 1.8;
+}
+
+.product-description h1,
+.product-description h2,
+.product-description h3 {
+  color: #ffffff !important;
+  font-weight: 800;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.product-description p {
+  color: #cbd5e1 !important;
+  margin-bottom: 1rem;
+}
+
+.product-description ul,
+.product-description ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.product-description li {
+  color: #cbd5e1 !important;
+  margin-bottom: 0.5rem;
+}
