@@ -1,0 +1,81 @@
+# AutoGear Ke - API Security Hardening
+# Protect sensitive files from direct access
+
+# Deny access to .env files
+<FilesMatch "\.env$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Deny access to .php files in includes subdirectory (if exists)
+<FilesMatch "includes/.*\.php$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Deny access to log files
+<FilesMatch "\.log$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Deny access to configuration files
+<FilesMatch "config\.php$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Deny access to security functions file
+<FilesMatch "security\.php$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Disable directory browsing
+Options -Indexes
+
+# Disable server signature
+ServerSignature Off
+
+# Protect against clickjacking
+Header always append X-Frame-Options SAMEORIGIN
+
+# XSS Protection
+Header set X-XSS-Protection "1; mode=block"
+
+# MIME type sniffing protection
+Header set X-Content-Type-Options "nosniff"
+
+# Content Security Policy (adjust as needed)
+Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https:"
+
+# Referrer Policy
+Header set Referrer-Policy "strict-origin-when-cross-origin"
+
+# Remove PHP version from headers
+php_value expose_php Off
+
+# Disable unused HTTP methods
+<LimitExcept GET POST>
+    Deny from all
+</LimitExcept>
+
+# Rate limiting for brute force protection
+<IfModule mod_ratelimit.c>
+    LimitRequestBody 5242880
+    SetOutputFilter RATE_LIMIT
+    SetEnv rate-limit 100
+</IfModule>
+
+# Block suspicious User-Agents
+<IfModule mod_setenvif.c>
+    SetEnvIfNoCase User-Agent "^curl" block_bot
+    SetEnvIfNoCase User-Agent "^wget" block_bot
+    SetEnvIfNoCase User-Agent "^python" block_bot
+    SetEnvIfNoCase User-Agent "^java" block_bot
+    <Limit GET POST>
+        Order allow,deny
+        Allow from all
+        Deny from env=block_bot
+    </Limit>
+</IfModule>
