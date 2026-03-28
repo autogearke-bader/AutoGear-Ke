@@ -1,0 +1,93 @@
+{
+  "name": "AutoGear Ke - Automotive Services Marketplace",
+  "short_name": "AutoGear Ke",
+  "description": "Automotive Services Marketplace - Find the best automotive service technicians for tinting, wrapping, PPF, ceramic coating, detailing & tuning.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "display_override": ["standalone", "fullscreen", "minimal-ui"],
+  "background_color": "#080909",
+  "theme_color": "#e8a020",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["business", "lifestyle", "shopping"],
+  "icons": [
+    {
+      "src": "/assets/180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/32.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/48.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/64.png",
+      "sizes": "64x64",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/launchericon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+     "src": "/assets/167.png",
+     "sizes": "167x167",
+     "type": "image/png",
+     "purpose": "any"
+   },
+   {
+    "src": "/assets/152.png",
+     "sizes": "152x152",
+    "type": "image/png",
+    "purpose": "any"
+   },
+    {
+      "src": "/assets/launchericon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/assets/screen.png",
+      "sizes": "1125x2436",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Book a Service",
+      "short_name": "Book",
+      "description": "Find and book a car service technician",
+      "url": "/?action=book"
+    },
+    {
+      "name": "Find Technicians",
+      "short_name": "Find",
+      "description": "Search for car service professionals",
+      "url": "/?action=search"
+    },
+    {
+      "name": "My Bookings",
+      "short_name": "Bookings",
+      "description": "View your service bookings",
+      "url": "/?action=bookings"
+    }
+  ]
+}

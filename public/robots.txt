@@ -1,0 +1,325 @@
+# =============================================================================
+# AutoGear robots.txt - Production robots.txt Configuration
+# =============================================================================
+# This file controls how search engine crawlers access your website.
+# Proper configuration improves SEO while protecting sensitive areas.
+#
+# Last Updated: 2026-03-28
+# Project: AutoGear (Auto Repair Service Platform)
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# SECTION 1: USER-AGENT DIRECTIVES
+# -----------------------------------------------------------------------------
+# Define rules for specific crawlers. The order matters - rules are applied
+# to the first matching User-agent, then to * (all crawlers) as fallback.
+
+# Googlebot - Primary Google crawler for web indexing
+User-agent: Googlebot
+Disallow: 
+Allow: /
+
+# Googlebot-Image - For Google Images search
+User-agent: Googlebot-Image
+Disallow:
+Allow: /
+
+# Googlebot-News - For Google News indexing
+User-agent: Googlebot-News
+Disallow:
+Allow: /
+
+# Googlebot-Video - For video content indexing
+User-agent: Googlebot-Video
+Disallow:
+Allow: /
+
+# Bingbot - Microsoft's Bing search crawler
+User-agent: Bingbot
+Disallow:
+Allow: /
+
+# BingBot - Alternative name for Bing crawler
+User-agent: BingBot
+Disallow:
+Allow: /
+
+# Yahoo! Slurp - Yahoo's crawler (now deprecated but some references exist)
+User-agent: Yahoo! Slurp
+Disallow:
+Allow: /
+
+# DuckDuckBot - DuckDuckGo privacy-focused search
+User-agent: DuckDuckBot
+Disallow:
+Allow: /
+
+# Baidu Spider - Baidu's Chinese search engine crawler
+User-agent: BaiduSpider
+Disallow:
+Allow: /
+
+# Yandex Bot - Yandex (Russian search engine) crawler
+User-agent: Yandex
+Disallow:
+Allow: /
+
+# Sogou Spider - Sogou (Chinese) crawler
+User-agent: Sogou web spider
+Disallow:
+Allow: /
+
+# Exabot - Exalead crawler
+User-agent: Exabot
+Disallow:
+Allow: /
+
+# Facebook Crawler - For social media sharing preview cards
+User-agent: FacebookBot
+Disallow:
+Allow: /
+
+# Twitterbot - For Twitter card rendering
+User-agent: Twitterbot
+Disallow:
+Allow: /
+
+# Applebot - For Apple search (Siri Suggestions)
+User-agent: Applebot
+Disallow:
+Allow: /
+
+# Amazonbot - For Alexa product search
+User-agent: Amazonbot
+Disallow:
+Allow: /
+
+# -----------------------------------------------------------------------------
+# SECTION 2: SENSITIVE DIRECTORIES - BLOCKED FOR ALL CRAWLERS
+# -----------------------------------------------------------------------------
+# These paths contain sensitive information and should NEVER be indexed.
+
+# Admin Dashboard and administrative interfaces
+Disallow: /admin
+Disallow: /admin/
+
+# Authentication pages - prevent duplicate content issues
+# Allow the login page itself but block processing pages
+Disallow: /auth
+Disallow: /auth/
+
+# Internal API endpoints - these are for dynamic data, not content indexing
+Disallow: /api
+
+# Database migrations - can expose schema information
+Disallow: /migrations
+
+# Database backup files and SQL scripts
+Disallow: /supabase-setup.sql
+Disallow: /migrations/*.sql
+
+# Version control folders - critical security risk
+Disallow: /.git
+Disallow: /.gitignore
+
+# Configuration files - can expose credentials and secrets
+Disallow: /.env
+Disallow: /.env.*
+Disallow: /vite.config.ts
+Disallow: /tsconfig.json
+
+# Source code directories
+Disallow: /src
+Disallow: /components
+Disallow: /pages
+
+# Type definitions and type configuration
+Disallow: /types
+Disallow: /types/
+
+# Utility scripts
+Disallow: /scripts
+Disallow: /scripts/
+
+# Private user areas - require authentication
+# These allow indexing of public-facing pages but block authenticated areas
+Disallow: /menu
+Disallow: /bookings
+Disallow: /profile
+Disallow: /dashboard
+
+# Error pages and server diagnostics
+Disallow: /*?
+Disallow: /*.json
+Disallow: /*.xml
+
+# -----------------------------------------------------------------------------
+# SECTION 3: SENSITIVE ENDPOINTS - SECURITY BLOCKS
+# -----------------------------------------------------------------------------
+# Block various endpoints that could expose sensitive information or
+# create security vulnerabilities if indexed.
+
+# Query string parameters that might expose sensitive data
+Disallow: /*?
+Disallow: /*?
+
+# Fragment identifiers with potential sensitive data
+Disallow: /*#
+
+# JSON and configuration endpoints
+Disallow: /*.json$
+Disallow: /*.json?
+
+# Backend and server files
+Disallow: /*.sql$
+Disallow: /*.ts$
+
+# Temporary and backup files
+Disallow: /*.backup
+Disallow: /*.temp
+Disallow: /*.bak
+
+# Environment-specific configurations
+Disallow: /.env
+Disallow: /.env.local
+Disallow: /.env.production
+Disallow: /.env.development
+
+# -----------------------------------------------------------------------------
+# SECTION 4: PUBLIC CONTENT - ALLOWED FOR INDEXING
+# -----------------------------------------------------------------------------
+# Explicitly allow public content that should be indexed for SEO.
+# These are the main public-facing pages of the application.
+
+# Homepage and root
+Allow: /$
+Allow: /$
+
+# Public pages - Articles, Blog, About, Contact, etc.
+Allow: /about$
+Allow: /blog
+Allow: /article/
+Allow: /contact$
+Allow: /terms$
+Allow: /privacy-policy$
+
+# Service-related public pages
+Allow: /service-location$
+Allow: /guest-menu$
+
+# Landing/Join pages for new users
+Allow: /join$
+
+# Auth pages - allow the main auth page for indexing
+Allow: /auth$
+
+# Static assets in public folder
+Allow: /manifest.json
+Allow: /sw.js
+Allow: /_headers
+
+# -----------------------------------------------------------------------------
+# SECTION 5: STATIC ASSETS - ALLOWED
+# -----------------------------------------------------------------------------
+# Allow all static assets (images, CSS, JS, fonts) for proper rendering
+
+# Favicon and icons
+Allow: /favicon.ico
+Allow: /favicon-
+Allow: /apple-touch-icon.png
+
+# PWA icons
+Allow: /assets/launchericon-
+Allow: /assets/
+Allow: /assets/*
+
+# -----------------------------------------------------------------------------
+# SECTION 6: CRAWL-DELAY DIRECTIVE
+# -----------------------------------------------------------------------------
+# Crawl-delay specifies the delay between successive crawl requests.
+# This helps prevent server overload from aggressive crawlers.
+# Note: Only supported by some crawlers (Yahoo Slurp, Yandex, etc.)
+# Googlebot and Bing respect sitemaps more than crawl-delay.
+#
+# For a typical web application, 1-2 seconds is reasonable.
+# Adjust based on your server capacity and traffic.
+
+Crawl-delay: 1
+
+# -----------------------------------------------------------------------------
+# SECTION 7: SITEMAP LOCATION
+# -----------------------------------------------------------------------------
+# Point to your XML sitemap for better SEO and crawl efficiency.
+# This helps search engines discover all URLs on your site.
+# 
+# Replace autogearke.com with your actual production domain.
+# For local development, this would be localhost or your dev URL.
+
+Sitemap: https://autogearke.com/sitemap.xml
+
+# Alternative: Point to index sitemap if you have multiple sitemaps
+# Sitemap: https://yourdomain.com/sitemap-index.xml
+
+# -----------------------------------------------------------------------------
+# SECTION 8: ENVIRONMENT-SPECIFIC RULES
+# -----------------------------------------------------------------------------
+# These rules handle different deployment environments.
+# Uncomment and adjust based on your environment.
+
+# Production Environment Rules
+# -----------------------------------------------------------------------------
+# For production, ensure all security blocks are active.
+# The base rules above already handle this.
+
+# Staging/Development Environment Rules
+# -----------------------------------------------------------------------------
+# If you have separate staging environments, you might want to
+# completely block staging to prevent indexing.
+# 
+# Example for staging:
+# User-agent: *
+# Disallow: /
+# 
+# Example for development:
+# User-agent: *
+# Disallow: /
+# Allow: /$
+
+# -----------------------------------------------------------------------------
+# SECTION 9: ADVANCED ROBOTS.TXT DIRECTIVES
+# -----------------------------------------------------------------------------
+
+# Clean URLs - Help search engines understand clean URL structure
+# Modern bots handle query parameters well, but explicit rules help
+
+# Prevent indexing of duplicate content with tracking parameters
+# Examples (uncomment as needed):
+# Disallow: /*utm_source
+# Disallow: /*utm_medium
+# Disallow: /*utm_campaign
+# Disallow: /*fbclid
+# Disallow: /*gclid
+
+# -----------------------------------------------------------------------------
+# SECTION 10: HOST DIRECTIVE (Legacy, but still respected by some)
+# -----------------------------------------------------------------------------
+# Specifies the preferred domain for crawling.
+# Most modern crawlers use canonical URLs instead.
+
+# Host: www.autogearke.com
+# Or for non-www:
+# Host: autogearke.com
+
+# -----------------------------------------------------------------------------
+# END OF ROBOTS.TXT
+# -----------------------------------------------------------------------------
+# For questions about robots.txt, refer to:
+# - Google: https://developers.google.com/search/docs/crawling-indexing/robots/intro
+# - Bing: https://www.bing.com/webmasters/help/robots-01-97bcf1b5
+# - Yandex: https://yandex.com/support/webmaster/robots.xml
+#
+# Always test your robots.txt after deployment using:
+# - Google Search Console robots.txt Tester
+# - Bing Webmaster Tools
+# - Online robots.txt validators
+# =============================================================================

@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" class="dark">
   <head>
     <!-- Google tag (gtag.js) -->
@@ -11,8 +11,8 @@
       gtag('config', 'G-72E9Z3HM9S');
     </script>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AutoGear Ke | Trending Car & Mobile Accessories in Kenya</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Find Automotive Technicians in Nairobi | AutoGear Ke</title>
     
     <!-- Favicon -->
     <link rel="icon" href="https://autogearke.com/favicon.ico" type="image/x-icon">
@@ -21,49 +21,62 @@
     <link rel="icon" type="image/png" sizes="64x64" href="/assets/favicon-64.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
 
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="AutoGear Ke">
+    <meta name="application-name" content="AutoGear Ke">
+    <meta name="theme-color" content="#e8a020">
+    <meta name="msapplication-TileColor" content="#080909">
+    <meta name="msapplication-tap-highlight" content="no">
+    
+    <!-- iOS PWA - Uses apple-touch-icon as fallback for splash screens -->
+    <meta name="apple-mobile-web-app-capable" content="default">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
     
     <!-- SEO Meta Tags - Human-First Optimized -->
-    <meta name="description" content="Shop the latest car gadgets & mobile accessories at AutoGear Ke. From 4K dash cams to fast chargers & smartwatches. Best prices & fast delivery in Nairobi!" />
-    <meta name="keywords" content="car accessories kenya, car accessories nairobi, ngong road car accessories, ambient lighting nairobi, car interior upgrades kenya, auto gear kenya, smart car scent diffuser, retractable car charger kenya, car floor mats nairobi, car seat covers kenya, pay on delivery car parts, professional car fitting nairobi" />
+    <meta name="description" content="Find trusted car tinting, wrapping, PPF & ceramic coating technicians in Nairobi. Book on AutoGear Ke today." />
+    <meta name="keywords" content="car tinting kenya, car wrapping nairobi, PPF coating kenya, ceramic coating nairobi, car detailing kenya, car tuning nairobi, mobile car service kenya, best car technicians kenya, auto detailing nairobi, car wrap shops kenya" />
     <link rel="canonical" href="https://autogearke.com/" />
     <meta name="MobileOptimized" content="320">
     <meta name="theme-color" content="#020617">
     <meta name="color-scheme" content="dark only">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <!-- Content Security Policy -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://cdnjs.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com https://static.cloudflareinsights.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; connect-src 'self' blob: https://www.google-analytics.com https://www.googletagmanager.com https://static.cloudflareinsights.com; font-src 'self' https://fonts.gstatic.com; media-src 'self' blob:;">
+    <!-- Content Security Policy - Production Ready -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://cdnjs.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com https://static.cloudflareinsights.com https://unpkg.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; img-src 'self' data: blob: https: res.cloudinary.com https://p16-tiktokcdn-com.akamaized.net; connect-src 'self' blob: data: https://*.supabase.co wss://*.supabase.co https://api.cloudinary.com https://*.cloudinary.com https://nominatim.openstreetmap.org https://*.openstreetmap.org https://www.tiktok.com https://*.tiktok.com https://api.allorigins.win; font-src 'self' https://fonts.gstatic.com; media-src 'self' blob:; frame-src 'self' https://www.google.com https://accounts.google.com https://www.youtube.com https://www.tiktok.com https://www.instagram.com https://player.vimeo.com;">
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://autogearke.com/" />
-    <meta property="og:title" content="AutoGear Ke | Premium Car Interior Upgrades & Fitting Nairobi" />
-    <meta property="og:description" content="Nairobi's leading car accessory workshop on Ngong Road. Expert ambient lighting installation, smart diffusers, and 5-in-1 chargers. Fast shipping across Kenya with pay on delivery!" />
+    <meta property="og:title" content="Find Auto Care Technicians in Nairobi | AutoGear Ke" />
+    <meta property="og:description" content="Find trusted car tinting, wrapping, PPF & ceramic coating technicians in Nairobi. Book on AutoGear Ke today." />
     <meta property="og:image" content="/assets/logo-4.png" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@autogear_ke">
     <meta name="twitter:url" content="https://autogearke.com/" />
-    <meta name="twitter:title" content="AutoGear Ke | Best Car Accessories in Kenya" />
-    <meta name="twitter:description" content="Shop high-quality car and mobile accessories that are quality verified before delivery. Same-day delivery in Nairobi. Simple, fast, and secure transactions." />
+    <meta name="twitter:title" content="Find Auto Care Technicians in Nairobi | AutoGear Ke" />
+    <meta name="twitter:description" content="Find trusted car tinting, wrapping, PPF & ceramic coating technicians in Nairobi. Book on AutoGear Ke today." />
     <meta name="twitter:image" content="/assets/logo-4.png" />
 
-    <!-- Structured Data: Local Business -->
+    <!-- Structured Data: Service Business -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "AutoAccessoriesStore",
+      "@type": "Service",
       "name": "AutoGear Ke",
-      "image": "https://autogearke.com/assets/logo-4.png",
-      "@id": "https://autogearke.com",
+      "description": "Kenya's car service technician marketplace connecting clients with expert professionals for tinting, wrapping, PPF, ceramic coating, detailing & tuning.",
       "url": "https://autogearke.com",
-      "telephone": "+254112493733",
-      "priceRange": "KSh 500 - KSh 25000",
-    
-      "sameAs": [
-        "https://www.instagram.com/autogear_ke?igsh=dWJjMTViZmllemtn",
-        "https://www.tiktok.com/@autogear_ke?_r=1&_t=ZM-92zVNcV4j07"
-      ]
+      "areaServed": {
+        "@type": "Country",
+        "name": "Kenya"
+      },
+      "serviceType": ["Car Tinting", "Car Wrapping", "PPF Coating", "Ceramic Coating", "Car Detailing", "Car Tuning"]
     }
     </script>
 
@@ -71,17 +84,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@19.0.0",
-    "react-dom": "https://esm.sh/react-dom@19.0.0",
-    "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
-    "react-router-dom": "https://esm.sh/react-router-dom@7.1.1?deps=react@19.0.0,react-dom@19.0.0",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+  {
+    "imports": {
+      "react": "https://esm.sh/react@19.0.0",
+      "react-dom": "https://esm.sh/react-dom@19.0.0",
+      "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+      "react-router-dom": "https://esm.sh/react-router-dom@7.1.1?deps=react@19.0.0,react-dom@19.0.0",
+      "react/": "https://esm.sh/react@^19.2.3/",
+      "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+    }
   }
-}
-</script>
+  </script>
   </head>
   <body class="bg-slate-950 text-slate-50">
     <div id="root"></div>
@@ -96,6 +109,16 @@
         background-color: #020617 !important;
         color: #f8fafc !important;
         -webkit-tap-highlight-color: transparent;
+        padding-top: env(safe-area-inset-top);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+      }
+
+      /* PWA Standalone mode styles */
+      @media (display-mode: standalone) {
+        html, body {
+          padding-top: env(safe-area-inset-top);
+        }
       }
 
       /* Force dark backgrounds on all mobile inputs */
@@ -105,5 +128,12 @@
         border-color: #1e293b !important;
       }
     </style>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+    </script>
   </body>
 </html>

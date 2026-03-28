@@ -2,6 +2,48 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Article } from '../types.ts';
 
+// Map keywords to service slugs for internal linking
+const KEYWORD_TO_SERVICE: Record<string, string> = {
+  'tinting': 'window-tinting',
+  'tint': 'window-tinting',
+  'window': 'window-tinting',
+  'wrapping': 'car-wrapping',
+  'wrap': 'car-wrapping',
+  'ppf': 'ppf',
+  'paint protection': 'ppf',
+  'ceramic': 'ceramic-coating',
+  'coating': 'ceramic-coating',
+  'buffing': 'car-buffing',
+  'polish': 'car-buffing',
+  'detailing': 'car-detailing',
+  'detail': 'car-detailing',
+  'headlight': 'headlight-restoration',
+  'tuning': 'car-tuning',
+  'riveting': 'car-riveting',
+  'identity': 'car-identity',
+};
+
+// Kenya locations for internal linking
+const LOCATIONS = ['nairobi', 'mombasa', 'kisumu', 'nakuru', 'eldoret', 'kiambu', 'thika', 'machakos', 'westlands', 'karen', 'kilimani'];
+
+// Detect service from article content
+const detectServiceSlug = (article: Article): string | null => {
+  const content = `${article.title} ${article.keywords} ${article.excerpt}`.toLowerCase();
+  for (const [keyword, slug] of Object.entries(KEYWORD_TO_SERVICE)) {
+    if (content.includes(keyword)) return slug;
+  }
+  return null;
+};
+
+// Detect location from article content
+const detectLocationSlug = (article: Article): string | null => {
+  const content = `${article.title} ${article.keywords} ${article.excerpt}`.toLowerCase();
+  for (const location of LOCATIONS) {
+    if (content.includes(location.toLowerCase())) return location;
+  }
+  return null;
+};
+
 interface ArticleCardProps {
   article: Article;
 }
@@ -36,9 +78,6 @@ const imageUrl = article.images?.[0]?.url
           : `/article-images/${article.featuredImage}`)
       : 'https://placehold.co/800x450/1e293b/94a3b8?text=No+Image');
 
-  // Get brand names (support both legacy single brand and new array format)
-  const brandNames = article.brand_names || (article.brand ? [article.brand] : []);
-
   return (
     <div className="group bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 flex flex-col h-auto shadow-lg transition-all duration-500 hover:shadow-blue-900/10 hover:-translate-y-1 hover:border-blue-600/50">
       {/* Image Section */}
@@ -49,32 +88,6 @@ const imageUrl = article.images?.[0]?.url
           loading="lazy"
           className="object-cover w-full h-full transition-all duration-700 ease-out group-hover:scale-110"
         />
-        {/* Category Badge */}
-        {article.category && (
-          <div className="absolute top-3 left-3">
-            <span className="bg-blue-600/90 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md">
-              {article.category}
-            </span>
-          </div>
-        )}
-        {/* Brand Badges */}
-        {brandNames.length > 0 && (
-          <div className="absolute top-3 right-3 flex flex-wrap gap-1 justify-end max-w-[60%]">
-            {brandNames.slice(0, 2).map((brand, index) => (
-              <span 
-                key={index} 
-                className="bg-slate-800/90 backdrop-blur-md text-slate-300 text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-md border border-slate-700"
-              >
-                {brand}
-              </span>
-            ))}
-            {brandNames.length > 2 && (
-              <span className="bg-slate-800/90 backdrop-blur-md text-slate-400 text-[8px] font-bold px-2 py-1 rounded-md">
-                +{brandNames.length - 2}
-              </span>
-            )}
-          </div>
-        )}
       </div>
       
       <div className="p-4 flex flex-col flex-grow text-left">
@@ -106,6 +119,26 @@ const imageUrl = article.images?.[0]?.url
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
           </Link>
+          
+          {/* Internal link to service/location page */}
+          {(() => {
+            const serviceSlug = detectServiceSlug(article);
+            const locationSlug = detectLocationSlug(article);
+            if (serviceSlug && locationSlug) {
+              return (
+                <Link 
+                  to={`/${serviceSlug}/${locationSlug}`}
+                  className="mt-2 text-slate-500 hover:text-blue-400 text-xs transition-colors flex items-center gap-1"
+                >
+                  View {serviceSlug.replace('-', ' ')} in {locationSlug}
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </Link>
+              );
+            }
+            return null;
+          })()}
         </div>
       </div>
     </div>

@@ -1,0 +1,18 @@
+/*
+  Security Headers for Production - AutoGear Ke
+  
+  Content-Security-Policy: Restricts resource loading to trusted sources
+  - 'self': Only allow resources from same origin
+  - Allows specific CDNs for fonts, analytics, and external services
+  - connect-src: Allows Supabase, Cloudinary, OpenStreetMap, TikTok APIs
+  
+  X-Frame-Options: Prevents clickjacking by denying iframe embedding
+  X-Content-Type-Options: Prevents MIME-type sniffing
+  Referrer-Policy: Controls referrer information sent to other sites
+  X-XSS-Protection: Legacy XSS protection (modern browsers use CSP)
+*/
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://cdnjs.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com https://static.cloudflareinsights.com https://unpkg.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; img-src 'self' data: blob: https://res.cloudinary.com https://*.openstreetmap.org https://p16-tiktokcdn-com.akamaized.net; connect-src 'self' blob: data: https://*.supabase.co wss://*.supabase.co https://api.cloudinary.com https://nominatim.openstreetmap.org https://*.openstreetmap.org https://www.tiktok.com https://*.tiktok.com https://api.allorigins.win; font-src 'self' data:; frame-src 'self' https://www.google.com https://accounts.google.com https://www.youtube.com https://www.tiktok.com https://www.instagram.com https://player.vimeo.com; object-src 'none';
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+X-XSS-Protection: 1; mode=block

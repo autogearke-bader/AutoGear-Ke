@@ -1,20 +1,24 @@
 {
-  "name": "autogear-ke---premium-car-accessories",
+  "name": "autogear-ke---Kenya's Best Car Service Techinicians",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run sitemap && vite build",
+    "build:only": "vite build",
     "preview": "vite preview",
     "test": "vitest --run",
     "test:watch": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "sitemap": "node scripts/generate-sitemap.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.99.0",
     "@types/dompurify": "^3.0.5",
-    "browser-image-compression": "^2.0.2",
+    "@types/leaflet": "^1.9.21",
     "dompurify": "^3.3.1",
+    "leaflet": "^1.9.4",
     "quill": "^2.0.3",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
@@ -34,6 +38,7 @@
     "tailwindcss": "^4.1.18",
     "typescript": "~5.8.2",
     "vite": "^6.2.0",
+    "vite-plugin-pwa": "^1.2.0",
     "vitest": "^4.0.18"
   }
 }

@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# check this exists in .gitignore
+.env
+.env.local

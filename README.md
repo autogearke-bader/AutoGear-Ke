@@ -1,204 +1,299 @@
+# AutoGear Ke - Kenya's Best Car Technicians & Accessories Marketplace
 
-# AutoGear Ke - Premium Car Accessories Nairobi
+A modern, responsive web application for  professional car services marketplace in Kenya. Built with React, TypeScript, and Vite for the frontend, with Supabase for authentication, user management, and database.
 
-A modern, responsive e-commerce website for premium car accessories and interior upgrades in Kenya. Built with React, TypeScript, and Vite for the frontend, and PHP/MySQL for the backend API.
+## 🚗 Features
 
-## Features
+### For Customers
+- **Technician Marketplace**: Find professional car service technicians (tinting, wrapping, PPF, ceramic coating, detailing)
+- **Browse Services**: View technician profiles, portfolios, pricing, and reviews
+- **Client Booking**: Book appointments with verified technicians
+- **Article Blog**: Read articles about car care, new products, and service guides
+- **Product Catalog**: Browse premium car accessories and gadgets
+- **Value Bundles**: Discover discounted product bundles
 
-- **Product Catalog**: Browse premium car accessories including lighting, interior upgrades, and gadgets
-- **Bundle Deals**: Exclusive accessory bundles with best value pricing
-- **Admin Panel**: Secure admin interface for managing products and bundles
+### For Technicians
+- **Join as Technician**: Professional registration with portfolio, services, and pricing
+- **Portfolio Management**: Upload work samples and project photos
+- **Service Listings**: Define services offered with pricing
+- **Profile Verification**: Build credibility with customer reviews
+
+### For Administrators
+- **Admin Panel**: Secure admin interface for managing all content
+- **Product Management**: Add, edit, delete products with images
+- **Bundle Management**: Create and manage product bundles
+- **Article Management**: Create and manage blog articles with rich text editor (Quill)
+- **Featured Content**: Control trending products, value bundles, and featured articles
+
+### Platform Features
 - **Responsive Design**: Mobile-first design optimized for all devices
 - **Dark Mode**: Built-in theme toggle for better user experience
 - **SEO Optimized**: Meta tags and structured data for search engines
 - **WhatsApp Integration**: Direct contact buttons for customer inquiries
-- **Testimonials**: Customer reviews and feedback section
+- **Google Authentication**: Gmail login for quick sign-up/sign-in
+- **Privacy-First**: WhatsApp numbers used only for booking confirmations
+- **PWA Support**: Progressive web app capabilities with service worker
 
-## Tech Stack
+## 🛠 Tech Stack
 
-### Frontend
+### Frontend (AutoGearKe/)
 - **React 19** - Modern React with hooks and concurrent features
 - **TypeScript** - Type-safe JavaScript
 - **Vite** - Fast build tool and development server
 - **React Router** - Client-side routing
 - **Tailwind CSS** - Utility-first CSS framework
-- **Custom Components** - Reusable UI components
 
-### Backend
-- **PHP** - Server-side scripting
-- **MySQL** - Database management
-- **REST API** - JSON-based API endpoints
+### Backend & Services
+- **Supabase** - Database, Authentication, and User Management
+- **Cloudinary** - Image optimization and CDN delivery
 
-## Prerequisites
-
-- **Node.js** (v16 or higher)
-- **PHP** (v7.4 or higher)
-- **MySQL** (v5.7 or higher)
-- **Web Server** (Apache/Nginx recommended)
-
-## Installation & Setup
-
-### Frontend Setup
-
-1. **Clone the repository** (if not already done):
-   ```bash
-   git clone <repository-url>
-   cd AutoGearKe
-   ```
-
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-
-3. **Environment Configuration**:
-   - Copy `.env.example` to `.env` (if exists) or create environment variables as needed
-   - No API keys required for basic functionality
-
-4. **Run the development server**:
-   ```bash
-   npm run dev
-   ```
-   The app will be available at `http://localhost:5173`
-
-5. **Build for production**:
-   ```bash
-   npm run build
-   npm run preview
-   ```
-
-### Backend Setup
-
-1. **Navigate to the API directory**:
-   ```bash
-   cd ../public_html
-   ```
-
-2. **Database Configuration**:
-   - Create a MySQL database
-   - Update `api/config.php` with your database credentials
-   - Run the database schema (if provided)
-
-3. **Web Server Configuration**:
-   - Ensure PHP is enabled on your web server
-   - Point your domain to the `public_html` directory
-   - Configure URL rewriting for clean URLs (optional)
-
-## Project Structure
+## 📁 Project Structure
 
 ```
 AutoGear/
-├── AutoGearKe/                 # Frontend React App
-│   ├── components/             # Reusable React components
-│   │   ├── ProductCard.tsx     # Product display component
-│   │   ├── BundleCard.tsx      # Bundle display component
-│   │   ├── Header.tsx          # Site header
-│   │   ├── Footer.tsx          # Site footer
-│   │   └── ...
-│   ├── pages/                  # Page components
-│   │   ├── HomePage.tsx        # Landing page
-│   │   ├── GadgetsPage.tsx     # Gadgets catalog
-│   │   └── AdminPage.tsx       # Admin dashboard
-│   ├── utils/                  # Utility functions
-│   ├── assets/                 # Static assets (images, icons)
-│   ├── index.html              # HTML template
-│   ├── constants.ts            # App constants
-│   ├── types.ts                # TypeScript type definitions
-│   ├── App.tsx                 # Main app component
-│   ├── index.tsx               # App entry point
-│   ├── package.json            # Dependencies and scripts
-│   └── vite.config.ts          # Vite configuration
-├── public_html/                # Backend PHP API
-│   ├── api/                    # API endpoints
-│   │   ├── config.php          # Database configuration
-│   │   ├── db.php              # Database connection
-│   │   ├── get-products.php    # Fetch products
-│   │   ├── add-product.php     # Add new product
-│   │   ├── update-product.php  # Update product
-│   │   ├── delete-product.php  # Delete product
-│   │   ├── get-bundles.php     # Fetch bundles
-│   │   ├── add-bundle.php      # Add new bundle
-│   │   ├── update-bundle.php   # Update bundle
-│   │   ├── delete-bundle.php   # Delete bundle
-│   │   ├── admin-login.php     # Admin authentication
-│   │   └── upload.php          # File upload handler
-│   └── uploads/                # Uploaded files directory
-│       ├── .htaccess           # Security configuration
-│       └── products/           # Product images
-└── README.md                   # This file
+├── AutoGearKe/                      # React Frontend Application
+│   ├── .env                         # Environment configuration
+│   ├── .gitignore                   # Git ignore rules
+│   ├── index.html                   # HTML template with CSP
+│   ├── index.tsx                    # React entry point
+│   ├── App.tsx                      # Main app component with routing
+│   ├── constants.ts                 # App constants and config
+│   ├── types.ts                     # TypeScript type definitions
+│   ├── metadata.json               # PWA metadata
+│   ├── package.json                 # NPM dependencies
+│   ├── tsconfig.json                 # TypeScript configuration
+│   ├── vite.config.ts               # Vite build configuration
+│   ├── vitest.config.ts             # Vitest testing configuration
+│   │
+│   ├── assets/                      # Static assets
+│   │   ├── apple-touch-icon.png
+│   │   ├── favicon.ico
+│   │   ├── favicon-32.png
+│   │   ├── favicon-48.png
+│   │   ├── favicon-64.png
+│   │   └── logo-4.png
+│   │
+│   ├── components/                  # Shared components (root level)
+│   │   ├── ArticleCard.tsx          # Blog article card
+│   │   ├── CategoryFilter.tsx       # Product category filter
+│   │   ├── ErrorBoundary.tsx        # React error boundary
+│   │   ├── FloatingWhatsApp.tsx     # WhatsApp float button
+│   │   ├── Footer.tsx               # Site footer
+│   │   ├── Header.tsx               # Site header/navigation
+│   │   ├── Layout.tsx               # Main layout wrapper
+│   │   ├── MobileBottomNav.tsx      # Mobile bottom navigation
+│   │   ├── QuillEditor.tsx          # Rich text editor wrapper
+│   │   ├── ThemeContext.tsx         # Dark mode context
+│   │   └── ThemeToggle.tsx          # Theme switcher
+│   │
+│   ├── pages/                       # Page components (root level)
+│   │   ├── AdminPage.tsx            # Admin dashboard (comprehensive)
+│   │   ├── ArticleDetailPage.tsx    # Blog article detail
+│   │   ├── BlogPage.tsx             # Blog listing page
+│   │   ├── HomePage.tsx             # Landing page
+│   │   ├── JoinPage.tsx             # Technician registration
+│   │   └── TechnicianProfilePage.tsx # Technician profile view
+│   │
+│   ├── src/                         # Source files (organized by function)
+│   │   ├── index.css                # Global styles
+│   │   │
+│   │   ├── components/              # Feature-specific components
+│   │   │   ├── AuthModal.tsx        # Login/Register modal
+│   │   │   ├── Avatar.tsx           # User/Technician avatar
+│   │   │   ├── BookingModal.tsx     # Booking request modal
+│   │   │   ├── LocationBanner.tsx   # Location selection banner
+│   │   │   ├── ProfileCompletionModal.tsx # Profile setup wizard
+│   │   │   ├── TechnicianCard.tsx    # Technician listing card
+│   │   │   └── TechnicianMap.tsx    # Map showing technician locations
+│   │   │
+│   │   ├── lib/                     # Library & API integrations
+│   │   │   ├── api.ts               # Backend API calls
+│   │   │   ├── auth.ts              # Supabase authentication
+│   │   │   ├── cloudinary.ts        # Image optimization utilities
+│   │   │   ├── location.ts          # Geolocation services
+│   │   │   └── supabase.ts          # Supabase client
+│   │   │
+│   │   └── pages/                   # Additional pages (src level)
+│   │       └── HomePage.tsx         # Additional home page variant
+│   │
+│   ├── public/                      # PWA public assets
+│   │   ├── manifest.json            # PWA manifest
+│   │   └── sw.js                     # Service worker
+│   │
+│   └── docs/                        # Documentation
+│       └── ADMIN_PAGE_README.md     # Admin panel documentation
+│
+├── AutoGear_upload/                 # Production Build (Deployed)
+│   ├── .htaccess                    # Apache security config
+│   ├── favicon.ico                  # Site favicon
+│   ├── google-feed.php              # Google Shopping feed
+│   ├── robots.txt                   # Search engine directives
+│   ├── return-policy.html           # Return policy page
+│   ├── sitemap.php                   # XML sitemap generator
+│   │
+│   ├── assets/                      # Built JavaScript & images
+│   │   ├── index-*.js               # Bundled React app (multiple versions)
+│   │   ├── logo-*.png               # Optimized logo
+│   │   └── favicon-*.{ico,png}      # Favicons
+│   │
+│   └── uploads/                     # User uploaded content
+│       └── .htaccess               # Directory protection
+│
+└── README.md                        # This file
 ```
 
-## API Endpoints
+## 🔧 Environment Configuration
 
-### Products
-- `GET /api/get-products.php` - Retrieve all products
-- `POST /api/add-product.php` - Add new product (admin only)
-- `POST /api/update-product.php` - Update existing product (admin only)
-- `POST /api/delete-product.php` - Delete product (admin only)
+### Required Variables (AutoGearKe/.env)
 
-### Bundles
-- `GET /api/get-bundles.php` - Retrieve all bundles
-- `POST /api/add-bundle.php` - Add new bundle (admin only)
-- `POST /api/update-bundle.php` - Update existing bundle (admin only)
-- `POST /api/delete-bundle.php` - Delete bundle (admin only)
+```env
+# Supabase Configuration (Database & Auth)
+# Get these from your Supabase project dashboard: https://app.supabase.com/project/_/settings/api
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
 
-### Authentication
-- `POST /api/admin-login.php` - Admin login
+# Cloudinary Configuration (Image Management)
+# Get these from your Cloudinary dashboard: https://cloudinary.com/console
+# Note: Uses unsigned upload preset (no API key/secret required)
+VITE_CLOUDINARY_CLOUD_NAME=your-cloud-name
+VITE_CLOUDINARY_UPLOAD_PRESET=your-unsigned-upload-preset
 
-### File Upload
-- `POST /api/upload.php` - Upload product images
+# Nominatim (OpenStreetMap Geocoding) - No API key required
+VITE_NOMINATIM_URL=https://nominatim.openstreetmap.org
+```
 
-## Development
+### Setting Up External Services
 
-### Available Scripts
+#### Supabase (Database & Authentication)
+1. Create a project at https://supabase.com
+2. Go to Settings → API
+3. Copy the Project URL and anon key
+4. Add to `.env` as shown above
+5. Configure your database tables in Supabase dashboard
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
+#### Cloudinary (Images)
+1. Create an account at https://cloudinary.com
+2. Go to Settings → Upload
+3. Add an upload preset (enable "Unsigned" mode)
+4. Copy your cloud name and preset name to `.env`
 
-### Code Style
+## 🏃‍♂️ Getting Started
 
-- Use TypeScript for type safety
-- Follow React best practices
-- Use Tailwind CSS for styling
-- Maintain consistent component structure
+```bash
+# Navigate to frontend directory
+cd AutoGearKe
 
-## Deployment
+# Install dependencies
+npm install
 
-1. **Build the frontend**:
-   ```bash
-   cd AutoGearKe
-   npm run build
-   ```
+# Start development server
+npm run dev
+# App runs at http://localhost:3000
 
-2. **Deploy to web server**:
-   - Upload `dist/` contents to your web server
-   - Ensure API endpoints are accessible
-   - Configure database on production server
+# Build for production
+npm run build
 
-3. **Environment Setup**:
-   - Set production database credentials
-   - Configure domain and SSL certificate
+# Preview production build
+npm run preview
+```
 
-## Contributing
+## 📱 Pages & Routes
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+| Route | Page | Description |
+|-------|------|-------------|
+| `/` | HomePage | Landing page with featured content |
+| `/blog` | BlogPage | Article listing |
+| `/blog/:slug` | ArticleDetailPage | Single article view |
+| `/join` | JoinPage | Technician registration |
+| `/technician/:id` | TechnicianProfilePage | Technician profile |
+| `/admin` | AdminPage | Admin dashboard |
 
-## License
+## 🎨 Image Optimization
 
-This project is proprietary. All rights reserved.
+The project uses Cloudinary for automatic image optimization:
 
-## Contact
+```typescript
+// Import from cloudinary.ts
+import { profileThumb, cardCover, portfolioFull } from './lib/cloudinary';
 
-For inquiries about car accessories or business partnerships:
+// Usage - automatically optimizes for size, format (WebP/AVIF), quality
+const optimizedUrl = profileThumb(user.avatarUrl);
+```
+
+### Available Optimizations
+- `profile_thumb` - 120x120 face-cropped avatar
+- `profile_full` - 300x300 face-cropped avatar
+- `card_cover` - 600x380 cover image
+- `portfolio_thumb` - 400x300 portfolio thumbnail
+- `portfolio_full` - 1200x900 full portfolio
+- `article_inline` - 900px wide article images
+- `article_thumb` - 600x380 article preview
+- `cover_banner` - 1400x500 profile banner
+
+## 🔒 Security Features
+
+- **Content Security Policy**: Strict CSP in index.html
+- **Supabase Auth**: Secure authentication with JWT tokens
+- **Row Level Security**: Database-level access control
+- **Input Sanitization**: XSS prevention
+- **CORS Protection**: Configured in Supabase
+
+## ♿ Accessibility
+
+The project is committed to WCAG 2.1 AA compliance. Key accessibility features include:
+
+- **Form Labels**: All form inputs have properly associated labels using `htmlFor` and `id` attributes
+- **ARIA Labels**: Complex components like disabled inputs and dynamic content include `aria-label` attributes
+- **Screen Reader Support**: Hidden labels (`.sr-only`) for visually hidden but accessible labels
+- **Keyboard Navigation**: All interactive elements are keyboard accessible
+- **Focus Indicators**: Visible focus states on all interactive elements
+- **Color Contrast**: High contrast colors meeting WCAG AA standards
+
+### Recent Accessibility Fixes
+
+- Fixed form label associations in TechnicianDashboardPage.tsx
+- Added accessible names to all select elements
+- Added dynamic IDs for form elements rendered in maps
+- Added ARIA labels for status dropdowns and read-only fields
+
+## 🐛 Recent Updates
+
+### March 2026
+- Migrated from legacy PHP/MySQL to Supabase
+- Fixed TypeScript compilation error in HomePage.tsx
+- Added comprehensive AdminPage documentation
+- Implemented Cloudinary image optimization
+- Added PWA service worker support
+- Enhanced SEO with structured data
+- **Updated authenticated client navigation header** with responsive design for tablet/desktop
+  - Added Home link for authenticated clients
+  - Added booking count display to My Bookings link (fetches from backend)
+  - Added Become a Technician link for client-to-technician conversion
+  - Removed Insights link from authenticated client view
+  - Simplified user avatar dropdown to only include Edit Profile and Sign Out
+
+### Features Added
+- Technician marketplace with booking
+- Rich text article editor (Quill)
+- Google OAuth authentication
+- Location-based technician search
+- Dark mode with theme toggle
+- WhatsApp integration for bookings
+
+## 📖 Additional Documentation
+
+- **[Admin Page Guide](./docs/ADMIN_PAGE_README.md)** - Complete guide to the admin command center
+
+## 📞 Support
+
 - **Location**: Nairobi, Kenya
-- **WhatsApp**: [Contact via site]
-- **Email**: [Contact information]
+- **WhatsApp**: Contact via website
+- **Email**: Available on website
+
+## 📜 License
+
+Proprietary - All rights reserved.
 
 ---
 
-*Premium Car Accessories & Professional Installation Services in Kenya*
+*Professional Car Technician Services Marketplace platform in Kenya*
