@@ -50,7 +50,7 @@ export default defineConfig(({ mode }) => {
         tailwindcss(),
         VitePWA({
           registerType: 'autoUpdate',
-          includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+          includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg', 'assets/tiktok-placeholder.png'],
           manifest: {
             name: 'AutoGear Ke - Car Services Marketplace',
             short_name: 'AutoGear',
@@ -121,7 +121,10 @@ export default defineConfig(({ mode }) => {
             ]
           },
           workbox: {
+            navigateFallback: 'index.html',
             globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+            globIgnores: ['**/apple-touch-icon.png', '**/favicon-32.png', '**/favicon-48.png', '**/favicon-64.png', '**/logo-4.png'],
+            navigateFallbackDenylist: [/^\/api/, /^\/rest/],
             runtimeCaching: [
               {
                 urlPattern: /^https:\/\/esm\.sh\/.*/i,
@@ -245,6 +248,28 @@ export default defineConfig(({ mode }) => {
                     maxAgeSeconds: 0
                   }
                 }
+              },
+              {
+                urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
+                handler: 'NetworkOnly',
+                options: {
+                  cacheName: 'supabase-all',
+                  expiration: {
+                    maxEntries: 0,
+                    maxAgeSeconds: 0
+                  }
+                }
+              },
+              {
+                urlPattern: /^https:\/\/api\.cloudinary\.com\/.*/i,
+                handler: 'NetworkOnly',
+                options: {
+                  cacheName: 'cloudinary-api',
+                  expiration: {
+                    maxEntries: 0,
+                    maxAgeSeconds: 0
+                  }
+                }
               }
             ]
           }
@@ -259,6 +284,7 @@ export default defineConfig(({ mode }) => {
         outDir: 'dist',
         emptyOutDir: true,
         sourcemap: false,
+        assetsInlineLimit: 0,
         // Security: Remove console logs and debug info in production
         minify: 'terser',
         terserOptions: {

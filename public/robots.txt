@@ -152,6 +152,7 @@ Disallow: /dashboard
 Disallow: /*?
 Disallow: /*.json
 Disallow: /*.xml
+Disallow: /sitemap.xml
 
 # -----------------------------------------------------------------------------
 # SECTION 3: SENSITIVE ENDPOINTS - SECURITY BLOCKS

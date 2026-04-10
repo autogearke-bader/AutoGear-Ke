@@ -66,6 +66,11 @@ export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '', {
   },
 });
 
+// Prevent free-tier cold starts by pinging every 3 minutes
+setInterval(() => {
+  supabase.from('articles').select('id').limit(1).then(() => {});
+}, 3 * 60 * 1000);
+
 // Security: Add auth state change listener - only log events in dev mode
 supabase.auth.onAuthStateChange((event, session) => {
   if (import.meta.env.DEV) {
