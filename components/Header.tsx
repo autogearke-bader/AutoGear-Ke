@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { BUSINESS_NAME } from '../constants.ts';
-import logoUrl from '../assets/logo-4.png';
 import { signOut, getSession, triggerProfileCompletion } from '../src/lib/auth';
 import { getMyClientLeads } from '../src/lib/api';
 import { Technician } from '../types';
@@ -100,7 +99,7 @@ const Header: React.FC<HeaderProps> = ({
           <Link to="/" className="text-xl font-black tracking-tighter text-white flex items-center group">
             <div className="relative mr-0 md:mr-4 logo-glow flex items-center justify-center">
               <img
-                src={logoUrl}
+                src="/assets/logo-4.png"
                 alt="AutoGear Ke Logo"
                 className="h-12 md:h-16 w-auto object-contain transform group-hover:rotate-12 transition-transform duration-500 ease-in-out"
                 loading="lazy"

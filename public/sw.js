@@ -11,7 +11,9 @@ const PRECACHE_ASSETS = [
   '/assets/favicon-32.png',
   '/assets/favicon-48.png',
   '/assets/favicon-64.png',
-  '/assets/apple-touch-icon.png'
+  '/assets/apple-touch-icon.png',
+  '/assets/tiktok.png',
+  '/assets/tiktok-placeholder.png'
 ];
 
 // Install event - cache static assets

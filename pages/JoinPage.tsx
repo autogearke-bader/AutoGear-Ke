@@ -1268,7 +1268,13 @@ const JoinPage: React.FC = () => {
         return (
           <div className="space-y-4">
             <h2 className="text-xl font-bold text-white mb-4">Services Offered</h2>
-            <p className="text-slate-400 text-sm mb-6">Select up to 4 services you offer</p>
+            <p className="text-slate-400 text-sm mb-4">Select 1–4 services you offer. Technicians who specialize in 2–3 services attract more relevant bookings.</p>
+            
+            {selectedServices.length > 0 && selectedServices.length < 2 && (
+              <div className="mb-4 p-3 bg-blue-900/30 border border-blue-800 rounded-lg">
+                <p className="text-blue-300 text-sm">💡 Technicians with 2+ services get more bookings</p>
+              </div>
+           )}
             
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
               {ALL_SERVICES.map(service => (

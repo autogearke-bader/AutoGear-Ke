@@ -4,10 +4,11 @@
   "description": "Automotive Services Marketplace - Find the best automotive service technicians for tinting, wrapping, PPF, ceramic coating, detailing & tuning.",
   "start_url": "/",
   "display": "standalone",
-  "orientation": "any",
-  "display_override": ["standalone", "fullscreen", "minimal-ui"],
+  "orientation": "portrait",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "background_color": "#080909",
   "theme_color": "#e8a020",
+  "prefer_related_applications": false,
   "scope": "/",
   "lang": "en",
   "categories": ["business", "lifestyle", "shopping"],
@@ -43,22 +44,22 @@
       "purpose": "any maskable"
     },
     {
-     "src": "/assets/167.png",
-     "sizes": "167x167",
-     "type": "image/png",
-     "purpose": "any"
-   },
-   {
-    "src": "/assets/152.png",
-     "sizes": "152x152",
-    "type": "image/png",
-    "purpose": "any"
-   },
+      "src": "/assets/167.png",
+      "sizes": "167x167",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "/assets/launchericon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ],
   "screenshots": [

@@ -934,7 +934,13 @@ export const ProfileCompletionModal = ({ isOpen, userType, onClose }: ProfileCom
             {userType === 'technician' && step === 2 && (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Services * <span className="text-slate-500 text-xs">(max 4)</span></label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Services * <span className="text-slate-500 text-xs">(min 1, max 4)</span></label>
+                  <p className="text-xs text-slate-400 mb-2">Select 1–4 services you offer. Technicians who specialize in 2–3 services attract more relevant bookings.</p>
+                  {(selectedServices.length + otherServices.length) > 0 && (selectedServices.length + otherServices.length) < 2 && (
+                    <div className="mb-3 p-2 bg-blue-900/30 border border-blue-800 rounded-lg">
+                      <p className="text-blue-300 text-xs">💡 Technicians with 2+ services get more bookings</p>
+                    </div>
+                  )}
                   <p className="text-xs text-blue-400 mb-2">Selected: {selectedServices.length + otherServices.length}/4</p>
                   <div className="grid grid-cols-2 gap-2">
                     {ALL_SERVICES.map((service) => (

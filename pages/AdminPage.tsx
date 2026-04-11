@@ -189,7 +189,7 @@ const AdminPage: React.FC = () => {
   const [articleExcerpt,       setArticleExcerpt]       = useState('');
   const [articleImages,        setArticleImages]        = useState<{url:string;alt:string}[]>([]);
   const [articleMetaDesc,      setArticleMetaDesc]      = useState('');
-  const [articleKeywords,      setArticleKeywords]      = useState('');
+  const [altTextError,         setAltTextError]         = useState<string | null>(null);
   const [articleIsPublished,   setArticleIsPublished]   = useState(true);
   const [articleImgUploading,  setArticleImgUploading]  = useState(false);
 
@@ -329,9 +329,15 @@ const AdminPage: React.FC = () => {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setIsAuthorized(false);
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.error('Error during sign out:', err);
+    }
+    // Navigate BEFORE updating state to ensure navigation completes
     navigate('/');
+    // Then update auth state
+    setIsAuthorized(false);
   };
 
   // ════════════════════════════════════════════════
@@ -590,8 +596,28 @@ const AdminPage: React.FC = () => {
 
   const suspendTechnician = async (id: string) => {
     if (!window.confirm('Suspend this technician? Their profile will be hidden from clients.')) return;
-    const { error } = await supabase.from('technicians').update({ status: 'suspended' }).eq('id', id);
-    if (!error) { fetchTechnicians(); setStatus({ message: 'Technician suspended.', type: 'success' }); }
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase.from('technicians').update({ status: 'suspended' }).eq('id', id);
+      if (error) {
+        console.error('Suspend technician error:', error);
+        setStatus({
+          message: `Failed to suspend technician: ${error.message}. If this persists, check browser console (F12) for details.`,
+          type: 'error'
+        });
+        return;
+      }
+      fetchTechnicians();
+      setStatus({ message: 'Technician suspended successfully.', type: 'success' });
+    } catch (err) {
+      console.error('Unexpected error suspending technician:', err);
+      setStatus({
+        message: `Unexpected error: ${err instanceof Error ? err.message : 'Unknown error'}. Check console (F12) for details.`,
+        type: 'error'
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const rejectTechnician = async () => {
@@ -709,14 +735,14 @@ const AdminPage: React.FC = () => {
   const resetArticleForm = () => {
     setEditingArticleId(null); setArticleTitle(''); setArticleContent('');
     setArticleExcerpt('');     setArticleImages([]); 
-    setArticleMetaDesc(''); setArticleKeywords('');
+    setArticleMetaDesc(''); setAltTextError(null);
     setArticleIsPublished(true);
   };
 
   const handleEditArticle = (a: Article) => {
     setEditingArticleId(a.id); setArticleTitle(a.title); setArticleContent(a.content ?? '');
     setArticleExcerpt(a.excerpt ?? ''); setArticleImages(a.images ?? []);
-    setArticleMetaDesc(a.meta_description ?? ''); setArticleKeywords(a.keywords ?? '');
+    setArticleMetaDesc(a.meta_description ?? ''); setAltTextError(null);
     setArticleIsPublished(a.is_published);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -737,42 +763,113 @@ const AdminPage: React.FC = () => {
 
   const handleSaveArticle = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!articleTitle.trim()) { setStatus({ message: 'Title is required.', type: 'error' }); return; }
-    setIsSaving(true);
-    const payload = {
-      title: articleTitle.trim(), slug: slug(articleTitle.trim()),
-      excerpt: articleExcerpt.trim(), content: articleContent,
-      images: articleImages, meta_description: articleMetaDesc.trim(),
-      keywords: articleKeywords.trim(), is_published: articleIsPublished,
-      updated_at: new Date().toISOString(),
-    };
-    const { error } = editingArticleId
-      ? await supabase.from('articles').update(payload).eq('id', editingArticleId)
-      : await supabase.from('articles').insert([payload]);
-    
-    if (error) {
-      console.error('AdminPage: Article save error:', error);
-      if (error.code === '406') {
-        setStatus({ message: 'Server error: Please try again. If the problem persists, contact support.', type: 'error' });
-      } else if (error.message?.includes('row-level security')) {
-        setStatus({ message: 'Permission denied: You may not have admin access.', type: 'error' });
-      } else {
-        setStatus({ message: `Failed to save article: ${error.message}`, type: 'error' });
-      }
-    } else { 
-      setStatus({ message: `Article "${articleTitle}" ${editingArticleId ? 'updated' : 'created'}.`, type: 'success' }); 
-      resetArticleForm(); 
-      fetchArticles(); 
+    if (!articleTitle.trim()) {
+      setStatus({ message: 'Title is required.', type: 'error' });
+      return;
     }
-    setIsSaving(false);
+
+    // Validate alt text
+    const missingAltText = articleImages.some(img => !img.alt.trim());
+    if (missingAltText) {
+      setAltTextError('Please add alt text for all images before publishing');
+      return;
+    }
+    setAltTextError(null);
+
+    // Validate image URLs
+    const invalidImages = articleImages.filter(img => !img.url.includes('cloudinary.com'));
+    if (invalidImages.length > 0) {
+      setStatus({ message: 'One or more images have invalid URLs. Please re-upload them.', type: 'error' });
+      return;
+    }
+
+    // Wake up Supabase instance before the actual write
+    setStatus({ message: 'Connecting...', type: 'warning' });
+    await supabase.from('articles').select('id').limit(1);
+    setStatus(null);
+
+    setIsSaving(true);
+
+    try {
+      const payload = {
+        title:            articleTitle.trim(),
+        slug:             slug(articleTitle.trim()),
+        excerpt:          articleExcerpt.trim(),
+        content:          articleContent,
+        images:           articleImages,
+        meta_description: articleMetaDesc.trim(),
+        keywords:         '',
+        is_published:     articleIsPublished,
+        updated_at:       new Date().toISOString(),
+      };
+
+      console.log('AdminPage: ARTICLE_SAVE_START', payload);
+
+      // Direct await with timeout to prevent infinite hanging
+      const savePromise = editingArticleId
+        ? supabase.from('articles').update(payload).eq('id', editingArticleId)
+        : supabase.from('articles').insert([payload]);
+
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Request timed out after 30 seconds')), 30000)
+      );
+
+      const { error } = await Promise.race([savePromise, timeoutPromise]) as any;
+
+      if (error) {
+        console.error('AdminPage: ARTICLE_SAVE_ERROR', error);
+        if (error.code === '42501' || error.message?.includes('row-level security')) {
+          setStatus({ message: 'Permission denied. Please log out and log back in.', type: 'error' });
+        } else if (error.code === '23505') {
+          setStatus({ message: 'This title already exists. Try a slightly different title.', type: 'error' });
+        } else {
+          setStatus({ message: `Failed to save: ${error.message || 'Unknown error'}`, type: 'error' });
+        }
+      } else {
+        console.log('AdminPage: ARTICLE_SAVE_SUCCESS');
+        setStatus({ message: `Article "${articleTitle}" ${editingArticleId ? 'updated' : 'created'}.`, type: 'success' });
+        resetArticleForm();
+        fetchArticles();
+      }
+    } catch (err) {
+      console.error('AdminPage: Article save unexpected error:', err);
+      setStatus({ message: `Unexpected error: ${err instanceof Error ? err.message : 'Unknown'}`, type: 'error' });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const deleteArticle = async (id: string, title: string) => {
     if (!window.confirm(`Delete "${title}"? Cannot be undone.`)) return;
+    setIsDeleting(false); // Reset any stuck state first
+    setIsSaving(false);   // Reset any stuck save state
     setIsDeleting(true);
-    const { error } = await supabase.from('articles').delete().eq('id', id);
-    if (!error) { if (editingArticleId === id) resetArticleForm(); fetchArticles(); setStatus({ message: 'Article deleted.', type: 'success' }); }
-    setIsDeleting(false);
+    try {
+      console.log('AdminPage: ARTICLE_DELETE_START - ID:', id);
+      const { error } = await supabase.from('articles').delete().eq('id', id);
+      if (error) {
+        console.error('AdminPage: ARTICLE_DELETE_ERROR:', error);
+        if (error.code === '42501') {
+          setStatus({ message: 'Permission denied (RLS). Please log out and log back in.', type: 'error' });
+        } else if (error.message?.includes('row-level security')) {
+          setStatus({ message: 'Permission denied: You may not have admin access.', type: 'error' });
+        } else {
+          setStatus({ message: `Failed to delete article: ${error.message}. Check console (F12) for details.`, type: 'error' });
+        }
+        return; // Exit early on error to prevent further processing
+      } else {
+        console.log('AdminPage: ARTICLE_DELETE_SUCCESS');
+        if (editingArticleId === id) resetArticleForm();
+        await fetchArticles(); // Wait for articles to refresh
+        setStatus({ message: 'Article deleted successfully.', type: 'success' });
+      }
+    } catch (err) {
+      console.error('AdminPage: Article delete unexpected error:', err);
+      const errorMsg = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setStatus({ message: `Failed to delete article: ${errorMsg}. Check console (F12) for details.`, type: 'error' });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleBulkArticleDelete = async () => {
@@ -780,9 +877,31 @@ const AdminPage: React.FC = () => {
     if (!window.confirm(`Delete ${selectedArticleIds.length} articles? Cannot be undone.`)) return;
     if (window.prompt('Type "DELETE ALL" to confirm:') !== 'DELETE ALL') { setStatus({ message: 'Cancelled.', type: 'error' }); return; }
     setIsDeleting(true);
-    const { error } = await supabase.from('articles').delete().in('id', selectedArticleIds);
-    if (!error) { setSelectedArticleIds([]); fetchArticles(); setStatus({ message: `${selectedArticleIds.length} articles deleted.`, type: 'success' }); }
-    setIsDeleting(false);
+    try {
+      console.log('AdminPage: BULK_ARTICLE_DELETE_START - IDs:', selectedArticleIds);
+      const { error } = await supabase.from('articles').delete().in('id', selectedArticleIds);
+      if (error) {
+        console.error('AdminPage: BULK_ARTICLE_DELETE_ERROR:', error);
+        if (error.code === '42501') {
+          setStatus({ message: 'Permission denied (RLS). Please log out and log back in.', type: 'error' });
+        } else if (error.message?.includes('row-level security')) {
+          setStatus({ message: 'Permission denied: You may not have admin access.', type: 'error' });
+        } else {
+          setStatus({ message: `Failed to delete articles: ${error.message}`, type: 'error' });
+        }
+      } else {
+        console.log('AdminPage: BULK_ARTICLE_DELETE_SUCCESS');
+        setSelectedArticleIds([]);
+        fetchArticles();
+        setStatus({ message: `${selectedArticleIds.length} articles deleted.`, type: 'success' });
+      }
+    } catch (err) {
+      console.error('AdminPage: Bulk article delete unexpected error:', err);
+      const errorMsg = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setStatus({ message: `Failed to delete articles: ${errorMsg}`, type: 'error' });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const exportBackup = () => {
@@ -1080,7 +1199,17 @@ const AdminPage: React.FC = () => {
                 <input type="date" value={leadsDateFrom} onChange={e => setLeadsDateFrom(e.target.value)} aria-label="Date from" className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-blue-500" />
                 <input type="date" value={leadsDateTo}   onChange={e => setLeadsDateTo(e.target.value)} aria-label="Date to" className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-blue-500" />
                 <button onClick={exportLeadsCSV} className="bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-blue-500/20 transition-all">Export CSV</button>
-                <button onClick={() => { setLeadsFilterTech(''); setLeadsDateFrom(''); setLeadsDateTo(''); }} className="bg-slate-800 hover:bg-slate-700 text-slate-400 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Clear</button>
+                <button onClick={() => {
+                  try {
+                    setLeadsFilterTech('');
+                    setLeadsDateFrom('');
+                    setLeadsDateTo('');
+                    console.log('Leads filters cleared successfully');
+                  } catch (err) {
+                    console.error('Error clearing leads filters:', err);
+                    setStatus({ message: 'Failed to clear filters.', type: 'error' });
+                  }
+                }} className="bg-slate-800 hover:bg-slate-700 text-slate-400 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Clear</button>
               </div>
 
               {leadsLoading ? (
@@ -1357,11 +1486,16 @@ const AdminPage: React.FC = () => {
                         className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white outline-none focus:border-blue-500 transition-all" />
                     </div>
 
-                    {/* Images — Cloudinary */}
+                    {/* Images — Cloudinary with Required Alt Text */}
                     <div>
                       <label className="block text-[10px] text-slate-500 font-black uppercase tracking-widest mb-2">
                         Images <span className="text-slate-700 normal-case font-normal tracking-normal">· Stored in Cloudinary <code>articles/</code></span>
                       </label>
+                      {altTextError && (
+                        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-3">
+                          <p className="text-red-400 text-[10px] font-bold">{altTextError}</p>
+                        </div>
+                      )}
                       {articleImages.length > 0 && (
                         <div className="grid grid-cols-3 gap-3 mb-3">
                           {articleImages.map((img, idx) => (
@@ -1370,8 +1504,14 @@ const AdminPage: React.FC = () => {
                                 className="w-full h-24 object-cover rounded-xl border border-slate-800" loading="lazy" />
                               <button type="button" onClick={() => setArticleImages(p => p.filter((_,i) => i !== idx))}
                                 className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full text-[9px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity font-black">✕</button>
-                              <input value={img.alt} onChange={e => setArticleImages(p => p.map((im,i) => i===idx ? {...im, alt: e.target.value} : im))}
-                                placeholder="Alt text" className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-[10px] text-white outline-none mt-1" />
+                              <input 
+                                value={img.alt} 
+                                onChange={e => setArticleImages(p => p.map((im,i) => i===idx ? {...im, alt: e.target.value} : im))}
+                                placeholder="Ceramic coating being applied to a Toyota Prado in Nairobi" 
+                                className={`w-full bg-slate-900 rounded-lg px-2 py-1 text-[10px] text-white outline-none mt-1 font-medium border ${
+                                  !img.alt.trim() ? 'border-red-500/50 bg-red-500/5' : 'border-slate-800'
+                                }`} />
+                              {!img.alt.trim() && <p className="text-[9px] text-red-400 mt-1 font-bold">Required for SEO</p>}
                             </div>
                           ))}
                         </div>
@@ -1406,11 +1546,7 @@ const AdminPage: React.FC = () => {
                           className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-3 text-white outline-none focus:border-blue-500 resize-none" />
                         <p className={`text-[10px] mt-1 ${articleMetaDesc.length > 160 ? 'text-red-400' : 'text-slate-600'}`}>{articleMetaDesc.length}/160</p>
                       </div>
-                      <div>
-                        <label className="block text-[10px] text-slate-500 font-black uppercase tracking-widest mb-2">Keywords</label>
-                        <input value={articleKeywords} onChange={e => setArticleKeywords(e.target.value)} placeholder="car tinting Nairobi, ceramic coating Kenya…"
-                          className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-3 text-white outline-none focus:border-blue-500" />
-                      </div>
+
                     </div>
 
                     {/* Published toggle */}

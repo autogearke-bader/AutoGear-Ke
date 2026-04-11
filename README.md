@@ -1,6 +1,6 @@
 # AutoGear Ke - Kenya's Best Car Technicians & Accessories Marketplace
 
-A modern, responsive web application for  professional car services marketplace in Kenya. Built with React, TypeScript, and Vite for the frontend, with Supabase for authentication, user management, and database.
+A modern, responsive web application for Automotive professional car services marketplace in Kenya. Built with React, TypeScript, and Vite for the frontend, with Supabase for authentication, user management, and database.
 
 ## 🚗 Features
 

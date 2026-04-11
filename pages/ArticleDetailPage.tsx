@@ -75,7 +75,6 @@ const ArticleDetailPage: React.FC = () => {
         <title>{article.title} | AutoGear Insights</title>
         <link rel="canonical" href={`https://autogearke.com/blogs/${article.slug}`} />
         <meta name="description" content={article.meta_description || article.excerpt} />
-        <meta name="keywords"    content={article.keywords} />
         <meta property="og:title"       content={article.title} />
         <meta property="og:description" content={article.meta_description || article.excerpt} />
         {heroImage && <meta property="og:image" content={cx(heroImage, 'w_1200,h_630,c_fill,q_auto,f_auto')} />}

@@ -630,7 +630,7 @@ const TechnicianProfilePage: React.FC = () => {
                             alt={video.service || 'TikTok video'}
                             className="absolute top-0 left-0 w-full h-full object-cover rounded-lg"
                             onError={(e) => {
-                              e.currentTarget.src = '/tiktok-placeholder.svg';
+                              e.currentTarget.src = '/assets/tiktok-placeholder.png';
                               e.currentTarget.onerror = null;
                             }}
                           />
@@ -665,15 +665,15 @@ const TechnicianProfilePage: React.FC = () => {
               ))}
             </div>
             
-            {/* Desktop/Tablet: 4 videos side by side, max height 500px */}
-            <div className="hidden md:grid grid-cols-4 gap-4">
+            {/* Tablet: 2 columns, Desktop: 4 columns */}
+            <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
               {videos.map((video) => (
                 <div key={video.id}>
                   <div 
-                    className="relative w-full"
+                    className="relative w-full overflow-hidden"
                     style={{ 
                       paddingBottom: '177.78%', /* 9:16 ratio */
-                      maxHeight: '200px'
+                      maxHeight: '300px'
                     }}
                   >
                     {video.platform === 'tiktok' ? (
@@ -689,7 +689,7 @@ const TechnicianProfilePage: React.FC = () => {
                             alt={video.service || 'TikTok video'}
                             className="absolute top-0 left-0 w-full h-full object-cover rounded-lg"
                             onError={(e) => {
-                              e.currentTarget.src = '/tiktok-placeholder.svg';
+                              e.currentTarget.src = '/assets/tiktok-placeholder.png';
                               e.currentTarget.onerror = null;
                             }}
                           />

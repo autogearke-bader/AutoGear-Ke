@@ -461,22 +461,88 @@ const HomePage: React.FC = () => {
     
     const { service, location } = parseSearchQuery(query);
     const liveTechs = techs.filter(t => t.status === 'live');
+    const lowerQuery = query.toLowerCase().trim();
     
     if (!service && !location) {
-      // Just a general search, try to match anything
+      // When no location keywords found, prioritize area matching
+      // Try exact match first (highest priority)
+      const exactAreaMatch = liveTechs.filter(t => 
+        t.area?.toLowerCase() === lowerQuery
+      );
+      
+      if (exactAreaMatch.length > 0) {
+        return exactAreaMatch;
+      }
+      
+      // Try prefix match (area starts with search term - e.g., "kasarani" matches "Kasarani location")
+      const prefixAreaMatch = liveTechs.filter(t => 
+        t.area?.toLowerCase().startsWith(lowerQuery)
+      );
+      
+      if (prefixAreaMatch.length > 0) {
+        return prefixAreaMatch;
+      }
+      
+      // Try partial match on area
+      const partialAreaMatch = liveTechs.filter(t => 
+        t.area?.toLowerCase().includes(lowerQuery)
+      );
+      
+      if (partialAreaMatch.length > 0) {
+        return partialAreaMatch;
+      }
+      
+      // Otherwise, do general search (business name, service keywords)
+      // But exclude county matching to prioritize area-based searches
       return liveTechs.filter(t => 
-        t.business_name?.toLowerCase().includes(query.toLowerCase()) ||
-        t.area?.toLowerCase().includes(query.toLowerCase()) ||
-        t.county?.toLowerCase().includes(query.toLowerCase()) ||
+        t.business_name?.toLowerCase().includes(lowerQuery) ||
         t.technician_services?.some(s => 
-          s.service_name.toLowerCase().includes(query.toLowerCase())
+          s.service_name.toLowerCase().includes(lowerQuery)
+        )
+      );
+    }
+    
+    // When we have a service but no explicit location keyword,
+    // check if the service might actually be a location first
+    if (service && !location) {
+      const lowerService = service.toLowerCase().trim();
+      
+      // Try to match as location first (exact, prefix, then partial)
+      const exactAreaMatch = liveTechs.filter(t => 
+        t.area?.toLowerCase() === lowerService
+      );
+      
+      if (exactAreaMatch.length > 0) {
+        return exactAreaMatch;
+      }
+      
+      const prefixAreaMatch = liveTechs.filter(t => 
+        t.area?.toLowerCase().startsWith(lowerService)
+      );
+      
+      if (prefixAreaMatch.length > 0) {
+        return prefixAreaMatch;
+      }
+      
+      const partialAreaMatch = liveTechs.filter(t => 
+        t.area?.toLowerCase().includes(lowerService)
+      );
+      
+      if (partialAreaMatch.length > 0) {
+        return partialAreaMatch;
+      }
+      
+      // If no area matches, treat as service search
+      return liveTechs.filter(t => 
+        t.technician_services?.some(s => 
+          s.service_name.toLowerCase().includes(service)
         )
       );
     }
     
     let filtered = liveTechs;
     
-    // Filter by service if specified
+    // Filter by service if specified (with explicit location keyword)
     if (service) {
       filtered = filtered.filter(t => 
         t.technician_services?.some(s => 
@@ -485,13 +551,30 @@ const HomePage: React.FC = () => {
       );
     }
     
-    // Filter by location if specified
+    // Filter by location if specified - try exact, prefix, then partial match
     if (location) {
-      const lowerLocation = location.toLowerCase();
-      filtered = filtered.filter(t => 
-        t.area?.toLowerCase().includes(lowerLocation) ||
-        t.county?.toLowerCase().includes(lowerLocation)
+      const lowerLocation = location.toLowerCase().trim();
+      
+      // Try exact match first
+      let locationMatches = filtered.filter(t =>
+        t.area?.toLowerCase() === lowerLocation
       );
+      
+      // If no exact match, try prefix match
+      if (locationMatches.length === 0) {
+        locationMatches = filtered.filter(t =>
+          t.area?.toLowerCase().startsWith(lowerLocation)
+        );
+      }
+      
+      // If still no match, try partial match
+      if (locationMatches.length === 0) {
+        locationMatches = filtered.filter(t =>
+          t.area?.toLowerCase().includes(lowerLocation)
+        );
+      }
+      
+      filtered = locationMatches;
     }
     
     return filtered;
@@ -603,21 +686,21 @@ const HomePage: React.FC = () => {
       },
       {
         id: 'tinting',
-        title: 'Car Tinting Nairobi & Window Tinting Near Me - Head Restoration Specialists',
+        title: 'Tinting Specialists - Windows, Headlights & Tail Light Smoking',
         technicians: tintingTechs,
         showSeeAll: tintingTechs.length >= 8,
         isVisible: tintingTechs.length > 0
       },
       {
         id: 'wrapping',
-        title: 'Car Wrapping Kenya, PPF Kenya & Ceramic Coating Nairobi Specialists',
+        title: 'Car Wrapping, PPF & Ceramic Coating Specialists',
         technicians: wrappingTechs,
         showSeeAll: wrappingTechs.length >= 8,
         isVisible: wrappingTechs.length > 0
       },
       {
         id: 'detailing',
-        title: 'Car Detailing Nairobi - Professional Car Care & Interior Experts',
+        title: 'Professional Detailing & Interior Care Experts',
         technicians: detailingTechs,
         showSeeAll: detailingTechs.length >= 8,
         isVisible: detailingTechs.length > 0

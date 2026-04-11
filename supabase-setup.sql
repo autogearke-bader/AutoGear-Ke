@@ -142,6 +142,7 @@ ALTER TABLE technician_payments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE leads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE articles ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================================
 -- RLS POLICIES
@@ -312,21 +313,21 @@ CREATE POLICY "Technicians can update own notifications" ON notifications
 
 -- ARTICLES (Blog):
 -- - Public can view published articles
--- - Admin can manage all articles
-CREATE POLICY "Anyone can view published articles" ON articles
+-- - Authenticated users (admin) can manage all articles
+CREATE POLICY "Public view published articles" ON articles
     FOR SELECT USING (is_published = true);
 
-CREATE POLICY "Anyone can view all articles (admin)" ON articles
-    FOR SELECT USING (true);
+CREATE POLICY "Authenticated view all articles" ON articles
+    FOR SELECT USING (auth.role() = 'authenticated' OR auth.role() = 'service_role');
 
-CREATE POLICY "Anyone can insert articles" ON articles
-    FOR INSERT WITH CHECK (true);
+CREATE POLICY "Authenticated insert articles" ON articles
+    FOR INSERT WITH CHECK (auth.role() = 'authenticated' OR auth.role() = 'service_role');
 
-CREATE POLICY "Anyone can update articles" ON articles
-    FOR UPDATE USING (true);
+CREATE POLICY "Authenticated update articles" ON articles
+    FOR UPDATE USING (auth.role() = 'authenticated' OR auth.role() = 'service_role');
 
-CREATE POLICY "Anyone can delete articles" ON articles
-    FOR DELETE USING (true);
+CREATE POLICY "Authenticated delete articles" ON articles
+    FOR DELETE USING (auth.role() = 'authenticated' OR auth.role() = 'service_role');
 
 
 -- ============================================================================

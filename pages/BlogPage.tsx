@@ -47,18 +47,19 @@ const BlogPage: React.FC = () => {
     <div className="min-h-screen bg-slate-950">
       <Helmet>
         <title>AutoGear Insights | Car Service Tips & Guides</title>
-        <meta name="description" content="Expert tips on car tinting, wrapping, PPF, ceramic coating, and detailing in Kenya. Your go-to source for car care advice from AutoGear Ke." />
-        <meta name="keywords"    content="car tinting Kenya, ceramic coating Nairobi, car wrapping guide, PPF Kenya, auto detailing tips" />
-        <meta property="og:title"       content="AutoGear Insights | Car Service Tips & Guides" />
-        <meta property="og:description" content="Expert tips on car tinting, wrapping, PPF, ceramic coating, and detailing in Kenya." />
-        <meta property="og:image"       content="https://autogearke.com/assets/logo-4.png" />
+        {/* Dynamic meta description: use featured article or fallback to generic */}
+        <meta name="description" content={featuredArticle?.meta_description || "Expert tips on car tinting, wrapping, PPF, ceramic coating, and detailing in Kenya. Your go-to source for car care advice from AutoGear Ke."} />
+        <meta property="og:title"       content={featuredArticle?.title || "AutoGear Insights | Car Service Tips & Guides"} />
+        <meta property="og:description" content={featuredArticle?.meta_description || featuredArticle?.excerpt || "Expert tips on car tinting, wrapping, PPF, ceramic coating, and detailing in Kenya."} />
+        {/* Dynamic OG image: use featured article image or fallback to logo */}
+        <meta property="og:image"       content={featuredArticle?.images?.[0]?.url ? cx(featuredArticle.images[0].url, 'w_1200,h_630,c_fill,q_auto,f_auto') : "https://autogearke.com/assets/logo-4.png"} />
         <meta property="og:url"         content="https://autogearke.com/blogs" />
         <meta property="og:type"        content="website" />
         <meta property="og:site_name"   content="AutoGear Ke" />
         <meta name="twitter:card"        content="summary_large_image" />
-        <meta name="twitter:title"       content="AutoGear Insights | Car Service Tips & Guides" />
-        <meta name="twitter:description" content="Expert tips on car tinting, wrapping, PPF, ceramic coating, and detailing in Kenya." />
-        <meta name="twitter:image"       content="https://autogearke.com/assets/logo-4.png" />
+        <meta name="twitter:title"       content={featuredArticle?.title || "AutoGear Insights | Car Service Tips & Guides"} />
+        <meta name="twitter:description" content={featuredArticle?.meta_description || featuredArticle?.excerpt || "Expert tips on car tinting, wrapping, PPF, ceramic coating, and detailing in Kenya."} />
+        <meta name="twitter:image"       content={featuredArticle?.images?.[0]?.url ? cx(featuredArticle.images[0].url, 'w_1200,h_630,c_fill,q_auto,f_auto') : "https://autogearke.com/assets/logo-4.png"} />
         <link rel="canonical" href="https://autogearke.com/blogs" />
         <script type="application/ld+json">
           {JSON.stringify({
@@ -68,6 +69,7 @@ const BlogPage: React.FC = () => {
             description:  'Expert car service tips and guides in Kenya.',
             publisher:    { '@type': 'Organization', name: 'AutoGear Ke' },
             url:          'https://autogearke.com/blogs',
+            image:        featuredArticle?.images?.[0]?.url ? cx(featuredArticle.images[0].url, 'w_1200,q_auto,f_auto') : undefined,
           })}
         </script>
       </Helmet>

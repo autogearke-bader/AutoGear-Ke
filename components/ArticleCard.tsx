@@ -26,7 +26,6 @@ const KEYWORD_TO_SERVICE: Record<string, string> = {
 // Kenya locations for internal linking
 const LOCATIONS = ['nairobi', 'mombasa', 'kisumu', 'nakuru', 'eldoret', 'kiambu', 'thika', 'machakos', 'westlands', 'karen', 'kilimani'];
 
-// Detect service from article content
 const detectServiceSlug = (article: Article): string | null => {
   const content = `${article.title} ${article.keywords} ${article.excerpt}`.toLowerCase();
   for (const [keyword, slug] of Object.entries(KEYWORD_TO_SERVICE)) {
@@ -35,7 +34,6 @@ const detectServiceSlug = (article: Article): string | null => {
   return null;
 };
 
-// Detect location from article content
 const detectLocationSlug = (article: Article): string | null => {
   const content = `${article.title} ${article.keywords} ${article.excerpt}`.toLowerCase();
   for (const location of LOCATIONS) {
@@ -44,101 +42,125 @@ const detectLocationSlug = (article: Article): string | null => {
   return null;
 };
 
+const detectTags = (article: Article): string[] => {
+  const content = `${article.title} ${article.keywords} ${article.excerpt}`.toLowerCase();
+  const tags: string[] = [];
+  const tagMap: Record<string, string> = {
+    'tint': 'Window Tinting',
+    'wrap': 'Car Wrapping',
+    'ppf': 'PPF',
+    'ceramic': 'Ceramic Coating',
+    'detail': 'Detailing',
+    'buff': 'Buffing',
+    'headlight': 'Headlights',
+    'tuning': 'Tuning',
+  };
+  for (const [keyword, label] of Object.entries(tagMap)) {
+    if (content.includes(keyword)) tags.push(label);
+    if (tags.length === 3) break;
+  }
+  return tags;
+};
+
 interface ArticleCardProps {
   article: Article;
 }
 
 const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
-  // Improved formatter to handle MySQL strings and naming mismatches
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'Recently Published';
-
     try {
-      // Replace the space with 'T' to make it compatible with all browsers
-      const formattedString = dateString.replace(' ', 'T');
-      const date = new Date(formattedString);
-
+      const date = new Date(dateString.replace(' ', 'T'));
       if (isNaN(date.getTime())) return 'Recently Published';
-
-      return date.toLocaleDateString('en-KE', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    } catch (e) {
+      return date.toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' });
+    } catch {
       return 'Recently Published';
     }
   };
 
-// Use the full URL from images array first, fallback to featuredImage
-const imageUrl = article.images?.[0]?.url 
-  || (article.featuredImage 
+  const imageUrl = article.images?.[0]?.url
+    || (article.featuredImage
       ? (article.featuredImage.startsWith('http') || article.featuredImage.startsWith('data:')
-          ? article.featuredImage 
-          : `/article-images/${article.featuredImage}`)
+        ? article.featuredImage
+        : `/article-images/${article.featuredImage}`)
       : 'https://placehold.co/800x450/1e293b/94a3b8?text=No+Image');
 
+  const tags = detectTags(article);
+  const serviceSlug = detectServiceSlug(article);
+  const locationSlug = detectLocationSlug(article);
+
   return (
-    <div className="group bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 flex flex-col h-auto shadow-lg transition-all duration-500 hover:shadow-blue-900/10 hover:-translate-y-1 hover:border-blue-600/50">
-      {/* Image Section */}
-      <div className="aspect-video relative overflow-hidden cursor-pointer bg-slate-800">
+    <div className="group bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 hover:border-blue-600/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-900/10 flex flex-col">
+
+      {/* ── Image — clean, no overlays ── */}
+      <div className="aspect-[4/3] overflow-hidden bg-slate-800 flex-shrink-0">
         <img
           src={imageUrl}
-          alt={article.title}
+          alt={article.images?.[0]?.alt || article.title}
           loading="lazy"
-          className="object-cover w-full h-full transition-all duration-700 ease-out group-hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
       </div>
-      
-      <div className="p-4 flex flex-col flex-grow text-left">
+
+      {/* ── All text content below image ── */}
+      <div className="p-4 flex flex-col flex-grow">
+
         {/* Date */}
-        <span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">
-          {formatDate(article.publishedAt || article.published_at || article.created_at)}
-        </span>
-        
+        <div className="flex items-center gap-1 mb-2">
+          <svg className="w-3 h-3 text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">
+            {formatDate(article.publishedAt || article.published_at || article.created_at)}
+          </span>
+        </div>
+
         {/* Title */}
-        <h3 className="text-lg font-bold text-white mb-3 leading-tight group-hover:text-blue-400 transition-colors line-clamp-2">
+        <h3 className="text-white font-bold text-[15px] leading-snug mb-2 line-clamp-2 group-hover:text-blue-400 transition-colors">
           {article.title}
         </h3>
-        
+
         {/* Excerpt */}
         {article.excerpt && (
-          <p className="text-slate-400 text-sm leading-relaxed mb-4 line-clamp-2 flex-grow">
+          <p className="text-slate-400 text-[12px] leading-relaxed line-clamp-2 mb-3 flex-grow">
             {article.excerpt}
           </p>
         )}
-        
-        {/* Footer Link */}
-        <div className="mt-auto pt-3 border-t border-slate-800">
-          <Link 
+
+        {/* Service tag pills */}
+        {tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {tags.map(tag => (
+              <span
+                key={tag}
+                className="text-[10px] font-semibold text-slate-300 bg-slate-800 border border-slate-700 rounded-full px-2.5 py-0.5"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Footer row — Read link + optional location link */}
+        <div className="flex items-center justify-between pt-3 border-t border-slate-800 mt-auto">
+          <Link
             to={`/blogs/${article.slug}`}
-            className="text-blue-400 hover:text-blue-300 text-xs font-bold uppercase tracking-widest transition-colors flex items-center gap-1"
+            className="text-blue-400 hover:text-blue-300 text-[11px] font-black uppercase tracking-widest transition-colors flex items-center gap-1"
           >
             Read Full Article
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
           </Link>
-          
-          {/* Internal link to service/location page */}
-          {(() => {
-            const serviceSlug = detectServiceSlug(article);
-            const locationSlug = detectLocationSlug(article);
-            if (serviceSlug && locationSlug) {
-              return (
-                <Link 
-                  to={`/${serviceSlug}/${locationSlug}`}
-                  className="mt-2 text-slate-500 hover:text-blue-400 text-xs transition-colors flex items-center gap-1"
-                >
-                  View {serviceSlug.replace('-', ' ')} in {locationSlug}
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </Link>
-              );
-            }
-            return null;
-          })()}
+
+          {serviceSlug && locationSlug && (
+            <Link
+              to={`/${serviceSlug}/${locationSlug}`}
+              className="text-slate-600 hover:text-blue-400 text-[10px] transition-colors"
+            >
+              {locationSlug.charAt(0).toUpperCase() + locationSlug.slice(1)}
+            </Link>
+          )}
         </div>
       </div>
     </div>

@@ -18,10 +18,10 @@ import {
   getCurrentUser, 
   signOut 
 } from '../src/lib/auth';
-import { 
-  getMyLeads, 
+import {
+  getMyLeads,
   updateLeadStatus,
-  getMyNotifications, 
+  getMyNotifications,
   markNotificationRead,
   markAllNotificationsRead,
   updateMyProfile,
@@ -31,7 +31,10 @@ import {
   uploadToCloudinary,
   generateUniqueSlug,
   getTechnicians,
-  getTikTokThumbnail
+  getTikTokThumbnail,
+  getAllServices,
+  addService,
+  serviceExists
 } from '../src/lib/api';
 import { supabase } from '../src/lib/supabase';
 import { BusinessHoursEditor } from '../src/components/BusinessHoursEditor';
@@ -76,6 +79,7 @@ const TechnicianDashboardPage: React.FC = () => {
   });
   
   const [services, setServices] = useState<TechnicianService[]>([]);
+  const [availableServices, setAvailableServices] = useState<string[]>([]);
   const [photos, setPhotos] = useState<TechnicianPhoto[]>([]);
   const [selectedPayments, setSelectedPayments] = useState<string[]>([]);
   const [allTechnicians, setAllTechnicians] = useState<Technician[]>([]);
@@ -109,6 +113,9 @@ const TechnicianDashboardPage: React.FC = () => {
     price: string;
     negotiable: boolean;
   }[]>([]);
+
+  // Track which services have "Other" selected for custom input
+  const [customServiceInputs, setCustomServiceInputs] = useState<Record<number, string>>({});
 
   // Handle tab change and update URL
   const handleTabChange = (tab: TabType) => {
@@ -168,6 +175,16 @@ const TechnicianDashboardPage: React.FC = () => {
       setServices(techProfile.technician_services || []);
       setPhotos(techProfile.technician_photos || []);
       setSelectedPayments((techProfile.technician_payments as { method: string }[] | undefined)?.map(p => p.method) || []);
+
+      // Load available services
+      try {
+        const allServices = await getAllServices();
+        setAvailableServices(allServices.map(s => s.name));
+      } catch (err) {
+        console.warn('Failed to load services from database, using fallback:', err);
+        // Fallback to ALL_SERVICES if database query fails
+        setAvailableServices(ALL_SERVICES);
+      }
       
       // Load videos from technician_videos table
       const { data: videosData } = await supabase
@@ -436,17 +453,40 @@ const TechnicianDashboardPage: React.FC = () => {
     try {
       setSaving(true);
       setError('');
-      
+
+      // Validate minimum services
+      if (servicesForm.length < 1) {
+        setError('At least 1 service is required');
+        setSaving(false);
+        return;
+      }
+
+      // Add any new custom services to the global services table
+      const customServices = Object.values(customServiceInputs).filter(name => name.trim());
+      for (const serviceName of customServices) {
+        try {
+          const exists = await serviceExists(serviceName.trim());
+          if (!exists) {
+            await addService(serviceName.trim());
+            setAvailableServices(prev => [...prev, serviceName.trim()]);
+          }
+        } catch (dbError) {
+          console.warn('Failed to add custom service to global table:', dbError);
+          // Continue anyway
+        }
+      }
+
       const servicesToSave = servicesForm.map((s: { id?: string; service_name: string; price: string; negotiable: boolean }) => ({
         id: s.id,
         service_name: s.service_name,
         price: s.price ? parseInt(s.price) : null,
         negotiable: s.negotiable,
       }));
-      
+
       await updateMyServices(servicesToSave);
       setSuccess('Services updated successfully!');
       setEditingServices(false);
+      setCustomServiceInputs({});
       loadData();
     } catch (err: any) {
       setError(err.message || 'Failed to update services');
@@ -455,7 +495,12 @@ const TechnicianDashboardPage: React.FC = () => {
     }
   };
 
+
   const handleAddService = () => {
+    if (servicesForm.length >= 4) {
+      setError('Maximum of 4 services allowed');
+      return;
+    }
     setServicesForm([
       ...servicesForm,
       { service_name: '', price: '', negotiable: false }
@@ -463,22 +508,65 @@ const TechnicianDashboardPage: React.FC = () => {
   };
 
   const handleRemoveService = (index: number) => {
+    if (servicesForm.length <= 1) {
+      setError('Minimum of 1 service required');
+      return;
+    }
     setServicesForm(servicesForm.filter((_, i) => i !== index));
+    // Also clean up custom inputs for this index
+    const newCustomInputs = { ...customServiceInputs };
+    delete newCustomInputs[index];
+    // Shift down indices for remaining custom inputs
+    const shiftedInputs: Record<number, string> = {};
+    Object.entries(newCustomInputs).forEach(([idx, value]) => {
+      const numIdx = parseInt(idx);
+      if (numIdx > index) {
+        shiftedInputs[numIdx - 1] = value;
+      } else {
+        shiftedInputs[numIdx] = value;
+      }
+    });
+    setCustomServiceInputs(shiftedInputs);
   };
 
   const handleServiceChange = (index: number, field: string, value: any) => {
     const updated = [...servicesForm];
-    (updated[index] as any)[field] = value;
+
+    // Handle "Other" selection for service name
+    if (field === 'service_name' && value === 'Other') {
+      // Show custom input
+      setCustomServiceInputs({ ...customServiceInputs, [index]: '' });
+      // Don't update service_name yet
+      return;
+    } else if (field === 'service_name' && value !== 'Other') {
+      // Clear custom input if a predefined service is selected
+      const newCustomInputs = { ...customServiceInputs };
+      delete newCustomInputs[index];
+      setCustomServiceInputs(newCustomInputs);
+      (updated[index] as any)[field] = value;
+    } else {
+      (updated[index] as any)[field] = value;
+    }
+
     setServicesForm(updated);
   };
 
   const startEditingServices = () => {
-    setServicesForm(services.map(s => ({
-      id: s.id,
-      service_name: s.service_name,
-      price: s.price?.toString() || '',
-      negotiable: s.negotiable,
-    })));
+    const initialCustomInputs: Record<number, string> = {};
+    const formData = services.map((s, index) => {
+      const isCustom = !availableServices.includes(s.service_name);
+      if (isCustom) {
+        initialCustomInputs[index] = s.service_name;
+      }
+      return {
+        id: s.id,
+        service_name: s.service_name,
+        price: s.price?.toString() || '',
+        negotiable: s.negotiable,
+      };
+    });
+    setServicesForm(formData);
+    setCustomServiceInputs(initialCustomInputs);
     setEditingServices(true);
   };
 
@@ -1020,17 +1108,36 @@ const TechnicianDashboardPage: React.FC = () => {
                         <div className="flex-1 grid md:grid-cols-4 gap-3">
                           <div className="md:col-span-2">
                             <label htmlFor={`serviceName-${index}`} className="block text-xs text-slate-500 mb-1">Service Name</label>
-                            <select
-                              id={`serviceName-${index}`}
-                              value={service.service_name}
-                              onChange={(e) => handleServiceChange(index, 'service_name', e.target.value)}
-                              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
-                            >
-                              <option value="">Select service</option>
-                              {ALL_SERVICES.map(s => (
-                                <option key={s} value={s}>{s}</option>
-                              ))}
-                            </select>
+                            <div className="space-y-2">
+                              <select
+                                id={`serviceName-${index}`}
+                                value={customServiceInputs[index] !== undefined ? 'Other' : service.service_name}
+                                onChange={(e) => handleServiceChange(index, 'service_name', e.target.value)}
+                                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                              >
+                                <option value="">Select service</option>
+                                {availableServices.map(s => (
+                                  <option key={s} value={s}>{s}</option>
+                                ))}
+                                <option value="Other">Other</option>
+                              </select>
+                              {customServiceInputs[index] !== undefined && (
+                                <input
+                                  type="text"
+                                  value={customServiceInputs[index] || ''}
+                                  onChange={(e) => {
+                                    const newValue = e.target.value;
+                                    setCustomServiceInputs({ ...customServiceInputs, [index]: newValue });
+                                    // Update the service name in the form
+                                    const updated = [...servicesForm];
+                                    (updated[index] as any).service_name = newValue;
+                                    setServicesForm(updated);
+                                  }}
+                                  placeholder="Enter custom service name"
+                                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400"
+                                />
+                              )}
+                            </div>
                           </div>
                           <div>
                             <label htmlFor={`price-${index}`} className="block text-xs text-slate-500 mb-1">Price (KSh)</label>
@@ -1044,14 +1151,16 @@ const TechnicianDashboardPage: React.FC = () => {
                             />
                           </div>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveService(index)}
-                          className="p-2 text-red-400 hover:text-red-300"
-                          aria-label="Remove service"
-                        >
-                          ✕
-                        </button>
+                        {servicesForm.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveService(index)}
+                            className="p-2 text-red-400 hover:text-red-300"
+                            aria-label="Remove service"
+                          >
+                            ✕
+                          </button>
+                        )}
                       </div>
                       <div className="mt-2 flex items-center gap-2">
                         <input
@@ -1071,9 +1180,10 @@ const TechnicianDashboardPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleAddService}
-                    className="w-full py-3 border-2 border-dashed border-slate-700 text-slate-400 hover:border-slate-600 hover:text-white rounded-lg transition-colors"
+                    disabled={servicesForm.length >= 4}
+                    className="w-full py-3 border-2 border-dashed border-slate-700 text-slate-400 hover:border-slate-600 hover:text-white disabled:border-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed rounded-lg transition-colors"
                   >
-                    + Add Service
+                    + Add Service {servicesForm.length >= 4 && '(Max 4)'}
                   </button>
 
                   <div className="flex gap-3">

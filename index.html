@@ -48,7 +48,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
     <!-- Content Security Policy - Production Ready -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://cdnjs.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com https://static.cloudflareinsights.com https://unpkg.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; img-src 'self' data: blob: https: res.cloudinary.com https://p16-tiktokcdn-com.akamaized.net; connect-src 'self' blob: data: https://*.supabase.co wss://*.supabase.co https://api.cloudinary.com https://*.cloudinary.com https://nominatim.openstreetmap.org https://*.openstreetmap.org https://www.tiktok.com https://*.tiktok.com https://api.allorigins.win; font-src 'self' https://fonts.gstatic.com; media-src 'self' blob:; frame-src 'self' https://www.google.com https://accounts.google.com https://www.youtube.com https://www.tiktok.com https://www.instagram.com https://player.vimeo.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://cdnjs.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com https://static.cloudflareinsights.com https://unpkg.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; img-src 'self' data: blob: https: https://res.cloudinary.com https://p16-tiktokcdn-com.akamaized.net https://*.tiktokcdn.com https://c.tile.openstreetmap.org https://*.tile.openstreetmap.org; connect-src 'self' blob: data: https://*.supabase.co wss://*.supabase.co https://api.cloudinary.com https://res.cloudinary.com https://*.cloudinary.com https://nominatim.openstreetmap.org https://*.openstreetmap.org https://www.tiktok.com https://*.tiktok.com https://api.allorigins.win https://www.google-analytics.com https://www.google.com https://www.googletagmanager.com; font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com; media-src 'self' blob:; frame-src 'self' https://www.google.com https://accounts.google.com https://www.youtube.com https://www.tiktok.com https://www.instagram.com https://player.vimeo.com;">
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://autogearke.com/" />
@@ -131,7 +131,9 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch(() => {});
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('SW registered:', reg))
+            .catch(err => console.log('SW error:', err));
         });
       }
     </script>

@@ -46,8 +46,51 @@ const AppContent: React.FC = () => {
   const [checkingProfile, setCheckingProfile] = useState(true);
   const navigate = useNavigate();
 
+  // ── PWA state (must be declared before any useEffect or JSX that references them) ──
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+
+  // handleInstall declared as a const so JSX can reference it
+  const handleInstall = async () => {
+    if (!installPrompt) return;
+    await installPrompt.prompt();
+    const result = await installPrompt.userChoice;
+    if (result.outcome === 'accepted') {
+      setShowInstallBanner(false);
+    }
+    setInstallPrompt(null);
+  };
+
+  // ── PWA: capture install prompt ──
   useEffect(() => {
-    // Check if user has completed their profile after OAuth sign-in
+    const handler = (e: Event) => {
+      e.preventDefault();
+      // Don't show again if user already dismissed it
+      if (localStorage.getItem('pwaInstallDismissed')) return;
+      setInstallPrompt(e);
+      setShowInstallBanner(true);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  // ── PWA: lock orientation to portrait (standalone mode only) ──
+  useEffect(() => {
+    const lockOrientation = async () => {
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        try {
+          // Cast to any — .lock() is a real browser API but not in TS's default lib types
+          await (window.screen.orientation as any).lock('portrait');
+        } catch (err) {
+          console.warn('Orientation lock not supported:', err);
+        }
+      }
+    };
+    lockOrientation();
+  }, []);
+
+  // ── Auth: check profile completion after sign-in ──
+  useEffect(() => {
     const checkProfileCompletion = async () => {
       try {
         const user = await getCurrentUser();
@@ -58,7 +101,7 @@ const AppContent: React.FC = () => {
 
         // Check for pending user type from localStorage (set during registration)
         const pendingUserType = localStorage.getItem('pendingUserType') as 'client' | 'technician' | null;
-        
+
         // If there's a pending user type for technician, redirect to JoinPage
         if (pendingUserType === 'technician') {
           localStorage.removeItem('pendingUserType');
@@ -69,13 +112,13 @@ const AppContent: React.FC = () => {
 
         // Check user metadata to determine type
         const userRole = user.user_metadata?.role;
-        
-        // Skip profile completion for admins - they don't need to complete a profile
+
+        // Skip profile completion for admins — they don't need to complete a profile
         if (userRole === 'admin') {
           setCheckingProfile(false);
           return;
         }
-        
+
         if (userRole === 'technician') {
           // Check if technician profile is complete
           try {
@@ -89,14 +132,14 @@ const AppContent: React.FC = () => {
               localStorage.setItem('redirectToTechnician', 'true');
             }
           } catch (techError) {
-            // Profile might not exist yet - redirect to JoinPage
+            // Profile might not exist yet — redirect to JoinPage
             setCheckingProfile(false);
             navigate('/join');
             return;
           }
         } else {
           // For clients (including Google users without explicit role)
-          // Check if onboarding is complete - redirect if not
+          // Check if onboarding is complete — redirect if not
           try {
             const onboardingComplete = await isClientOnboardingComplete();
             if (!onboardingComplete) {
@@ -113,19 +156,21 @@ const AppContent: React.FC = () => {
           setCheckingProfile(false);
         }
       } catch (error) {
-        // Auth error - could be CSP blocking or network issues
+        // Auth error — could be CSP blocking or network issues
         console.warn('Error checking profile:', error);
       } finally {
         setCheckingProfile(false);
       }
     };
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    // Listen for auth state changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session) {
         // Delay slightly to allow for profile creation
         setTimeout(checkProfileCompletion, 1000);
-        
+
         // Check if there's a pending user type to redirect to JoinPage
         const pendingUserType = localStorage.getItem('pendingUserType') as 'client' | 'technician' | null;
         if (pendingUserType === 'technician') {
@@ -161,7 +206,13 @@ const AppContent: React.FC = () => {
 
   return (
     <Layout>
-      <Suspense fallback={<div className="min-h-screen bg-slate-950 flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sky-500"></div></div>}>
+      <Suspense
+        fallback={
+          <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sky-500" />
+          </div>
+        }
+      >
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/auth" element={<AuthPage />} />
@@ -187,6 +238,32 @@ const AppContent: React.FC = () => {
           <Route path="/:service/:location" element={<ServiceLocationPage />} />
         </Routes>
       </Suspense>
+
+      {/* PWA Install Banner */}
+      {showInstallBanner && (
+        <div className="fixed bottom-20 left-4 right-4 bg-slate-900 border border-blue-600 rounded-2xl p-4 flex items-center gap-3 z-50 shadow-xl">
+          <img src="/assets/180.png" className="w-10 h-10 rounded-xl" alt="AutoGear Ke" />
+          <div className="flex-1">
+            <p className="text-white font-bold text-sm">Install AutoGear Ke</p>
+            <p className="text-slate-400 text-xs">Add to your home screen for quick access</p>
+          </div>
+          <button
+            onClick={handleInstall}
+            className="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-full"
+          >
+            Install
+          </button>
+          <button
+            onClick={() => {
+              localStorage.setItem('pwaInstallDismissed', 'true');
+              setShowInstallBanner(false);
+            }}
+            className="text-slate-500 text-xs"
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </Layout>
   );
 };

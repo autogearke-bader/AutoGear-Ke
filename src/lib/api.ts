@@ -385,6 +385,51 @@ export const updateMyServices = async (
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SERVICES
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Fetch all available services. */
+export const getAllServices = async () => {
+  const { data, error } = await supabase
+    .from('services')
+    .select('*')
+    .order('name', { ascending: true });
+
+  if (error) throw error;
+  return data ?? [];
+};
+
+/** Add a new service to the global services table. */
+export const addService = async (name: string) => {
+  const user = await getCurrentUser();
+  if (!user) throw new Error('Not authenticated');
+
+  const { data, error } = await supabase
+    .from('services')
+    .insert({
+      name: name.trim(),
+      created_by: user.id,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+/** Check if a service name already exists. */
+export const serviceExists = async (name: string) => {
+  const { data, error } = await supabase
+    .from('services')
+    .select('id')
+    .eq('name', name.trim())
+    .maybeSingle();
+
+  if (error) throw error;
+  return !!data;
+};
+
 /** Replace the current technician's portfolio photos. */
 export const updateMyPhotos = async (
   photos: { id?: string; photo_url: string; caption?: string; alt_text?: string }[]

@@ -6,6 +6,13 @@ export interface TechnicianService {
   negotiable: boolean;
 }
 
+export interface Service {
+  id: string;
+  name: string;
+  created_by: string | null;
+  created_at: string;
+}
+
 export interface TechnicianPhoto {
   id: string;
   technician_id: string;

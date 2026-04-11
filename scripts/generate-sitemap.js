@@ -9,7 +9,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { writeFileSync, existsSync, readFileSync } from 'fs';
+import { writeFileSync, existsSync, readFileSync, mkdirSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -151,97 +151,119 @@ const extractDate = (timestamp) => {
 const generate = async () => {
   console.log('Starting sitemap generation...\n');
 
+  // Track if we successfully fetched data
+  let fetchedData = false;
+  let technicians = [];
+  let articles = [];
+
   try {
     // Fetch live technicians
     console.log('Fetching live technicians from Supabase...');
-    const { data: technicians, error: techError } = await supabase
-      .from('technicians')
-      .select('slug, created_at')
-      .eq('status', 'live');
+    try {
+      const { data, error } = await supabase
+        .from('technicians')
+        .select('slug, created_at')
+        .eq('status', 'live');
 
-    if (techError) {
-      console.error('Error fetching technicians:', techError);
-      throw techError;
+      if (error) {
+        console.warn('Warning fetching technicians:', error.message);
+      } else {
+        technicians = data || [];
+        console.log(`Found ${technicians.length} live technicians`);
+      }
+    } catch (techErr) {
+      console.warn('Warning: Could not fetch technicians:', techErr.message);
     }
-
-    console.log(`Found ${technicians?.length || 0} live technicians`);
 
     // Fetch published articles
     console.log('Fetching published articles from Supabase...');
-    const { data: articles, error: articleError } = await supabase
-      .from('articles')
-      .select('slug, updated_at')
-      .eq('is_published', true);
+    try {
+      const { data, error } = await supabase
+        .from('articles')
+        .select('slug, updated_at')
+        .eq('is_published', true);
 
-    if (articleError) {
-      console.error('Error fetching articles:', articleError);
-      throw articleError;
-    }
-
-    console.log(`Found ${articles?.length || 0} published articles`);
-
-    // Map technicians to URL objects
-    const technicianUrls = (technicians || []).map(t => ({
-      url: `/technician/${t.slug}`,
-      priority: '0.9',
-      changefreq: 'weekly',
-      lastmod: extractDate(t.created_at),
-    }));
-
-    // Map articles to URL objects
-    const articleUrls = (articles || []).map(a => ({
-      url: `/blogs/${a.slug}`,
-      priority: '0.7',
-      changefreq: 'monthly',
-      lastmod: extractDate(a.updated_at),
-    }));
-
-    // Generate service-location page URLs (Programmatic SEO)
-    // Uses cleaner /technicians/:service/:location pattern instead of /:service/:location
-    const serviceLocationUrls = [];
-    for (const service of SERVICE_SLUGS) {
-      for (const location of LOCATION_SLUGS) {
-        serviceLocationUrls.push({
-          url: `/technicians/${service}/${location}`,
-          priority: '0.8',
-          changefreq: 'weekly',
-          lastmod: null,
-        });
+      if (error) {
+        console.warn('Warning fetching articles:', error.message);
+      } else {
+        articles = data || [];
+        console.log(`Found ${articles.length} published articles`);
       }
+    } catch (articleErr) {
+      console.warn('Warning: Could not fetch articles:', articleErr.message);
     }
 
-    console.log(`Generated ${serviceLocationUrls.length} service-location page URLs`);
+    fetchedData = true;
 
-    // Combine all URLs
-    const allUrls = [
-      ...staticPages,
-      ...technicianUrls,
-      ...articleUrls,
-      ...serviceLocationUrls,
-    ];
+  } catch (error) {
+    console.warn('\n⚠️ Network error fetching from Supabase, using fallback data');
+    console.warn('   The sitemap will be generated with static pages only');
+    // Continue with empty arrays - we still want to generate the static sitemap
+  }
 
-    // Generate XML
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+  // Map technicians to URL objects
+  const technicianUrls = technicians.map(t => ({
+    url: `/technician/${t.slug}`,
+    priority: '0.9',
+    changefreq: 'weekly',
+    lastmod: extractDate(t.created_at),
+  }));
+
+  // Map articles to URL objects
+  const articleUrls = articles.map(a => ({
+    url: `/blogs/${a.slug}`,
+    priority: '0.7',
+    changefreq: 'monthly',
+    lastmod: extractDate(a.updated_at),
+  }));
+
+  // Generate service-location page URLs (Programmatic SEO)
+  // Uses cleaner /technicians/:service/:location pattern instead of /:service/:location
+  const serviceLocationUrls = [];
+  for (const service of SERVICE_SLUGS) {
+    for (const location of LOCATION_SLUGS) {
+      serviceLocationUrls.push({
+        url: `/technicians/${service}/${location}`,
+        priority: '0.8',
+        changefreq: 'weekly',
+        lastmod: null,
+      });
+    }
+  }
+
+  console.log(`Generated ${serviceLocationUrls.length} service-location page URLs`);
+
+  // Combine all URLs
+  const allUrls = [
+    ...staticPages,
+    ...technicianUrls,
+    ...articleUrls,
+    ...serviceLocationUrls,
+  ];
+
+  // Generate XML
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${allUrls.map(toUrl).join('\n')}
 </urlset>`;
 
-    // Write to file - output to dist folder for deployment
-    const outputPath = path.join(__dirname, '..', 'dist', 'sitemap.xml');
-    writeFileSync(outputPath, xml);
-    
-    console.log(`\n✅ Sitemap generated successfully!`);
-    console.log(`   Total URLs: ${allUrls.length}`);
-    console.log(`   - Static pages: ${staticPages.length}`);
-    console.log(`   - Technician profiles: ${technicianUrls.length}`);
-    console.log(`   - Blog articles: ${articleUrls.length}`);
-    console.log(`   - Service-location pages: ${serviceLocationUrls.length}`);
-    console.log(`   Output: ${outputPath}`);
-
-  } catch (error) {
-    console.error('\n❌ Error generating sitemap:', error.message);
-    process.exit(1);
+  // Write to file - output to dist folder for deployment
+  // Ensure dist directory exists
+  const distDir = path.join(__dirname, '..', 'dist');
+  if (!existsSync(distDir)) {
+    mkdirSync(distDir, { recursive: true });
   }
+  
+  const outputPath = path.join(distDir, 'sitemap.xml');
+  writeFileSync(outputPath, xml);
+  
+  console.log(`\n✅ Sitemap generated successfully!`);
+  console.log(`   Total URLs: ${allUrls.length}`);
+  console.log(`   - Static pages: ${staticPages.length}`);
+  console.log(`   - Technician profiles: ${technicianUrls.length}`);
+  console.log(`   - Blog articles: ${articleUrls.length}`);
+  console.log(`   - Service-location pages: ${serviceLocationUrls.length}`);
+  console.log(`   Output: ${outputPath}`);
 };
 
 // Run the generator

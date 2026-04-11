@@ -30,7 +30,7 @@ const Footer: React.FC = () => {
   if (isPWA) return null;
 
   const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-    `Hi ${BUSINESS_NAME}!I found you on autogearke.com and I have a question. Are you available?`
+    `Hi ${BUSINESS_NAME}! I'd like to connect with you for support and inquiries.`
   )}`;
 
   const SocialIcons = ({ size = 'sm' }: { size?: 'sm' | 'lg' }) => {

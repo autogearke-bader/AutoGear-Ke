@@ -4,8 +4,8 @@ import {  } from './types.ts';
 export const WHATSAPP_NUMBER = "254112493733";
 export const BUSINESS_NAME = "AUTOGEAR KE";
 export const CONTACT_EMAIL = "support@autogearke.com";
-export const TIKTOK_URL = "https://www.tiktok.com/@autogear_ke?_r=1&_t=ZM-92zVNcV4j07";
-export const INSTAGRAM_URL = "https://www.instagram.com/autogear_ke?igsh=dWJjMTViZmllemtn";
+export const TIKTOK_URL = "https://www.tiktok.com/@autogear.ke?_r=1&_t=ZM-92zVNcV4j07";
+export const INSTAGRAM_URL = "https://www.instagram.com/autogearke?igsh=dWJjMTViZmllemtn";
 export const X_URL = "https://x.com/AutogearKe";
 
 
