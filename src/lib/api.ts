@@ -72,7 +72,7 @@ export const isClientOnboardingComplete = async (): Promise<boolean> => {
 export const getPublicTechnicians = async () => {
   const { data, error } = await supabase
     .from('technicians')
-    .select('*, technician_services(*), technician_photos(*), technician_videos(*), technician_payments(*)')
+    .select('*, technician_services(*), technician_photos(*), technician_videos(*), technician_payments(*), avg_rating, review_count')
     .eq('status', 'live')
     .order('created_at', { ascending: false });
 
@@ -126,7 +126,19 @@ export const getTechnicianBusinessHours = async (technicianId: string) => {
     .order('day_of_week', { ascending: true });
 
   if (error) throw error;
-  return data ?? [];
+
+  // Ensure available_on_request field exists with default value
+  // Temporary workaround: if Sunday is open but has no times, assume it's "available on request"
+  return (data ?? []).map(hour => {
+    const isSunday = hour.day_of_week === 0;
+    const hasNoTimes = !hour.open_time && !hour.close_time;
+    const shouldBeAvailableOnRequest = isSunday && hour.is_open && hasNoTimes;
+
+    return {
+      ...hour,
+      available_on_request: hour.available_on_request ?? (shouldBeAvailableOnRequest ? true : false)
+    };
+  });
 };
 
 /** Fetch published articles. */
@@ -202,10 +214,63 @@ export const getMyClientLeads = async (_userId?: string) => {
     .from('leads')
     .select('*, technicians(business_name, slug, profile_image)')
     .eq('client_id', clientRow.id)
+    .eq('hidden_from_client', false)
     .order('created_at', { ascending: false });
 
   if (error) throw error;
   return data ?? [];
+};
+
+/**
+ * Delete a booking/lead for the current client.
+ * Only allows deletion of bookings with status "job_done" or "contacted".
+ */
+export const deleteBooking = async (leadId: string): Promise<void> => {
+  const userId = await getUserIdFromSession();
+  if (!userId) throw new Error('Not authenticated');
+
+  // Get the client row to verify ownership
+  const { data: clientRow } = await supabase
+    .from('clients')
+    .select('id')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (!clientRow) throw new Error('Client profile not found');
+
+  // Verify the lead belongs to this client and has eligible status
+  const { data: lead } = await supabase
+    .from('leads')
+    .select('status')
+    .eq('id', leadId)
+    .eq('client_id', clientRow.id)
+    .maybeSingle();
+
+  if (!lead) throw new Error('Booking not found');
+
+  if (lead.status !== 'job_done' && lead.status !== 'contacted') {
+    throw new Error('Only completed or contacted bookings can be removed');
+  }
+
+  // Delete the booking
+  const { error } = await supabase
+    .from('leads')
+    .delete()
+    .eq('id', leadId);
+
+  if (error) throw error;
+};
+
+/**
+ * Clean up old bookings (older than 2 days with eligible statuses).
+ * This function calls the database cleanup function to hide old bookings
+ * from client view. Returns the number of bookings cleaned up.
+ */
+export const cleanupOldBookings = async (): Promise<number> => {
+  const { data, error } = await supabase.rpc('cleanup_old_bookings');
+
+  if (error) throw error;
+  return data ?? 0;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -250,11 +315,16 @@ export const getMyLeads = async () => {
 /** Update the status of a lead (technician action). */
 export const updateLeadStatus = async (
   leadId: string,
-  status: 'pending' | 'contacted' | 'job_done' | 'no_response'
+  status: 'pending' | 'job_done' | 'not_converted'
 ) => {
+  const updateData: { status: string; is_archived?: boolean } = { status };
+  if (status === 'job_done') {
+    updateData.is_archived = true;
+  }
+
   const { error } = await supabase
     .from('leads')
-    .update({ status })
+    .update(updateData)
     .eq('id', leadId);
 
   if (error) throw error;
@@ -513,31 +583,32 @@ export const submitReview = async (
   rating: number,
   comment: string,
   wouldReBook: 'yes' | 'no',
-  leadId?: string
+  leadId?: string,
+  clientId?: string
 ) => {
   const userId = await getUserIdFromSession();
+  if (!userId) throw new Error('You must be signed in to submit a review');
 
   // Try to get the client's name for the review
   let clientName = 'Anonymous';
-  if (userId) {
-    const { data: clientRow } = await supabase
-      .from('clients')
-      .select('name')
-      .eq('user_id', userId)
-      .maybeSingle();
-    if (clientRow?.name) clientName = clientRow.name;
-  }
+  const { data: clientRow } = await supabase
+    .from('clients')
+    .select('name')
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (clientRow?.name) clientName = clientRow.name;
 
   const reviewPayload: Record<string, any> = {
     technician_id: technicianId,
+    client_id: clientId || userId,
     client_name: clientName,
     rating,
     comment,
     would_rebook: wouldReBook,
-    is_visible: true,
+    lead_id: leadId || null,
+    status: 'pending',        // awaits admin approval (migration 015 workflow)
+    is_visible: false,        // shown only after approval
   };
-
-  if (leadId) reviewPayload.lead_id = leadId;
 
   const { error } = await supabase.from('reviews').insert([reviewPayload]);
   if (error) throw error;

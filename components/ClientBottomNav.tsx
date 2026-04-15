@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../src/lib/supabase';
 
 declare global {
@@ -10,6 +10,7 @@ declare global {
 
 const ClientBottomNav: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isVisible, setIsVisible]     = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isClient, setIsClient]       = useState(false);
@@ -112,6 +113,18 @@ const ClientBottomNav: React.FC = () => {
   const active   = 'text-sky-500';
   const inactive = 'text-slate-400 hover:text-white';
 
+  // Handle home button click with refresh
+  const handleHomeClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (location.pathname === '/') {
+      // Already on home page, trigger a refresh by reloading
+      window.location.reload();
+    } else {
+      // Navigate to home page
+      navigate('/');
+    }
+  };
+
   // Only render for authenticated clients
   // md:hidden handles tablet + desktop hiding via CSS — no JS needed
   if (!isClient) return null;
@@ -133,6 +146,7 @@ const ClientBottomNav: React.FC = () => {
       {/* Home */}
       <Link
         to="/"
+        onClick={handleHomeClick}
         className={`flex flex-col items-center gap-0.5 px-4 pt-3 pb-1 transition-colors ${
           isActive('/') && !isActive('/bookings') && !isActive('/blogs') && !isActive('/menu')
             ? active : inactive

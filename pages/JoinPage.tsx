@@ -4,8 +4,9 @@ import { Helmet } from 'react-helmet-async';
 import { supabase } from '../src/lib/supabase';
 import { uploadToCloudinary } from '../src/lib/api';
 import { reverseGeocode } from '../src/lib/location';
-import { ALL_SERVICES, EXPERIENCE_OPTIONS, DAYS_OF_WEEK } from '../types';
+import { ALL_SERVICES, EXPERIENCE_OPTIONS, DAYS_OF_WEEK, WINDOW_TINT_TYPES } from '../types';
 import { BusinessHoursEditor } from '../src/components/BusinessHoursEditor';
+import { useServiceManager } from '../src/hooks/useServiceManager';
 
 // Photo slot type
 interface PhotoSlot {
@@ -48,7 +49,8 @@ const extractVideoId = (url: string): string | null => {
     const patterns = [
       /tiktok\.com\/@[\w.]+\/video\/(\d+)/,
       /tiktok\.com\/v\/(\d+)/,
-      /vm\.tiktok\.com\/([a-zA-Z0-9_-]+)/
+      /vm\.tiktok\.com\/([a-zA-Z0-9_-]+)/,
+      /vt\.tiktok\.com\/([a-zA-Z0-9_-]+)/
     ];
     for (const pattern of patterns) {
       const match = url.match(pattern);
@@ -93,10 +95,12 @@ interface WizardState {
   profileForm: ProfileFormData;
   selectedServices: string[];
   servicePrices: Record<string, { price: string; negotiable: boolean }>;
+  serviceVariants: Record<string, Array<{ variant_name: string; price: string; negotiable: boolean }>>;
+  windowTintPrices: Record<string, { price: string; negotiable: boolean }>;
   otherServices: string[];
   photoSlots: (PhotoSlot | null)[];
   videoLinks: VideoLink[];
-  businessHours: { day_of_week: number; is_open: boolean; open_time: string | null; close_time: string | null }[];
+  businessHours: { day_of_week: number; is_open: boolean; open_time: string | null; close_time: string | null; available_on_request: boolean }[];
 }
 
 const JoinPage: React.FC = () => {
@@ -120,6 +124,8 @@ const JoinPage: React.FC = () => {
       profileForm,
       selectedServices,
       servicePrices,
+      serviceVariants,
+      windowTintPrices,
       otherServices,
       photoSlots,
       videoLinks,
@@ -192,18 +198,25 @@ const JoinPage: React.FC = () => {
   // Services state
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [servicePrices, setServicePrices] = useState<Record<string, { price: string; negotiable: boolean }>>({});
+
+  // Service variants state
+  const [serviceVariants, setServiceVariants] = useState<Record<string, Array<{ variant_name: string; price: string; negotiable: boolean }>>>({});
+
+  // Window Tinting sub-services state
+  const [windowTintPrices, setWindowTintPrices] = useState<Record<string, { price: string; negotiable: boolean }>>({});
   
   // Other services state
   const [newOtherService, setNewOtherService] = useState('');
   const [otherServices, setOtherServices] = useState<string[]>([]);
 
   // Business hours state - initialized with all days closed
-  const [businessHours, setBusinessHours] = useState<{ day_of_week: number; is_open: boolean; open_time: string | null; close_time: string | null }[]>(
+  const [businessHours, setBusinessHours] = useState<{ day_of_week: number; is_open: boolean; open_time: string | null; close_time: string | null; available_on_request: boolean }[]>(
     DAYS_OF_WEEK.map(day => ({
       day_of_week: day.value,
       is_open: false,
       open_time: null,
       close_time: null,
+      available_on_request: false,
     }))
   );
 
@@ -237,6 +250,8 @@ const JoinPage: React.FC = () => {
           }));
           setSelectedServices(savedState.selectedServices);
           setServicePrices(savedState.servicePrices);
+          setServiceVariants(savedState.serviceVariants || {});
+          setWindowTintPrices(savedState.windowTintPrices || {});
           setOtherServices(savedState.otherServices || []);
           setPhotoSlots(savedState.photoSlots);
           setVideoLinks(savedState.videoLinks);
@@ -268,7 +283,7 @@ const JoinPage: React.FC = () => {
     if (!checkingAuth && user) {
       saveWizardState();
     }
-  }, [profileForm, selectedServices, servicePrices, photoSlots, videoLinks, businessHours, checkingAuth, user]);
+  }, [profileForm, selectedServices, servicePrices, serviceVariants, windowTintPrices, otherServices, photoSlots, videoLinks, businessHours, checkingAuth, user]);
 
   // Extract coordinates from Google Maps link
   const extractCoordinates = () => {
@@ -420,6 +435,37 @@ const JoinPage: React.FC = () => {
     const newPrices = { ...servicePrices };
     delete newPrices[service];
     setServicePrices(newPrices);
+    // Also remove variants
+    const newVariants = { ...serviceVariants };
+    delete newVariants[service];
+    setServiceVariants(newVariants);
+  };
+
+  const handleAddVariant = (serviceName: string) => {
+    const currentVariants = serviceVariants[serviceName] || [];
+    setServiceVariants({
+      ...serviceVariants,
+      [serviceName]: [...currentVariants, { variant_name: '', price: '', negotiable: false }]
+    });
+  };
+
+  const handleUpdateVariant = (serviceName: string, variantIndex: number, field: string, value: string | boolean) => {
+    const currentVariants = serviceVariants[serviceName] || [];
+    const updatedVariants = [...currentVariants];
+    (updatedVariants[variantIndex] as any)[field] = value;
+    setServiceVariants({
+      ...serviceVariants,
+      [serviceName]: updatedVariants
+    });
+  };
+
+  const handleRemoveVariant = (serviceName: string, variantIndex: number) => {
+    const currentVariants = serviceVariants[serviceName] || [];
+    const updatedVariants = currentVariants.filter((_, i) => i !== variantIndex);
+    setServiceVariants({
+      ...serviceVariants,
+      [serviceName]: updatedVariants
+    });
   };
 
   // Photo upload handlers
@@ -708,14 +754,87 @@ const JoinPage: React.FC = () => {
       // Delete existing services and insert new ones
       await supabase.from('technician_services').delete().eq('technician_id', technicianId);
 
+      // Prepare services for upsert (since all new, will insert)
+      const servicesToUpsert = [];
       for (const serviceName of selectedServices) {
-        const priceData = servicePrices[serviceName];
-        await supabase.from('technician_services').insert({
+        let priceData = servicePrices[serviceName];
+
+        // Check if service has variants (Window Tinting always has tint types, or custom variants)
+        const hasVariants = serviceName === 'Window Tinting' || (serviceVariants[serviceName] || []).length > 0;
+
+        servicesToUpsert.push({
           technician_id: technicianId,
           service_name: serviceName,
-          price: priceData?.price ? parseInt(priceData.price) : null,
-          negotiable: priceData?.negotiable || false,
+          price: hasVariants ? null : (priceData?.price ? parseInt(priceData.price) : null),
+          negotiable: hasVariants ? false : (priceData?.negotiable || false),
         });
+      }
+
+      // Upsert all services at once
+      const { data: savedServices, error: upsertError } = await supabase
+        .from('technician_services')
+        .upsert(servicesToUpsert)
+        .select();
+
+      if (upsertError) {
+        console.error('Upsert services error:', upsertError);
+        throw upsertError;
+      }
+
+      if (!savedServices) throw new Error('Failed to upsert services');
+
+      // Map service names to IDs
+      const serviceIdMap: Record<string, string> = {};
+      savedServices.forEach(s => {
+        serviceIdMap[s.service_name] = s.id;
+      });
+
+      // Collect ALL variants from ALL services, not just Window Tinting
+      const allVariants: { service_id: string; variant_name: string; price: number | null; is_negotiable: boolean }[] = [];
+
+      savedServices.forEach(savedService => {
+        const serviceId = savedService.id;
+        const serviceName = savedService.service_name;
+
+        // Handle Window Tinting variants from windowTintPrices
+        if (serviceName === 'Window Tinting') {
+          WINDOW_TINT_TYPES.forEach(tintType => {
+            const tintPriceData = windowTintPrices[tintType.name];
+            if (tintPriceData?.price) {
+              allVariants.push({
+                service_id: serviceId,
+                variant_name: tintType.name,
+                price: parseInt(tintPriceData.price),
+                is_negotiable: tintPriceData.negotiable || false
+              });
+            }
+          });
+        }
+
+        // Handle custom variants from serviceVariants for all services
+        const variants = serviceVariants[serviceName] || [];
+        variants.forEach(variant => {
+          if (variant.variant_name.trim()) {
+            allVariants.push({
+              service_id: serviceId,
+              variant_name: variant.variant_name.trim(),
+              price: variant.price ? parseInt(variant.price) : null,
+              is_negotiable: variant.negotiable
+            });
+          }
+        });
+      });
+
+      // Batch insert ALL variants at once
+      if (allVariants.length > 0) {
+        const { error: variantError } = await supabase
+          .from('service_variants')
+          .insert(allVariants);
+
+        if (variantError) {
+          console.error('[SERVICES SAVE] Variants insert error:', variantError);
+          throw variantError;
+        }
       }
 
       return true;
@@ -905,6 +1024,7 @@ const JoinPage: React.FC = () => {
         is_open: h.is_open,
         open_time: h.is_open ? h.open_time : null,
         close_time: h.is_open ? h.close_time : null,
+        available_on_request: h.available_on_request || false,
       }));
 
       // First delete existing business hours
@@ -1297,30 +1417,124 @@ const JoinPage: React.FC = () => {
               <div className="mt-6 pt-4 border-t border-slate-700">
                 <h3 className="text-white font-medium mb-3">Set prices for your services (optional)</h3>
                 {selectedServices.map(serviceName => (
-                  <div key={serviceName} className="flex gap-2 mb-3 items-center">
-                    <span className="w-32 text-slate-300 text-sm">{serviceName}</span>
-                    <input
-                      type="number"
-                      value={servicePrices[serviceName]?.price || ''}
-                      onChange={(e) => setServicePrices({
-                        ...servicePrices,
-                        [serviceName]: { ...servicePrices[serviceName], price: e.target.value }
-                      })}
-                      placeholder="Price (KSh)"
-                      className="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm"
-                    />
-                    <label className="flex items-center gap-1 text-xs text-slate-400">
-                      <input
-                        type="checkbox"
-                        checked={servicePrices[serviceName]?.negotiable || false}
-                        onChange={(e) => setServicePrices({
-                          ...servicePrices,
-                          [serviceName]: { ...servicePrices[serviceName], negotiable: e.target.checked }
-                        })}
-                        className="w-4 h-4"
-                      />
-                      Negotiable
-                    </label>
+                  <div key={serviceName}>
+                    {/* Window Tinting - Show tint type options instead of main service price */}
+                    {serviceName === 'Window Tinting' ? (
+                      <div className="mb-4 p-4 bg-slate-800 rounded-lg border border-slate-700">
+                        <h4 className="text-white font-medium mb-3 text-sm">Window Tint Types & Pricing</h4>
+                        <div className="space-y-2">
+                          {WINDOW_TINT_TYPES.map(tintType => (
+                            <div key={tintType.name} className="flex gap-2 items-center">
+                              <span className="w-24 text-slate-300 text-sm">{tintType.name}</span>
+                              <input
+                                type="number"
+                                value={windowTintPrices[tintType.name]?.price || ''}
+                                onChange={(e) => setWindowTintPrices({
+                                  ...windowTintPrices,
+                                  [tintType.name]: { ...windowTintPrices[tintType.name], price: e.target.value }
+                                })}
+                                placeholder={`Price (KSh, e.g. ${tintType.minPrice})`}
+                                className="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm"
+                              />
+                              <label className="flex items-center gap-1 text-xs text-slate-400 whitespace-nowrap">
+                                <input
+                                  type="checkbox"
+                                  checked={windowTintPrices[tintType.name]?.negotiable || false}
+                                  onChange={(e) => setWindowTintPrices({
+                                    ...windowTintPrices,
+                                    [tintType.name]: { ...windowTintPrices[tintType.name], negotiable: e.target.checked }
+                                  })}
+                                  className="w-4 h-4"
+                                />
+                                Negotiable
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      /* Regular services - Always show service name, show price only if no variants */
+                      <div className="mb-3">
+                        <div className="flex gap-2 items-center">
+                          <span className="w-32 text-slate-300 text-sm">{serviceName}</span>
+                          {(serviceVariants[serviceName] || []).length === 0 ? (
+                            <>
+                              <input
+                                type="number"
+                                value={servicePrices[serviceName]?.price || ''}
+                                onChange={(e) => setServicePrices({
+                                  ...servicePrices,
+                                  [serviceName]: { ...servicePrices[serviceName], price: e.target.value }
+                                })}
+                                placeholder="Price (KSh)"
+                                className="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm"
+                              />
+                              <label className="flex items-center gap-1 text-xs text-slate-400">
+                                <input
+                                  type="checkbox"
+                                  checked={servicePrices[serviceName]?.negotiable || false}
+                                  onChange={(e) => setServicePrices({
+                                    ...servicePrices,
+                                    [serviceName]: { ...servicePrices[serviceName], negotiable: e.target.checked }
+                                  })}
+                                  className="w-4 h-4"
+                                />
+                                Negotiable
+                              </label>
+                            </>
+                          ) : null}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Variants for regular services (optional) */}
+                    {serviceName !== 'Window Tinting' && (
+                      <div className="ml-32 mb-3">
+                        {(serviceVariants[serviceName] || []).map((variant, variantIndex) => (
+                          <div key={variantIndex} className="flex flex-col gap-2 p-2 bg-slate-700 rounded-lg mb-2">
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="text"
+                                value={variant.variant_name}
+                                onChange={(e) => handleUpdateVariant(serviceName, variantIndex, 'variant_name', e.target.value)}
+                                placeholder="Variant name (e.g. Basic, Premium)"
+                                className="flex-1 px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg text-white text-sm"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveVariant(serviceName, variantIndex)}
+                                className="p-2 text-red-400 hover:text-red-300 flex-shrink-0"
+                              >
+                                ×
+                              </button>
+                            </div>
+                            <input
+                              type="number"
+                              value={variant.price}
+                              onChange={(e) => handleUpdateVariant(serviceName, variantIndex, 'price', e.target.value)}
+                              placeholder="Price"
+                              className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg text-white text-sm"
+                            />
+                            <label className="flex items-center gap-2 text-sm text-slate-400">
+                              <input
+                                type="checkbox"
+                                checked={variant.negotiable}
+                                onChange={(e) => handleUpdateVariant(serviceName, variantIndex, 'negotiable', e.target.checked)}
+                                className="w-4 h-4"
+                              />
+                              Negotiable
+                            </label>
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => handleAddVariant(serviceName)}
+                          className="text-blue-400 hover:text-blue-300 text-sm"
+                        >
+                          + Add Variant
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

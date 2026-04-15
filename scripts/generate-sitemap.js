@@ -79,8 +79,6 @@ const SERVICE_SLUGS = [
   'car-detailing',
   'headlight-restoration',
   'car-tuning',
-  'car-riveting',
-  'car-identity',
 ];
 
 // Location slugs for programmatic SEO pages
@@ -218,12 +216,12 @@ const generate = async () => {
   }));
 
   // Generate service-location page URLs (Programmatic SEO)
-  // Uses cleaner /technicians/:service/:location pattern instead of /:service/:location
+  // Uses /:service/:location pattern
   const serviceLocationUrls = [];
   for (const service of SERVICE_SLUGS) {
     for (const location of LOCATION_SLUGS) {
       serviceLocationUrls.push({
-        url: `/technicians/${service}/${location}`,
+        url: `/${service}/${location}`,
         priority: '0.8',
         changefreq: 'weekly',
         lastmod: null,

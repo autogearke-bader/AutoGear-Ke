@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { 
-  Technician, 
-  Lead, 
+import { v4 as uuidv4 } from 'uuid';
+import {
+  Technician,
+  Lead,
   Notification,
   TechnicianService,
+  ServiceVariant,
   TechnicianPhoto,
   TechnicianVideo,
   ALL_SERVICES,
   EXPERIENCE_OPTIONS,
   PAYMENT_METHODS,
-  DAYS_OF_WEEK
+  DAYS_OF_WEEK,
+  WINDOW_TINT_TYPES
 } from '../types';
 import { 
   getMyTechnicianProfile, 
@@ -79,7 +82,11 @@ const TechnicianDashboardPage: React.FC = () => {
   });
   
   const [services, setServices] = useState<TechnicianService[]>([]);
+  const [serviceVariants, setServiceVariants] = useState<ServiceVariant[]>([]);
   const [availableServices, setAvailableServices] = useState<string[]>([]);
+  const [editingServices, setEditingServices] = useState(false);
+  const [servicesForm, setServicesForm] = useState<{ id?: string; service_name: string; price: string; negotiable: boolean; variants: { id?: string; service_id?: string; variant_name: string; price: string; is_negotiable: boolean }[] }[]>([]);
+  const [dirtyServiceIndices, setDirtyServiceIndices] = useState<Set<number>>(new Set());
   const [photos, setPhotos] = useState<TechnicianPhoto[]>([]);
   const [selectedPayments, setSelectedPayments] = useState<string[]>([]);
   const [allTechnicians, setAllTechnicians] = useState<Technician[]>([]);
@@ -91,6 +98,9 @@ const TechnicianDashboardPage: React.FC = () => {
   const [newVideoUrl, setNewVideoUrl] = useState('');
   const [videoUrlError, setVideoUrlError] = useState('');
   const [videoSaving, setVideoSaving] = useState(false);
+
+  // Leads view state
+  const [leadsView, setLeadsView] = useState<'active' | 'archived'>('active');
   
   // Business hours state
   const [businessHours, setBusinessHours] = useState<{
@@ -98,24 +108,14 @@ const TechnicianDashboardPage: React.FC = () => {
     is_open: boolean;
     open_time: string | null;
     close_time: string | null;
-  }[]>(DAYS_OF_WEEK.map(day => ({
-    day_of_week: day.value,
-    is_open: false,
-    open_time: null,
-    close_time: null,
-  })));
-  
-  // Editable services form
-  const [editingServices, setEditingServices] = useState(false);
-  const [servicesForm, setServicesForm] = useState<{
-    id?: string;
-    service_name: string;
-    price: string;
-    negotiable: boolean;
+    available_on_request: boolean;
   }[]>([]);
 
   // Track which services have "Other" selected for custom input
   const [customServiceInputs, setCustomServiceInputs] = useState<Record<number, string>>({});
+  
+  // Track window tinting sub-services during editing
+  const [editingWindowTintPrices, setEditingWindowTintPrices] = useState<Record<string, { price: string; negotiable: boolean }>>({});
 
   // Handle tab change and update URL
   const handleTabChange = (tab: TabType) => {
@@ -173,6 +173,15 @@ const TechnicianDashboardPage: React.FC = () => {
       });
       
       setServices(techProfile.technician_services || []);
+
+      // Load service variants
+      const { data: variantsData } = await supabase
+        .from('service_variants')
+        .select('*')
+        .in('service_id', techProfile.technician_services?.map((s: TechnicianService) => s.id) || []);
+
+      setServiceVariants(variantsData || []);
+
       setPhotos(techProfile.technician_photos || []);
       setSelectedPayments((techProfile.technician_payments as { method: string }[] | undefined)?.map(p => p.method) || []);
 
@@ -215,11 +224,36 @@ const TechnicianDashboardPage: React.FC = () => {
         .order('day_of_week', { ascending: true });
       
       if (hoursData && hoursData.length > 0) {
-        setBusinessHours(hoursData.map(h => ({
-          day_of_week: h.day_of_week,
-          is_open: h.is_open,
-          open_time: h.open_time,
-          close_time: h.close_time,
+        // Map existing data and ensure all days are represented
+        const mappedHours = DAYS_OF_WEEK.map(day => {
+          const existing = hoursData.find(h => h.day_of_week === day.value);
+          const isSunday = existing.day_of_week === 0;
+          const hasNoTimes = !existing.open_time && !existing.close_time;
+          const shouldBeAvailableOnRequest = isSunday && existing.is_open && hasNoTimes;
+
+          return existing ? {
+            day_of_week: existing.day_of_week,
+            is_open: existing.is_open,
+            open_time: existing.open_time,
+            close_time: existing.close_time,
+            available_on_request: existing.available_on_request ?? (shouldBeAvailableOnRequest ? true : false),
+          } : {
+            day_of_week: day.value,
+            is_open: false,
+            open_time: null,
+            close_time: null,
+            available_on_request: false,
+          };
+        });
+        setBusinessHours(mappedHours);
+      } else {
+        // Initialize with all days closed
+        setBusinessHours(DAYS_OF_WEEK.map(day => ({
+          day_of_week: day.value,
+          is_open: false,
+          open_time: null,
+          close_time: null,
+          available_on_request: false,
         })));
       }
       
@@ -290,8 +324,9 @@ const TechnicianDashboardPage: React.FC = () => {
           is_open: h.is_open,
           open_time: h.is_open ? h.open_time : null,
           close_time: h.is_open ? h.close_time : null,
+          available_on_request: h.available_on_request || false,
         }));
-        
+
         // Delete existing and insert new
         await supabase.from('business_hours').delete().eq('technician_id', technician.id);
         if (hoursToSave.length > 0) {
@@ -310,8 +345,8 @@ const TechnicianDashboardPage: React.FC = () => {
   
   // Extract video ID from URL for different platforms
   const getVideoId = (url: string): { platform: string; videoId: string } | null => {
-    // TikTok patterns
-    const tiktokMatch = url.match(/(?:tiktok\.com\/@[\w.]+\/video\/|tiktok\.com\/v\/|vm\.tiktok\.com\/)([\da-zA-Z_-]+)/);
+    // TikTok patterns (including mobile app shared links)
+    const tiktokMatch = url.match(/(?:tiktok\.com\/@[\w.]+\/video\/|tiktok\.com\/v\/|vm\.tiktok\.com\/|vt\.tiktok\.com\/)([\da-zA-Z_-]+)/);
     if (tiktokMatch) return { platform: 'tiktok', videoId: tiktokMatch[1] };
     
     // YouTube patterns
@@ -449,17 +484,28 @@ const TechnicianDashboardPage: React.FC = () => {
     }
   };
 
+  const markDirty = (index: number) => {
+    setDirtyServiceIndices(prev => new Set(prev).add(index));
+  };
+
   const handleServicesSave = async () => {
     try {
       setSaving(true);
       setError('');
+      setSuccess('');
 
       // Validate minimum services
       if (servicesForm.length < 1) {
         setError('At least 1 service is required');
-        setSaving(false);
         return;
       }
+
+      // Helper function for safe price parsing
+      const safeParseInt = (str: string) => {
+        if (!str || !str.trim()) return null;
+        const num = parseInt(str.trim());
+        return isNaN(num) ? null : num;
+      };
 
       // Add any new custom services to the global services table
       const customServices = Object.values(customServiceInputs).filter(name => name.trim());
@@ -476,19 +522,135 @@ const TechnicianDashboardPage: React.FC = () => {
         }
       }
 
-      const servicesToSave = servicesForm.map((s: { id?: string; service_name: string; price: string; negotiable: boolean }) => ({
-        id: s.id,
-        service_name: s.service_name,
-        price: s.price ? parseInt(s.price) : null,
-        negotiable: s.negotiable,
-      }));
+      // Prepare services for upsert
+      const servicesToUpsert: { id?: string; technician_id: string; service_name: string; price?: number | null; negotiable: boolean }[] = [];
+      servicesForm.forEach((s) => {
+        if (s.variants.length > 0) {
+          // Service with variants - no overall price
+          servicesToUpsert.push({
+            id: s.id || uuidv4(),
+            technician_id: technician!.id,
+            service_name: s.service_name,
+            price: null,
+            negotiable: false,
+          });
+        } else {
+          // Regular service without variants
+          servicesToUpsert.push({
+            id: s.id || uuidv4(),
+            technician_id: technician!.id,
+            service_name: s.service_name,
+            price: safeParseInt(s.price),
+            negotiable: s.negotiable,
+          });
+        }
+      });
 
-      await updateMyServices(servicesToSave);
+      // Delete removed services
+      const currentIds = servicesToUpsert.map(s => s.id).filter(Boolean);
+      const originalIds = services.map(s => s.id);
+      const idsToDelete = originalIds.filter(id => !currentIds.includes(id));
+
+      if (idsToDelete.length > 0) {
+        console.log('[SERVICES SAVE] Deleting removed services:', idsToDelete);
+
+        // Delete variants first to avoid foreign key constraints
+        const { error: deleteVariantsError } = await supabase
+          .from('service_variants')
+          .delete()
+          .in('service_id', idsToDelete);
+
+        if (deleteVariantsError) {
+          console.error('[SERVICES SAVE] Delete variants error:', deleteVariantsError);
+          throw deleteVariantsError;
+        }
+
+        // Then delete the services
+        const { error: deleteServiceError } = await supabase
+          .from('technician_services')
+          .delete()
+          .in('id', idsToDelete);
+
+        if (deleteServiceError) {
+          console.error('[SERVICES SAVE] Delete services error:', deleteServiceError);
+          throw deleteServiceError;
+        }
+      }
+
+      // Step 1: Upsert all services at once
+      console.log('[SERVICES SAVE] Upserting services:', servicesToUpsert);
+      const { data: savedServices, error: upsertError } = await supabase
+        .from('technician_services')
+        .upsert(servicesToUpsert)
+        .select();
+
+      if (upsertError) {
+        console.error('[SERVICES SAVE] Upsert services error:', upsertError);
+        throw upsertError;
+      }
+
+      if (!savedServices) throw new Error('Failed to upsert services');
+
+      // Map service names to their saved IDs
+      const serviceIdMap: Record<string, string> = {};
+      savedServices.forEach(saved => {
+        serviceIdMap[saved.service_name] = saved.id;
+      });
+
+      // Step 2: For dirty services only, process variants
+      const dirtyServiceNames = Array.from(dirtyServiceIndices).map(i => servicesForm[i]?.service_name).filter(Boolean);
+      const dirtyServiceIds = dirtyServiceNames.map(name => serviceIdMap[name]).filter(Boolean);
+
+      if (dirtyServiceIds.length > 0) {
+        console.log('[SERVICES SAVE] Processing variants for dirty services:', dirtyServiceIds);
+
+        // Delete existing variants for dirty services
+        const { error: deleteError } = await supabase
+          .from('service_variants')
+          .delete()
+          .in('service_id', dirtyServiceIds);
+
+        if (deleteError) {
+          console.error('[SERVICES SAVE] Delete variants error:', deleteError);
+          throw deleteError;
+        }
+
+        // Collect all variants from dirty services
+        const allVariants = servicesForm
+          .filter(s => dirtyServiceNames.includes(s.service_name))
+          .flatMap(s => s.variants
+            .filter(v => v.variant_name.trim())
+            .map(v => ({
+              service_id: serviceIdMap[s.service_name],
+              variant_name: v.variant_name.trim(),
+              price: safeParseInt(v.price),
+              is_negotiable: v.is_negotiable
+            }))
+          );
+
+        // Step 3: Batch insert all variants at once
+        if (allVariants.length > 0) {
+          console.log('[SERVICES SAVE] Batch inserting variants:', allVariants);
+          const { error: insertError } = await supabase
+            .from('service_variants')
+            .insert(allVariants);
+
+          if (insertError) {
+            console.error('[SERVICES SAVE] Insert variants error:', insertError);
+            throw insertError;
+          }
+        }
+      }
+
+      // Step 4: Clear dirty state after successful save
+      setDirtyServiceIndices(new Set());
       setSuccess('Services updated successfully!');
       setEditingServices(false);
       setCustomServiceInputs({});
+      setEditingWindowTintPrices({});
       loadData();
     } catch (err: any) {
+      console.error('[SERVICES SAVE] Error:', err);
       setError(err.message || 'Failed to update services');
     } finally {
       setSaving(false);
@@ -501,10 +663,17 @@ const TechnicianDashboardPage: React.FC = () => {
       setError('Maximum of 4 services allowed');
       return;
     }
-    setServicesForm([
-      ...servicesForm,
-      { service_name: '', price: '', negotiable: false }
-    ]);
+    const newIndex = servicesForm.length;
+    const newService = {
+      id: uuidv4(),
+      service_name: '',
+      price: '',
+      negotiable: false,
+      variants: []
+    };
+    setServicesForm(prev => [...prev, newService]);
+    // Mark new service as dirty immediately so variants are saved
+    setDirtyServiceIndices(prev => new Set(prev).add(newIndex));
   };
 
   const handleRemoveService = (index: number) => {
@@ -549,24 +718,81 @@ const TechnicianDashboardPage: React.FC = () => {
     }
 
     setServicesForm(updated);
+    // Mark as dirty on any change
+    setDirtyServiceIndices(prev => new Set(prev).add(index));
+  };
+
+  const handleVariantChange = (serviceIndex: number, variantIndex: number, field: string, value: any) => {
+    const updated = [...servicesForm];
+    (updated[serviceIndex].variants[variantIndex] as any)[field] = value;
+    setServicesForm(updated);
+    markDirty(serviceIndex);
+  };
+
+  const handleAddVariant = (serviceIndex: number) => {
+    const updated = [...servicesForm];
+    updated[serviceIndex].variants.push({
+      id: uuidv4(),
+      variant_name: '',
+      price: '',
+      is_negotiable: false,
+      service_id: updated[serviceIndex].id,
+    });
+    setServicesForm(updated);
+    markDirty(serviceIndex);
+  };
+
+  const handleRemoveVariant = (serviceIndex: number, variantIndex: number) => {
+    const updated = [...servicesForm];
+    updated[serviceIndex].variants.splice(variantIndex, 1);
+    setServicesForm(updated);
+    markDirty(serviceIndex);
   };
 
   const startEditingServices = () => {
     const initialCustomInputs: Record<number, string> = {};
-    const formData = services.map((s, index) => {
+
+    // Initialize services with variants
+    const servicesWithVariants: { id?: string; service_name: string; price: string; negotiable: boolean; variants: { id?: string; service_id?: string; variant_name: string; price: string; is_negotiable: boolean }[] }[] = [];
+
+    services.forEach((s) => {
       const isCustom = !availableServices.includes(s.service_name);
-      if (isCustom) {
-        initialCustomInputs[index] = s.service_name;
+
+      // Check if this is a window tinting sub-service (legacy support)
+      const isTintType = WINDOW_TINT_TYPES.some(t => t.name === s.service_name);
+
+      if (isTintType && s.service_name !== 'Window Tinting') {
+        // Skip legacy tint types that are stored as separate services, but allow Window Tinting main service
+        return;
       }
-      return {
+
+      if (isCustom) {
+        initialCustomInputs[servicesWithVariants.length] = s.service_name;
+      }
+
+      // Get variants for this service
+      const variants = serviceVariants
+        .filter(v => v.service_id === s.id)
+        .map(v => ({
+          id: v.id,
+          service_id: v.service_id,
+          variant_name: v.variant_name,
+          price: v.price?.toString() || '',
+          is_negotiable: v.is_negotiable,
+        }));
+
+      servicesWithVariants.push({
         id: s.id,
         service_name: s.service_name,
         price: s.price?.toString() || '',
         negotiable: s.negotiable,
-      };
+        variants: variants,
+      });
     });
-    setServicesForm(formData);
+
+    setServicesForm(servicesWithVariants);
     setCustomServiceInputs(initialCustomInputs);
+    setDirtyServiceIndices(new Set());
     setEditingServices(true);
   };
 
@@ -684,7 +910,7 @@ const TechnicianDashboardPage: React.FC = () => {
   };
 
   const unreadNotifications = notifications.filter(n => !n.is_read).length;
-  const unreadBookings = leads.filter(l => l.status === 'pending').length;
+  const unreadBookings = leads.filter(l => l.status === 'pending' && !l.is_archived).length;
 
   if (loading) {
     return (
@@ -1139,17 +1365,24 @@ const TechnicianDashboardPage: React.FC = () => {
                               )}
                             </div>
                           </div>
-                          <div>
-                            <label htmlFor={`price-${index}`} className="block text-xs text-slate-500 mb-1">Price (KSh)</label>
-                            <input
-                              id={`price-${index}`}
-                              type="number"
-                              value={service.price}
-                              onChange={(e) => handleServiceChange(index, 'price', e.target.value)}
-                              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
-                              placeholder="0"
-                            />
-                          </div>
+                           {service.variants.length === 0 && (
+                             <div>
+                               <label htmlFor={`price-${index}`} className="block text-xs text-slate-500 mb-1">Price (KSh)</label>
+                               <input
+                                 id={`price-${index}`}
+                                 type="number"
+                                 value={service.price}
+                                 onChange={(e) => handleServiceChange(index, 'price', e.target.value)}
+                                 className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                                 placeholder="0"
+                               />
+                             </div>
+                           )}
+                           {service.variants.length > 0 && (
+                             <div className="md:col-span-2">
+                               <p className="text-xs text-slate-500">Pricing set per variant</p>
+                             </div>
+                           )}
                         </div>
                         {servicesForm.length > 1 && (
                           <button
@@ -1162,18 +1395,78 @@ const TechnicianDashboardPage: React.FC = () => {
                           </button>
                         )}
                       </div>
-                      <div className="mt-2 flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={service.negotiable}
-                          onChange={(e) => handleServiceChange(index, 'negotiable', e.target.checked)}
-                          className="rounded"
-                          id={`negotiable-${index}`}
-                        />
-                        <label htmlFor={`negotiable-${index}`} className="text-sm text-slate-400">
-                          Price is negotiable
-                        </label>
-                      </div>
+                       {service.variants.length === 0 && (
+                         <div className="mt-2 flex items-center gap-2">
+                           <input
+                             type="checkbox"
+                             checked={service.negotiable}
+                             onChange={(e) => handleServiceChange(index, 'negotiable', e.target.checked)}
+                             className="rounded"
+                             id={`negotiable-${index}`}
+                           />
+                           <label htmlFor={`negotiable-${index}`} className="text-sm text-slate-400">
+                             Price is negotiable
+                           </label>
+                         </div>
+                       )}
+                      
+                       {/* Variants Section */}
+                       <div className="mt-4 pt-4 border-t border-slate-700">
+                         <div className="flex items-center justify-between mb-3">
+                           <h4 className="text-white font-medium text-sm">Add Variants (Optional)</h4>
+                           <button
+                             type="button"
+                             onClick={() => handleAddVariant(index)}
+                             className="text-blue-400 hover:text-blue-300 text-sm"
+                           >
+                             + Add Variant
+                           </button>
+                         </div>
+                         {service.variants.length > 0 && (
+                           <div className="space-y-2">
+                             {service.variants.map((variant, variantIndex) => (
+                               <div key={variantIndex} className="flex flex-col gap-2 p-2 bg-slate-700 rounded-lg">
+                                 <div className="flex items-center gap-2">
+                                   <input
+                                     type="text"
+                                     value={variant.variant_name}
+                                     onChange={(e) => handleVariantChange(index, variantIndex, 'variant_name', e.target.value)}
+                                     placeholder="Variant name (e.g. Ceramic, 3M, etc.)"
+                                     className="flex-1 px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg text-white text-sm placeholder-slate-400"
+                                   />
+                                   <button
+                                     type="button"
+                                     onClick={() => handleRemoveVariant(index, variantIndex)}
+                                     className="p-2 text-red-400 hover:text-red-300 flex-shrink-0"
+                                     aria-label="Remove variant"
+                                   >
+                                     ✕
+                                   </button>
+                                 </div>
+                                 <input
+                                   type="number"
+                                   value={variant.price}
+                                   onChange={(e) => handleVariantChange(index, variantIndex, 'price', e.target.value)}
+                                   placeholder="Price (KSh)"
+                                   className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg text-white text-sm"
+                                 />
+                                 <label className="flex items-center gap-2 text-sm text-slate-400">
+                                   <input
+                                     type="checkbox"
+                                     checked={variant.is_negotiable}
+                                     onChange={(e) => handleVariantChange(index, variantIndex, 'is_negotiable', e.target.checked)}
+                                     className="w-4 h-4"
+                                   />
+                                   Negotiable
+                                 </label>
+                               </div>
+                             ))}
+                           </div>
+                         )}
+                         {service.variants.length === 0 && (
+                           <p className="text-slate-500 text-sm">No variants added. Click "Add Variant" to create sub services options.</p>
+                         )}
+                       </div>
                     </div>
                   ))}
                   
@@ -1281,11 +1574,37 @@ const TechnicianDashboardPage: React.FC = () => {
                 Bookings / Leads ({leads.length})
               </h2>
 
-              {leads.length === 0 ? (
-                <p className="text-slate-400">No bookings yet.</p>
+              {/* Leads View Tabs */}
+              <div className="flex gap-2 mb-4">
+                <button
+                  onClick={() => setLeadsView('active')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    leadsView === 'active'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                  }`}
+                >
+                  Active ({leads.filter(l => !l.is_archived).length})
+                </button>
+                <button
+                  onClick={() => setLeadsView('archived')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    leadsView === 'archived'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                  }`}
+                >
+                  Archived ({leads.filter(l => l.is_archived).length})
+                </button>
+              </div>
+
+              {leadsView === 'active' && leads.filter(l => !l.is_archived).length === 0 ? (
+                <p className="text-slate-400">No active bookings.</p>
+              ) : leadsView === 'archived' && leads.filter(l => l.is_archived).length === 0 ? (
+                <p className="text-slate-400">No archived bookings.</p>
               ) : (
                 <div className="space-y-3">
-                  {leads.map((lead) => (
+                  {(leadsView === 'active' ? leads.filter(l => !l.is_archived) : leads.filter(l => l.is_archived)).map((lead) => (
                     <div key={lead.id} className="p-4 bg-slate-800 rounded-lg">
                       <div className="flex items-start justify-between mb-2">
                         <div>
@@ -1297,17 +1616,16 @@ const TechnicianDashboardPage: React.FC = () => {
                           aria-label={`Status for booking from ${lead.client_name}`}
                           value={lead.status}
                           onChange={(e) => handleLeadStatusChange(lead.id, e.target.value as Lead['status'])}
+                          disabled={lead.status === 'job_done' || leadsView === 'archived'}
                           className={`px-3 py-1 rounded-full text-xs font-medium ${
                             lead.status === 'pending' ? 'bg-yellow-900/50 text-yellow-400' :
-                            lead.status === 'contacted' ? 'bg-blue-900/50 text-blue-400' :
                             lead.status === 'job_done' ? 'bg-green-900/50 text-green-400' :
                             'bg-red-900/50 text-red-400'
                           }`}
                         >
                           <option value="pending">Pending</option>
-                          <option value="contacted">Contacted</option>
                           <option value="job_done">Job Done</option>
-                          <option value="no_response">No Response</option>
+                          <option value="not_converted">Not Converted</option>
                         </select>
                       </div>
                       <div className="text-sm">

@@ -66,7 +66,9 @@ export const TechnicianCard: React.FC<TechnicianCardProps> = ({ technician, onBo
         {/* Rating Badge */}
         <div className="absolute top-1 right-1 bg-black/70 backdrop-blur-sm px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
           <span className="text-yellow-400 text-[10px]">★</span>
-          <span className="text-white text-[10px] font-medium">{technician.avg_rating || 0}</span>
+          <span className="text-white text-[10px] font-medium">
+            {technician.review_count > 0 ? (technician.avg_rating || 0).toFixed(1) : 'New'}
+          </span>
           <span className="text-slate-400 text-[8px]">({technician.review_count || 0})</span>
         </div>
       </div>

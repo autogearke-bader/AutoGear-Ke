@@ -15,8 +15,6 @@ export const SERVICE_SLUGS: Record<string, string> = {
   'car-detailing': 'Car Detailing',
   'headlight-restoration': 'Headlight Restoration',
   'car-tuning': 'Car Tuning',
-  'car-riveting': 'Car Riveting',
-  'car-identity': 'Car Identity',
 };
 
 // ─── Location Slugs (all lowercase + hyphens for URL safety) ──────────────────
@@ -329,9 +327,14 @@ const ServiceLocationPage: React.FC = () => {
   const { service, location } = useParams<{ service: string; location: string }>();
   const navigate = useNavigate();
 
+  // Guard: redirect invalid service/location to 404
+  if (!service || !location || !SERVICE_SLUGS[service] || !LOCATION_SLUGS[location]) {
+    return <Navigate to="/404" replace />;
+  }
+
   const [technicians, setTechnicians] = useState<Technician[]>([]);
   const [loading, setLoading] = useState(true);
-  const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+  const [expandedFaq, setExpandedFaq] = useState<number[]>([]);
 
   // Display names
   const serviceName = service ? SERVICE_SLUGS[service] || service : '';
@@ -356,6 +359,18 @@ const ServiceLocationPage: React.FC = () => {
       })),
     };
   }, [rawContent, locationName]);
+
+  // Expand all FAQs by default for SEO
+  useEffect(() => {
+    if (serviceContent?.faqs) {
+      setExpandedFaq(serviceContent.faqs.map((_, idx) => idx));
+    }
+  }, [serviceContent]);
+
+  // Toggle FAQ expansion
+  const toggleFaq = (idx: number) => {
+    setExpandedFaq(prev => prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx]);
+  };
 
   // Fetch technicians
   useEffect(() => {
@@ -421,25 +436,12 @@ const ServiceLocationPage: React.FC = () => {
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://autogearke.com' },
-      { '@type': 'ListItem', position: 2, name: serviceName, item: `https://autogearke.com/services/${service}` },
-      { '@type': 'ListItem', position: 3, name: locationName, item: `https://autogearke.com/services/${service}/${location}` },
+      { '@type': 'ListItem', position: 2, name: serviceName, item: `https://autogearke.com/${service}/nairobi` }, // Link to service in a default location
+      { '@type': 'ListItem', position: 3, name: locationName, item: `https://autogearke.com/${service}/${location}` },
     ],
   }), [serviceName, locationName, service, location]);
 
-  // 404 for invalid slugs
-  if (!service || !location || !SERVICE_SLUGS[service] || !LOCATION_SLUGS[location]) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
-        <div className="text-center">
-          <h1 className="text-4xl font-black text-white mb-4">404</h1>
-          <p className="text-slate-400 mb-6">This service or location page doesn't exist yet.</p>
-          <Link to="/" className="text-blue-400 hover:underline">
-            Return to Home
-          </Link>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <div className="min-h-screen bg-slate-950">
@@ -453,7 +455,7 @@ const ServiceLocationPage: React.FC = () => {
         <meta name="description" content={serviceContent?.metaDescription || ''} />
 
         {/* Canonical URL */}
-        <link rel="canonical" href={`https://autogearke.com/services/${service}/${location}`} />
+        <link rel="canonical" href={`https://autogearke.com/${service}/${location}`} />
 
         {/* Open Graph */}
         <meta property="og:title" content={`${serviceName} in ${locationName} | AutoGear Ke`} />
@@ -657,8 +659,8 @@ const ServiceLocationPage: React.FC = () => {
                   <button
                     type="button"
                     className="w-full text-left px-5 py-4 flex items-center justify-between gap-3"
-                    onClick={() => setExpandedFaq(expandedFaq === idx ? null : idx)}
-                    aria-expanded={expandedFaq === idx ? true : false}
+                    onClick={() => toggleFaq(idx)}
+                    aria-expanded={expandedFaq.includes(idx) ? true : false}
                     aria-controls={`faq-answer-${idx}`}
                   >
 
@@ -667,7 +669,7 @@ const ServiceLocationPage: React.FC = () => {
                     </h3>
                     <svg
                       className={`w-4 h-4 text-slate-400 flex-shrink-0 transition-transform duration-200 ${
-                        expandedFaq === idx ? 'rotate-180' : ''
+                        expandedFaq.includes(idx) ? 'rotate-180' : ''
                       }`}
                       fill="none"
                       stroke="currentColor"
@@ -676,7 +678,7 @@ const ServiceLocationPage: React.FC = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
-                  {expandedFaq === idx && (
+                  {expandedFaq.includes(idx) && (
                     <div id={`faq-answer-${idx}`} className="px-5 pb-4">
                       <p className="text-slate-400 text-sm leading-relaxed">{faq.answer}</p>
                     </div>
@@ -696,6 +698,28 @@ const ServiceLocationPage: React.FC = () => {
           </div>
         </section>
       )}
+
+      {/* ─── Other Services ────────────────────────────────────────────── */}
+      <section className="px-4 pb-12" aria-label="Other services">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-lg font-bold text-white mb-4">
+            Other Services in {locationName}
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(SERVICE_SLUGS)
+              .filter(([slug]) => slug !== service)
+              .map(([slug, name]) => (
+                <Link
+                  key={slug}
+                  to={`/${slug}/${location}`}
+                  className="bg-slate-900 border border-slate-800 hover:border-slate-600 text-slate-300 hover:text-white px-3 py-1.5 rounded-full text-sm transition-colors"
+                >
+                  {name} in {locationName}
+                </Link>
+              ))}
+          </div>
+        </div>
+      </section>
 
       {/* ─── Related Locations ────────────────────────────────────────────── */}
       <section className="px-4 pb-12" aria-label="Other locations">

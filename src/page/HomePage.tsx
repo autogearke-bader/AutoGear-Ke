@@ -89,7 +89,7 @@ const HomePage: React.FC = () => {
     l => l.status === 'job_done'
   );
 
-  // Fetch technicians on mount
+  // Fetch technicians on mount and on page visibility/focus
   useEffect(() => {
     const fetchTechnicians = async () => {
       try {
@@ -101,7 +101,28 @@ const HomePage: React.FC = () => {
         setLoading(false);
       }
     };
+
     fetchTechnicians();
+
+    // Refetch when tab becomes visible again (e.g. switching back from another tab)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchTechnicians();
+      }
+    };
+
+    // Refetch when window regains focus (e.g. navigating back)
+    const handleFocus = () => {
+      fetchTechnicians();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   // Fetch articles

@@ -33,11 +33,11 @@ import { supabase } from './src/lib/supabase.ts';
 const App: React.FC = () => {
   return (
     <HelmetProvider>
-      <BrowserRouter>
-        <ErrorBoundary>
+      <ErrorBoundary>
+        <BrowserRouter>
           <AppContent />
-        </ErrorBoundary>
-      </BrowserRouter>
+        </BrowserRouter>
+      </ErrorBoundary>
     </HelmetProvider>
   );
 };

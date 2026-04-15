@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { getMyClientLeads, submitReview } from '../src/lib/api';
+import { getMyClientLeads, submitReview, deleteBooking, cleanupOldBookings } from '../src/lib/api';
 import { getMyClientProfile, getCurrentUser } from '../src/lib/auth';
+import { supabase } from '../src/lib/supabase';
 
 const BookingsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ const BookingsPage: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [needsProfile, setNeedsProfile] = useState(false);
+  const [reviewedLeadIds, setReviewedLeadIds] = useState<Set<string>>(new Set());
 
   // Review modal state
   const [reviewModal, setReviewModal] = useState<{
@@ -18,6 +20,7 @@ const BookingsPage: React.FC = () => {
     technicianId: string;
     technicianName: string;
     leadId: string;
+    clientId: string;
     rating: number;
     comment: string;
     wouldReBook: 'yes' | 'no';
@@ -26,6 +29,7 @@ const BookingsPage: React.FC = () => {
     technicianId: '',
     technicianName: '',
     leadId: '',
+    clientId: '',
     rating: 5,
     comment: '',
     wouldReBook: 'yes',
@@ -51,8 +55,30 @@ const BookingsPage: React.FC = () => {
           return;
         }
 
+        // Run automatic cleanup of old bookings (older than 2 days)
+        try {
+          await cleanupOldBookings();
+        } catch (cleanupErr) {
+          // Log cleanup errors but don't block the page load
+          console.error('Failed to cleanup old bookings:', cleanupErr);
+        }
+
         const clientLeads = await getMyClientLeads();
         setLeads(clientLeads || []);
+
+        // Fetch existing reviews for this client
+        const { data: existingReviews } = await supabase
+          .from('reviews')
+          .select('lead_id')
+          .eq('client_id', currentUser.id)
+
+        if (existingReviews) {
+          setReviewedLeadIds(new Set(
+            existingReviews
+              .map(r => r.lead_id)
+              .filter(Boolean)
+          ))
+        }
       } catch (err) {
         console.error('Failed to load bookings:', err);
         setError('Failed to load bookings');
@@ -71,6 +97,7 @@ const BookingsPage: React.FC = () => {
       technicianId: lead.technician_id,
       technicianName: lead.technicians?.business_name || 'Technician',
       leadId: lead.id,
+      clientId: lead.client_id,
       rating: 5,
       comment: '',
       wouldReBook: 'yes',
@@ -84,7 +111,9 @@ const BookingsPage: React.FC = () => {
         reviewModal.technicianId,
         reviewModal.rating,
         reviewModal.comment,
-        reviewModal.wouldReBook
+        reviewModal.wouldReBook,
+        reviewModal.leadId,
+        reviewModal.clientId
       );
 
       // Close modal
@@ -93,6 +122,9 @@ const BookingsPage: React.FC = () => {
       // Show success message
       setSuccess('Review submitted successfully!');
       setTimeout(() => setSuccess(''), 3000);
+
+      // Add to reviewedLeadIds
+      setReviewedLeadIds(prev => new Set(prev).add(reviewModal.leadId))
 
       // Refresh leads
       const clientLeads = await getMyClientLeads();
@@ -106,13 +138,33 @@ const BookingsPage: React.FC = () => {
     }
   };
 
+  const handleRemoveBooking = async (leadId: string) => {
+    if (!confirm('Are you sure you want to remove this booking?')) return;
+
+    try {
+      // Delete the booking using the API function
+      await deleteBooking(leadId);
+
+      // Show success message
+      setSuccess('Booking removed successfully');
+      setTimeout(() => setSuccess(''), 3000);
+
+      // Refresh leads
+      const clientLeads = await getMyClientLeads();
+      setLeads(clientLeads || []);
+    } catch (err) {
+      console.error('Failed to remove booking:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to remove booking';
+      setError(errorMessage);
+      setTimeout(() => setError(''), 3000);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { bg: string; label: string }> = {
       job_done: { bg: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20', label: '✓ Completed' },
-      in_progress: { bg: 'bg-blue-500/10 text-blue-400 border border-blue-500/20', label: '⟳ In Progress' },
-      contacted: { bg: 'bg-purple-500/10 text-purple-400 border border-purple-500/20', label: '● Contacted' },
-      no_response: { bg: 'bg-red-500/10 text-red-400 border border-red-500/20', label: '✕ Not Possible' },
       pending: { bg: 'bg-amber-500/10 text-amber-400 border border-amber-500/20', label: '○ Pending' },
+      not_converted: { bg: 'bg-red-500/10 text-red-400 border border-red-500/20', label: '✕ Not Converted' },
     };
 
     const config = statusConfig[status] || statusConfig.pending;
@@ -256,12 +308,26 @@ const BookingsPage: React.FC = () => {
                   >
                     View Technician
                   </Link>
-                  {lead.status === 'job_done' && (
+                  {lead.status === 'job_done' && !reviewedLeadIds.has(lead.id) && (
                     <button
                       onClick={() => handleOpenReview(lead)}
                       className="flex-1 flex items-center justify-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-[11px] font-black uppercase tracking-widest py-2.5 rounded-xl transition-all"
                     >
                       ⭐ Leave Review
+                    </button>
+                  )}
+                  {lead.status === 'job_done' && reviewedLeadIds.has(lead.id) && (
+                    <span className="flex-1 flex items-center justify-center text-emerald-400 text-[11px] font-black uppercase tracking-widest py-2.5">
+                      ✓ Reviewed
+                    </span>
+                  )}
+                  {(lead.status === 'job_done' || lead.status === 'contacted') && (
+                    <button
+                      onClick={() => handleRemoveBooking(lead.id)}
+                      className="flex items-center justify-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-[11px] font-black uppercase tracking-widest px-3 py-2.5 rounded-xl transition-all border border-red-500/20"
+                      title="Remove booking"
+                    >
+                      ✕
                     </button>
                   )}
                 </div>

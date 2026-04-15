@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { Technician, TechnicianVideo } from '../types';
+import { Technician, TechnicianVideo, WINDOW_TINT_TYPES } from '../types';
 import { getPublicTechnicianBySlug, createWhatsAppLead, canClientReviewTechnician, submitReview, getTikTokThumbnail, getTechnicianBusinessHours } from '../src/lib/api';
 import { getSession } from '../src/lib/auth';
 import { supabase } from '../src/lib/supabase';
@@ -74,6 +74,7 @@ const TechnicianProfilePage: React.FC = () => {
     is_open: boolean;
     open_time: string | null;
     close_time: string | null;
+    available_on_request: boolean;
   }[]>([]);
 
   // Edit profile state
@@ -92,11 +93,12 @@ const TechnicianProfilePage: React.FC = () => {
   useEffect(() => {
     const fetchTechnician = async () => {
       if (!slug) return;
-      
+
       try {
+
         const data = await getPublicTechnicianBySlug(slug);
         setTechnician(data);
-        
+
         // Check if current user is the owner
         const session = await getSession();
         if (session && data) {
@@ -106,7 +108,7 @@ const TechnicianProfilePage: React.FC = () => {
             setIsCurrentUser(true);
           }
         }
-        
+
         // Fetch TikTok thumbnails
         if (data?.technician_videos) {
           const thumbnails: Record<string, string> = {};
@@ -118,7 +120,21 @@ const TechnicianProfilePage: React.FC = () => {
           }
           setTiktokThumbnails(thumbnails);
         }
-        
+
+        // Fetch service variants
+        if (data?.technician_services) {
+          try {
+            const { data: variants } = await supabase
+              .from('service_variants')
+              .select('*')
+              .in('service_id', data.technician_services.map(s => s.id));
+
+            data.service_variants = variants || [];
+          } catch (e) {
+            console.error('Failed to fetch service variants:', e);
+          }
+        }
+
         // Fetch business hours
         if (data?.id) {
           try {
@@ -136,7 +152,7 @@ const TechnicianProfilePage: React.FC = () => {
     };
 
     fetchTechnician();
-  }, [slug]);
+  }, [slug, location.pathname]); // Add location.pathname to force re-fetch on navigation
 
   // Check if logged in client can review this technician
   useEffect(() => {
@@ -559,8 +575,15 @@ const TechnicianProfilePage: React.FC = () => {
               <div className="flex items-center gap-2 mb-2">
                 <div className="flex items-center gap-1">
                   <span className="text-yellow-400 text-lg">★</span>
-                  <span className="text-white font-bold">{technician.avg_rating > 0 ? technician.avg_rating : 'New'}</span>
-                  <span className="text-slate-400">({technician.review_count} reviews)</span>
+                  <span className="text-white font-bold">
+                    {technician.review_count > 0 
+                      ? (technician.avg_rating || 0).toFixed(1)
+                      : 'New'
+                    }
+                  </span>
+                  <span className="text-slate-400">
+                    ({technician.review_count || 0} {technician.review_count === 1 ? 'review' : 'reviews'})
+                  </span>
                 </div>
               </div>
 
@@ -743,31 +766,69 @@ const TechnicianProfilePage: React.FC = () => {
           <div className="max-w-4xl mx-auto">
             <h2 className="text-lg font-bold text-white mb-3">Services <span className="text-xs font-normal text-slate-400 ml-2">The Pricing of a service depends on the vehicle size and the Model</span></h2>
             <ul className="space-y-2">
-              {technician.technician_services.map((service) => (
-                <li key={service.id} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-blue-400">•</span>
-                    <span className="text-white">{service.service_name}</span>
-                    {service.price && (
-                      <span className="text-green-400 font-medium">
-                        KSh {service.price.toLocaleString()}
-                      </span>
+              {technician.technician_services.map((service) => {
+                const variants = technician.service_variants?.filter(v => v.service_id === service.id) || [];
+
+                return (
+                  <li key={service.id} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-blue-400">•</span>
+                        <span className="text-white font-medium">{service.service_name}</span>
+                        {variants.length === 0 && service.price && (
+                          <span className="text-green-400 font-medium">
+                            KSh {service.price.toLocaleString()}
+                          </span>
+                        )}
+                        {variants.length === 0 && service.negotiable && (
+                          <span className="bg-yellow-900/50 text-yellow-400 text-xs px-2 py-0.5 rounded border border-yellow-800">
+                            Negotiable
+                          </span>
+                        )}
+                      </div>
+                      {variants.length === 0 && (
+                        <Link
+                          to={`#book-${service.id}`}
+                          onClick={() => handleBookService(service.service_name)}
+                          className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
+                        >
+                          Book →
+                        </Link>
+                      )}
+                    </div>
+
+                    {variants.length > 0 && (
+                      <ul className="ml-6 space-y-1">
+                        {variants.map((variant) => (
+                          <li key={variant.id} className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-blue-300">◦</span>
+                              <span className="text-slate-300">{variant.variant_name}</span>
+                              {variant.price && (
+                                <span className="text-green-400 font-medium">
+                                  KSh {variant.price.toLocaleString()}
+                                </span>
+                              )}
+                              {variant.is_negotiable && (
+                                <span className="bg-yellow-900/50 text-yellow-400 text-xs px-2 py-0.5 rounded border border-yellow-800">
+                                  Negotiable
+                                </span>
+                              )}
+                            </div>
+                            <Link
+                              to={`#book-${service.id}`}
+                              onClick={() => handleBookService(`${service.service_name} - ${variant.variant_name}`)}
+                              className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
+                            >
+                              Book →
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
                     )}
-                    {service.negotiable && (
-                      <span className="bg-yellow-900/50 text-yellow-400 text-xs px-2 py-0.5 rounded border border-yellow-800">
-                        Negotiable
-                      </span>
-                    )}
-                  </div>
-                  <Link
-                    to={`#book-${service.id}`}
-                    onClick={() => handleBookService(service.service_name)}
-                    className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
-                  >
-                    Book →
-                  </Link>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ul>
             
             {/* Link to service/location page */}
@@ -857,10 +918,24 @@ const TechnicianProfilePage: React.FC = () => {
             
             {/* Rating Summary */}
             <div className="flex items-center gap-4 mb-4">
-              <div className="text-4xl font-black text-white">{technician.avg_rating > 0 ? technician.avg_rating : '-'}</div>
+              <div className="text-4xl font-black text-white">
+                {technician.review_count > 0 ? (technician.avg_rating || 0).toFixed(1) : '-'}
+              </div>
               <div>
-                <div className="flex text-yellow-400">{technician.avg_rating > 0 ? '★'.repeat(Math.round(technician.avg_rating)) : 'No ratings yet'}</div>
-                <p className="text-slate-400 text-sm">{technician.review_count} reviews</p>
+                <div className="flex text-yellow-400">
+                  {technician.review_count > 0 
+                    ? '★'.repeat(Math.round(technician.avg_rating || 0))
+                    : null
+                  }
+                </div>
+                {technician.review_count === 0 && (
+                  <p className="text-slate-400 text-sm">No ratings yet</p>
+                )}
+                {technician.review_count > 0 && (
+                  <p className="text-slate-400 text-sm">
+                    {technician.review_count} {technician.review_count === 1 ? 'review' : 'reviews'}
+                  </p>
+                )}
               </div>
             </div>
 

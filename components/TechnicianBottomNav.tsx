@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 // Extend Navigator interface for PWA standalone mode
 declare global {
@@ -10,6 +10,7 @@ declare global {
 
 const TechnicianBottomNav: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isPWA, setIsPWA] = useState(false);
@@ -56,13 +57,25 @@ const TechnicianBottomNav: React.FC = () => {
   const activeClass = "text-sky-500 transition-colors";
   const inactiveClass = "text-slate-300 hover:text-white transition-colors";
 
+  // Handle home button click with refresh
+  const handleHomeClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (location.pathname === '/') {
+      // Already on home page, trigger a refresh by reloading
+      window.location.reload();
+    } else {
+      // Navigate to home page
+      navigate('/');
+    }
+  };
+
   // Show on mobile only (< 640px / sm breakpoint) OR in PWA standalone mode on mobile
   const showNav = !window.matchMedia('(min-width: 640px)').matches || (isPWA && !window.matchMedia('(min-width: 640px)').matches);
 
   return (
     showNav ? (
     <nav className={`fixed bottom-0 left-0 right-0 flex sm:hidden bg-slate-900 border-t border-slate-800 p-3 justify-around z-50 rounded-t-lg transition-transform duration-300 ${isVisible ? 'translate-y-0' : 'translate-y-full'} ${!isVisible ? 'pointer-events-none' : ''}`} style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
-      <Link to="/" className={`flex flex-col items-center ${location.pathname === '/' ? activeClass : inactiveClass}`}>
+      <Link to="/" onClick={handleHomeClick} className={`flex flex-col items-center ${location.pathname === '/' ? activeClass : inactiveClass}`}>
         <svg className="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24">
           <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
         </svg>

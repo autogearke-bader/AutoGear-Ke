@@ -6,6 +6,14 @@ export interface TechnicianService {
   negotiable: boolean;
 }
 
+export interface ServiceVariant {
+  id?: string;
+  service_id: string;
+  variant_name: string;
+  price: number | null;
+  is_negotiable: boolean;
+}
+
 export interface Service {
   id: string;
   name: string;
@@ -86,6 +94,7 @@ export interface Technician {
   cover_photo: string | null;      // Cloudinary URL for cover photo (cards only)
   thumbnail_image: string | null; // Cloudinary URL for clear thumbnail in cards
   technician_services: TechnicianService[];
+  service_variants?: ServiceVariant[];
   technician_photos: TechnicianPhoto[];
   technician_videos: TechnicianVideo[];
   technician_payments: { id: string; method: string }[];
@@ -111,11 +120,13 @@ export interface Lead {
   client_location: string;
   client_lat: number | null;
   client_lng: number | null;
-  status: 'pending' | 'contacted' | 'job_done' | 'no_response';
+  status: 'pending' | 'job_done' | 'not_converted';
+  is_archived: boolean;
   admin_confirmed_job_done: boolean;  // Admin must also confirm job done before review notification
   review_notification_sent: boolean;  // Track if review notification was already sent
   is_whatsapp_lead: boolean;    // True if lead was created via WhatsApp click
   whatsapp_clicked_at: string | null;  // Timestamp when WhatsApp was clicked
+  hidden_from_client: boolean;  // Soft delete flag for automatic cleanup
   created_at: string;
 }
 
@@ -165,11 +176,11 @@ export const ALL_SERVICES = [
 
 // Sub-services for Window Tinting - New predefined list
 export const WINDOW_TINT_TYPES = [
-  { name: 'Carbon Dyed', minPrice: 3000, maxPrice: 8000 },
-  { name: 'Chameleon', minPrice: 5000, maxPrice: 12000 },
+  { name: 'Chameleon Tint', minPrice: 5000, maxPrice: 12000 },
   { name: 'Ceramic Tint', minPrice: 8000, maxPrice: 18000 },
   { name: '3M Tint', minPrice: 15000, maxPrice: 35000 },
-  { name: 'Metalized Window Tint', minPrice: 10000, maxPrice: 25000 },
+  { name: 'Llumar Tint', minPrice: 12000, maxPrice: 28000 },
+  { name: 'Local Tint', minPrice: 2000, maxPrice: 6000 },
 ];
 
 // Sub-services for Car Wrapping with their typical price ranges
@@ -235,7 +246,7 @@ export interface AdminLead {
   client_phone: string;
   service_requested: string;
   client_location: string;
-  status: 'pending' | 'contacted' | 'job_done' | 'no_response';
+  status: 'pending' | 'job_done' | 'not_converted';
   admin_confirmed_job_done: boolean;
   review_notification_sent: boolean;
   is_whatsapp_lead: boolean;
@@ -274,6 +285,7 @@ export interface BusinessHours {
   is_open: boolean;
   open_time: string | null;  // HH:MM format
   close_time: string | null;  // HH:MM format
+  available_on_request: boolean;
 }
 
 // Day of week labels
