@@ -114,6 +114,7 @@ export interface Lead {
   technician_id: string;
   client_id: string | null;
   client_name: string;
+  client_email: string | null;
   client_phone: string;
   service_requested: string;
   vehicle_model: string | null;

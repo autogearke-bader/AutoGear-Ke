@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../src/lib/supabase';
-import { adminUpdateLeadStatus, sendReviewNotificationToClient, adminGetPendingReviews, adminApproveReview, adminDeclineReview, getTikTokThumbnail } from '../src/lib/api';
+import { adminUpdateLeadStatus, sendReviewNotificationToClient, adminGetPendingReviews, adminApproveReview, adminDeclineReview, adminRevokeReview, getTikTokThumbnail } from '../src/lib/api';
 import QuillEditor from '../components/QuillEditor';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -163,6 +163,7 @@ const AdminPage: React.FC = () => {
   const [leadsFilterTech,setLeadsFilterTech]= useState('');
   const [leadsDateFrom,  setLeadsDateFrom]  = useState('');
   const [leadsDateTo,    setLeadsDateTo]    = useState('');
+  const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
 
   // ── Reviews ────────────────────────────────────────────────
   const [reviews,       setReviews]       = useState<Review[]>([]);
@@ -200,7 +201,7 @@ const AdminPage: React.FC = () => {
   // Noindex admin
   useEffect(() => {
     const prev = document.title;
-    document.title = 'Admin | AutoGear Ke';
+    document.title = 'Admin | Mekh';
     let m = document.querySelector('meta[name="robots"]') as HTMLMetaElement;
     if (!m) { m = document.createElement('meta'); m.setAttribute('name','robots'); document.head.appendChild(m); }
     m.setAttribute('content','noindex, nofollow');
@@ -393,8 +394,14 @@ const AdminPage: React.FC = () => {
             allThumbnails[t.id] = {};
             for (const video of t.technician_videos) {
               if (video.platform === 'tiktok') {
-                const thumb = await getTikTokThumbnail(video.video_url);
-                if (thumb) allThumbnails[t.id][video.id] = thumb;
+                if (video.thumbnail_url) {
+                  // Use the cached value — no network call needed
+                  allThumbnails[t.id][video.id] = video.thumbnail_url;
+                } else {
+                  // Fallback: fetch live (for videos added before this update)
+                  const thumb = await getTikTokThumbnail(video.video_url);
+                  if (thumb) allThumbnails[t.id][video.id] = thumb;
+                }
               }
             }
           }
@@ -495,6 +502,25 @@ const AdminPage: React.FC = () => {
     setLeadsLoading(false);
   };
 
+  const deleteLeads = async (ids: string[]) => {
+    if (!window.confirm(`Delete ${ids.length} lead${ids.length !== 1 ? 's' : ''}? This cannot be undone.`)) return;
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase.from('leads').delete().in('id', ids);
+      if (!error) {
+        setLeads(p => p.filter(l => !ids.includes(l.id)));
+        setSelectedLeadIds([]);
+        setStatus({ message: `${ids.length} lead${ids.length !== 1 ? 's' : ''} deleted.`, type: 'success' });
+      } else {
+        setStatus({ message: `Failed to delete leads: ${error.message}`, type: 'error' });
+      }
+    } catch (err) {
+      setStatus({ message: 'Failed to delete leads.', type: 'error' });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const fetchReviews = async () => {
     setReviewsLoading(true);
     try {
@@ -536,7 +562,7 @@ const AdminPage: React.FC = () => {
   // Decline a review
   const handleDeclineReview = async (reviewId: string) => {
     if (!window.confirm('Decline this review? It will be hidden from public view.')) return;
-    
+
     setReviewActionInProgress(reviewId);
     try {
       const notes = adminNotes[reviewId] || 'Declined by admin';
@@ -547,6 +573,25 @@ const AdminPage: React.FC = () => {
     } catch (error) {
       console.error('Error declining review:', error);
       setStatus({ message: 'Failed to decline review. Please try again.', type: 'error' });
+    } finally {
+      setReviewActionInProgress(null);
+    }
+  };
+
+  // Revoke an approved review
+  const handleRevokeReview = async (reviewId: string) => {
+    if (!window.confirm('Revoke this approved review? It will be hidden from public view but remain approved.')) return;
+
+    setReviewActionInProgress(reviewId);
+    try {
+      const notes = adminNotes[reviewId] || 'Revoked by admin';
+      await adminRevokeReview(reviewId, notes);
+      setStatus({ message: 'Review revoked and hidden from public view.', type: 'success' });
+      setAdminNotes(prev => ({ ...prev, [reviewId]: '' }));
+      fetchReviews();
+    } catch (error) {
+      console.error('Error revoking review:', error);
+      setStatus({ message: 'Failed to revoke review. Please try again.', type: 'error' });
     } finally {
       setReviewActionInProgress(null);
     }
@@ -580,7 +625,7 @@ const AdminPage: React.FC = () => {
       // Create notification for technician
       const { error: notifError } = await supabase.from('notifications').insert([{
         technician_id: id, type: 'profile_approved',
-        message: 'Your profile has been approved and is now live on AutoGear Ke. Share your link and start getting clients!',
+        message: 'Your profile has been approved and is now live on Mekh. Share your link and start getting clients!',
       }]);
       if (notifError) {
         console.error('Notification error:', notifError);
@@ -703,7 +748,7 @@ const AdminPage: React.FC = () => {
       .map(r => r.map(v => `"${v}"`).join(',')).join('\n');
     const a = Object.assign(document.createElement('a'), {
       href: URL.createObjectURL(new Blob([csv], { type: 'text/csv' })),
-      download: `autogearke-leads-${new Date().toISOString().split('T')[0]}.csv`,
+      download: `mekh-leads-${new Date().toISOString().split('T')[0]}.csv`,
     });
     a.click();
   };
@@ -762,6 +807,7 @@ const AdminPage: React.FC = () => {
   };
 
   const handleSaveArticle = async (e: React.FormEvent) => {
+    console.log('handleSaveArticle called, isSaving:', isSaving, 'articleIsPublished:', articleIsPublished);
     e.preventDefault();
     if (!articleTitle.trim()) {
       setStatus({ message: 'Title is required.', type: 'error' });
@@ -810,11 +856,15 @@ const AdminPage: React.FC = () => {
         ? supabase.from('articles').update(payload).eq('id', editingArticleId)
         : supabase.from('articles').insert([payload]);
 
+      console.log('About to execute savePromise');
+
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Request timed out after 30 seconds')), 30000)
       );
 
       const { error } = await Promise.race([savePromise, timeoutPromise]) as any;
+
+      console.log('Save promise resolved, error:', error);
 
       if (error) {
         console.error('AdminPage: ARTICLE_SAVE_ERROR', error);
@@ -905,10 +955,10 @@ const AdminPage: React.FC = () => {
   };
 
   const exportBackup = () => {
-    const payload = { exported_at: new Date().toISOString(), platform: 'AutoGear Ke Marketplace', technicians, leads, reviews, articles: localArticles };
+    const payload = { exported_at: new Date().toISOString(), platform: 'Mekh Marketplace', technicians, leads, reviews, articles: localArticles };
     const a = Object.assign(document.createElement('a'), {
       href: URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })),
-      download: `autogearke-backup-${new Date().toISOString().split('T')[0]}.json`,
+      download: `mekh-backup-${new Date().toISOString().split('T')[0]}.json`,
     });
     a.click();
   };
@@ -959,7 +1009,7 @@ const AdminPage: React.FC = () => {
               </svg>
             </div>
             <h1 className="text-2xl font-black text-white uppercase tracking-widest">Command Center</h1>
-            <p className="text-slate-600 text-[10px] font-black uppercase tracking-widest mt-1">AutoGear Ke Admin</p>
+            <p className="text-slate-600 text-[10px] font-black uppercase tracking-widest mt-1">Mekh Admin</p>
           </div>
 
           {/* Attempt progress bar */}
@@ -1018,7 +1068,7 @@ const AdminPage: React.FC = () => {
             <h1 className="text-xl font-black text-white uppercase tracking-tighter">Command Center</h1>
             <p className="text-slate-600 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 mt-0.5">
               <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse inline-block" />
-              AutoGear Ke Marketplace
+              Mekh Marketplace
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -1199,18 +1249,36 @@ const AdminPage: React.FC = () => {
                 <input type="date" value={leadsDateFrom} onChange={e => setLeadsDateFrom(e.target.value)} aria-label="Date from" className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-blue-500" />
                 <input type="date" value={leadsDateTo}   onChange={e => setLeadsDateTo(e.target.value)} aria-label="Date to" className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-blue-500" />
                 <button onClick={exportLeadsCSV} className="bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-blue-500/20 transition-all">Export CSV</button>
-                <button onClick={() => {
-                  try {
-                    setLeadsFilterTech('');
-                    setLeadsDateFrom('');
-                    setLeadsDateTo('');
-                    console.log('Leads filters cleared successfully');
-                  } catch (err) {
-                    console.error('Error clearing leads filters:', err);
-                    setStatus({ message: 'Failed to clear filters.', type: 'error' });
-                  }
-                }} className="bg-slate-800 hover:bg-slate-700 text-slate-400 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Clear</button>
+                {selectedLeadIds.length > 0 ? (
+                  <button onClick={() => deleteLeads(selectedLeadIds)} disabled={isDeleting}
+                    className="bg-red-500/10 hover:bg-red-500/20 text-red-400 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-red-500/20 transition-all disabled:opacity-50">
+                    🗑 Delete {selectedLeadIds.length}
+                  </button>
+                ) : (
+                  <button onClick={() => {
+                    try {
+                      setLeadsFilterTech('');
+                      setLeadsDateFrom('');
+                      setLeadsDateTo('');
+                      console.log('Leads filters cleared successfully');
+                    } catch (err) {
+                      console.error('Error clearing leads filters:', err);
+                      setStatus({ message: 'Failed to clear filters.', type: 'error' });
+                    }
+                  }} className="bg-slate-800 hover:bg-slate-700 text-slate-400 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Clear</button>
+                )}
               </div>
+
+              {/* Select All Checkbox */}
+              {filteredLeads.length > 0 && (
+                <label className="flex items-center gap-2 mb-4 cursor-pointer">
+                  <input type="checkbox"
+                    checked={selectedLeadIds.length === filteredLeads.length && filteredLeads.length > 0}
+                    onChange={() => setSelectedLeadIds(selectedLeadIds.length === filteredLeads.length ? [] : filteredLeads.map(l => l.id))}
+                    className="w-4 h-4 rounded bg-slate-950 border-slate-700 text-blue-600" />
+                  <span className="text-slate-600 text-[10px] font-black uppercase tracking-widest">Select All</span>
+                </label>
+              )}
 
               {leadsLoading ? (
                 <div className="text-center py-16 text-slate-600 font-black uppercase tracking-widest text-[11px]">Loading…</div>
@@ -1221,7 +1289,7 @@ const AdminPage: React.FC = () => {
                   <table className="w-full text-left min-w-[900px]">
                     <thead>
                       <tr className="border-b border-slate-800">
-                        {['Date','Client','Phone','Service','Location','Technician','Source','Status'].map(h => (
+                        {['Select','Date','Client','Phone','Service','Location','Technician','Source','Status'].map(h => (
                           <th key={h} className="pb-3 pr-4 text-[9px] font-black uppercase tracking-widest text-slate-600 whitespace-nowrap">{h}</th>
                         ))}
                       </tr>
@@ -1229,6 +1297,11 @@ const AdminPage: React.FC = () => {
                     <tbody className="divide-y divide-slate-900">
                       {filteredLeads.map(l => (
                         <tr key={l.id} className="hover:bg-slate-900/40 transition-colors">
+                          <td className="py-3 pr-4">
+                            <input type="checkbox" checked={selectedLeadIds.includes(l.id)} aria-label={`Select lead ${l.id}`}
+                              onChange={() => setSelectedLeadIds(p => p.includes(l.id) ? p.filter(id => id !== l.id) : [...p, l.id])}
+                              className="w-4 h-4 rounded bg-slate-950 border-slate-700 text-blue-600" />
+                          </td>
                           <td className="py-3 pr-4 text-slate-500 text-[10px] whitespace-nowrap">{formatDate(l.created_at)}</td>
                           <td className="py-3 pr-4 text-slate-200 text-sm font-semibold">{l.client_name}</td>
                           <td className="py-3 pr-4">
@@ -1308,8 +1381,9 @@ const AdminPage: React.FC = () => {
               {/* Stats */}
               <div className="grid grid-cols-4 gap-4 mb-6">
                 {[['Total', reviews.length, 'text-white'], 
-                  ['Pending', reviews.filter(r => r.status === 'pending').length, 'text-amber-400'], 
-                  ['Approved', reviews.filter(r => r.status === 'approved').length, 'text-emerald-400'], 
+                  ['Pending', reviews.filter(r => r.status === 'pending').length, 'text-amber-400'],
+                  ['Approved', reviews.filter(r => r.status === 'approved' && r.is_visible).length, 'text-emerald-400'],
+                  ['Hidden', reviews.filter(r => r.status === 'approved' && !r.is_visible).length, 'text-orange-400'],
                   ['Declined', reviews.filter(r => r.status === 'declined').length, 'text-red-400'
                 ]].map(([label, count, color]) => (
                   <div key={label as string} className="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-center">
@@ -1430,13 +1504,22 @@ const AdminPage: React.FC = () => {
                                   </div>
                                 </>
                               )}
-                              {r.status === 'approved' && (
+                              {r.status === 'approved' && r.is_visible && (
                                 <button
-                                  onClick={() => handleDeclineReview(r.id)}
+                                  onClick={() => handleRevokeReview(r.id)}
                                   disabled={reviewActionInProgress === r.id}
                                   className="bg-slate-800 hover:bg-red-500/20 text-slate-400 hover:text-red-400 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all disabled:opacity-50"
                                 >
                                   Revoke
+                                </button>
+                              )}
+                              {r.status === 'approved' && !r.is_visible && (
+                                <button
+                                  onClick={() => handleApproveReview(r.id)}
+                                  disabled={reviewActionInProgress === r.id}
+                                  className="bg-slate-800 hover:bg-emerald-500/20 text-slate-400 hover:text-emerald-400 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all disabled:opacity-50"
+                                >
+                                  Restore
                                 </button>
                               )}
                               {r.status === 'declined' && (
@@ -1551,7 +1634,7 @@ const AdminPage: React.FC = () => {
 
                     {/* Published toggle */}
                     <div className="flex items-center gap-3">
-                      <button type="button" onClick={() => setArticleIsPublished(p => !p)} aria-label={articleIsPublished ? 'Unpublish article' : 'Publish article'}
+                      <button type="button" onClick={() => { console.log('Publish toggle clicked, current:', articleIsPublished); setArticleIsPublished(p => !p); }} aria-label={articleIsPublished ? 'Unpublish article' : 'Publish article'}
                         className={`relative w-12 h-6 rounded-full transition-colors ${articleIsPublished ? 'bg-blue-600' : 'bg-slate-700'}`}>
                         <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${articleIsPublished ? 'left-7' : 'left-1'}`} />
                       </button>

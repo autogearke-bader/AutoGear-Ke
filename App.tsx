@@ -26,6 +26,7 @@ const AuthCallback = lazy(() => import('./pages/AuthCallback.tsx'));
 
 import Layout from './components/Layout.tsx';
 import ErrorBoundary from './components/ErrorBoundary.tsx';
+import { UpdatePrompt } from './src/components/UpdatePrompt';
 import { getCurrentUser, isClientProfileComplete, isTechnicianProfileComplete } from './src/lib/auth';
 import { isClientOnboardingComplete } from './src/lib/api';
 import { supabase } from './src/lib/supabase.ts';
@@ -199,9 +200,13 @@ const AppContent: React.FC = () => {
     };
   }, [navigate]);
 
-  // Don't render anything until we've checked the profile
+  // Show a loading skeleton until auth check completes (prevents blank screen on slow connections)
   if (checkingProfile) {
-    return null;
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sky-500" />
+      </div>
+    );
   }
 
   return (
@@ -231,7 +236,7 @@ const AppContent: React.FC = () => {
           <Route path="/menu" element={<MenuPage />} />
           <Route path="/guest-menu" element={<GuestMenuPage />} />
           <Route path="/technician-menu" element={<TechnicianMenuPage />} />
-          <Route path="/admin-portal" element={<AdminPage />} />
+           <Route path="/ag-internal-2026" element={<AdminPage />} />
           <Route path="/technicianprofile" element={<TechnicianProfilePage />} />
           <Route path="/blogs" element={<BlogPage />} />
           <Route path="/blogs/:slug" element={<ArticleDetailPage />} />
@@ -242,9 +247,9 @@ const AppContent: React.FC = () => {
       {/* PWA Install Banner */}
       {showInstallBanner && (
         <div className="fixed bottom-20 left-4 right-4 bg-slate-900 border border-blue-600 rounded-2xl p-4 flex items-center gap-3 z-50 shadow-xl">
-          <img src="/assets/180.png" className="w-10 h-10 rounded-xl" alt="AutoGear Ke" />
+          <img src="/assets/180.png" className="w-10 h-10 rounded-xl" alt="Mekh" />
           <div className="flex-1">
-            <p className="text-white font-bold text-sm">Install AutoGear Ke</p>
+            <p className="text-white font-bold text-sm">Install Mekh</p>
             <p className="text-slate-400 text-xs">Add to your home screen for quick access</p>
           </div>
           <button
@@ -264,6 +269,8 @@ const AppContent: React.FC = () => {
           </button>
         </div>
       )}
+
+      <UpdatePrompt />
     </Layout>
   );
 };

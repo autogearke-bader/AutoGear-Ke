@@ -5,8 +5,8 @@ const PrivacyPolicyPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Privacy Policy | AutoGear Ke</title>
-        <meta name="description" content="AutoGear Ke Privacy Policy - Learn how we collect, use, and protect your data." />
+        <title>Privacy Policy | Mekh</title>
+        <meta name="description" content="Mekh Privacy Policy - Learn how we collect, use, and protect your data." />
       </Helmet>
       
       <div className="min-h-screen bg-slate-950 text-slate-200 py-12 px-4">
@@ -19,12 +19,12 @@ const PrivacyPolicyPage: React.FC = () => {
             <section className="bg-slate-900/50 rounded-xl p-6 border border-slate-800">
               <h2 className="text-xl font-bold text-white mb-4">1. Who We Are</h2>
               <p className="text-slate-300 leading-relaxed">
-                AutoGear Ke is a marketplace connecting car owners with automotive technicians in Kenya. 
+                Mekh is a marketplace connecting car owners with automotive technicians in Kenya. 
                 We provide a platform where clients can find and book services from verified technicians including 
                 tinting, wrapping, PPF coating, ceramic coating, detailing, and tuning services.
               </p>
               <p className="text-slate-300 mt-4">
-                For privacy concerns, contact us at: <a href="mailto:support@autogearke.com" className="text-blue-400 hover:underline">support@autogearke.com</a>
+                For privacy concerns, contact us at: <a href="mailto:support@mekh.app" className="text-blue-400 hover:underline">support@mekh.app</a>
               </p>
             </section>
 
@@ -187,11 +187,11 @@ const PrivacyPolicyPage: React.FC = () => {
                 </li>
                 <li className="flex items-start">
                   <span className="text-blue-400 mr-2">•</span>
-                  <span>Technicians can request removal of their photos by contacting <a href="mailto:support@autogearke.com" className="text-blue-400 hover:underline">support@autogearke.com</a></span>
+                  <span>Technicians can request removal of their photos by contacting <a href="mailto:support@mekh.app" className="text-blue-400 hover:underline">support@mekh.app</a></span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-blue-400 mr-2">•</span>
-                  <span>AutoGear Ke does not claim ownership of photos uploaded by technicians. They remain the property of the uploader.</span>
+                  <span>Mekh does not claim ownership of photos uploaded by technicians. They remain the property of the uploader.</span>
                 </li>
               </ul>
             </section>
@@ -214,7 +214,7 @@ const PrivacyPolicyPage: React.FC = () => {
                 </li>
                 <li className="flex items-start">
                   <span className="text-blue-400 mr-2">•</span>
-                  <span>Users can request full data deletion at any time by emailing <a href="mailto:support@autogearke.com" className="text-blue-400 hover:underline">support@autogearke.com</a></span>
+                  <span>Users can request full data deletion at any time by emailing <a href="mailto:support@mekh.app" className="text-blue-400 hover:underline">support@mekh.app</a></span>
                 </li>
               </ul>
             </section>
@@ -242,7 +242,7 @@ const PrivacyPolicyPage: React.FC = () => {
                 </li>
               </ul>
               <p className="text-slate-300 mt-4">
-                To exercise any of these rights, contact us at <a href="mailto:support@autogearke.com" className="text-blue-400 hover:underline">support@autogearke.com</a>
+                To exercise any of these rights, contact us at <a href="mailto:support@mekh.app" className="text-blue-400 hover:underline">support@mekh.app</a>
               </p>
             </section>
 
@@ -265,9 +265,9 @@ const PrivacyPolicyPage: React.FC = () => {
             <section className="bg-slate-900/50 rounded-xl p-6 border border-slate-800">
               <h2 className="text-xl font-bold text-white mb-4">11. Children</h2>
               <p className="text-slate-300">
-                AutoGear Ke is not intended for anyone under the age of 18. We do not knowingly collect 
+                Mekh is not intended for anyone under the age of 18. We do not knowingly collect 
                 personal data from minors. If you believe we have collected data from a minor, please 
-                contact us immediately at <a href="mailto:support@autogearke.com" className="text-blue-400 hover:underline">support@autogearke.com</a> and we will delete such data.
+                contact us immediately at <a href="mailto:support@mekh.app" className="text-blue-400 hover:underline">support@mekh.app</a> and we will delete such data.
               </p>
             </section>
 
@@ -276,7 +276,7 @@ const PrivacyPolicyPage: React.FC = () => {
               <h2 className="text-xl font-bold text-white mb-4">12. Changes to This Policy</h2>
               <p className="text-slate-300">
                 We may update this Privacy Policy from time to time. If we make significant changes, 
-                we will notify users via the platform. Continued use of AutoGear Ke after any changes 
+                we will notify users via the platform. Continued use of Mekh after any changes 
                 to this policy constitutes acceptance of the updated terms.
               </p>
             </section>
@@ -286,10 +286,10 @@ const PrivacyPolicyPage: React.FC = () => {
               <h2 className="text-xl font-bold text-white mb-4">13. Contact Us</h2>
               <div className="space-y-3 text-slate-300">
                 <p>
-                  <span className="font-semibold">Email:</span> <a href="mailto:support@autogearke.com" className="text-blue-400 hover:underline">support@autogearke.com</a>
+                  <span className="font-semibold">Email:</span> <a href="mailto:support@mekh.app" className="text-blue-400 hover:underline">support@mekh.app</a>
                 </p>
                 <p>
-                  <span className="font-semibold">WhatsApp:</span> <a href="https://wa.me/254112493733" className="text-blue-400 hover:underline">0112493733</a>
+                  <span className="font-semibold">WhatsApp:</span> <a href="https://wa.me/254738242743" className="text-blue-400 hover:underline">0738242743</a>
                 </p>
               </div>
             </section>

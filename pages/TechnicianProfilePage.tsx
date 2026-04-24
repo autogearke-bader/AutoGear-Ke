@@ -82,6 +82,21 @@ const TechnicianProfilePage: React.FC = () => {
   const [isCurrentUser, setIsCurrentUser] = useState(false);
   const [user, setUser] = useState<any>(null);
 
+  // Expanded variant names (mobile only)
+  const [expandedVariants, setExpandedVariants] = useState<Set<string>>(new Set());
+
+  const toggleVariantName = (variantId: string) => {
+    setExpandedVariants(prev => {
+      const next = new Set(prev);
+      if (next.has(variantId)) {
+        next.delete(variantId);
+      } else {
+        next.add(variantId);
+      }
+      return next;
+    });
+  };
+
   // Video link management state
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [editingVideo, setEditingVideo] = useState<TechnicianVideo | null>(null);
@@ -109,13 +124,19 @@ const TechnicianProfilePage: React.FC = () => {
           }
         }
 
-        // Fetch TikTok thumbnails
+        // Use cached thumbnail_url from DB; fall back to edge function only if missing
         if (data?.technician_videos) {
           const thumbnails: Record<string, string> = {};
           for (const video of data.technician_videos) {
             if (video.platform === 'tiktok') {
-              const thumb = await getTikTokThumbnail(video.video_url);
-              if (thumb) thumbnails[video.id] = thumb;
+              if (video.thumbnail_url) {
+                // Use the cached value — no network call needed
+                thumbnails[video.id] = video.thumbnail_url;
+              } else {
+                // Fallback: fetch live (for videos added before this update)
+                const thumb = await getTikTokThumbnail(video.video_url);
+                if (thumb) thumbnails[video.id] = thumb;
+              }
             }
           }
           setTiktokThumbnails(thumbnails);
@@ -127,7 +148,7 @@ const TechnicianProfilePage: React.FC = () => {
             const { data: variants } = await supabase
               .from('service_variants')
               .select('*')
-              .in('service_id', data.technician_services.map(s => s.id));
+              .in('service_id', data.technician_services.map((s: { id: string }) => s.id))
 
             data.service_variants = variants || [];
           } catch (e) {
@@ -492,9 +513,9 @@ const TechnicianProfilePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-950 pt-16 md:pt-20">
       <Helmet>
-        <title>{technician.business_name} - {technician.technician_services?.[0]?.service_name || 'Car Services'} in {technician.area || 'Nairobi'} | AutoGear Ke</title>
-        <meta name="description" content={`${technician.business_name} offers professional ${technician.technician_services?.[0]?.service_name || 'car services'} in ${technician.area || 'Nairobi'}, Nairobi. Ceramic tint, 3M & Llumar options available. View portfolio & book on AutoGear Ke.`} />
-        <link rel="canonical" href={`https://autogearke.com/technician/${technician.slug}`} />
+        <title>{technician.business_name} - {technician.technician_services?.[0]?.service_name || 'Car Services'} in {technician.area || 'Nairobi'} | Mekh</title>
+        <meta name="description" content={`${technician.business_name} offers professional ${technician.technician_services?.[0]?.service_name || 'car services'} in ${technician.area || 'Nairobi'}, Nairobi. Ceramic tint, 3M & Llumar options available. View portfolio & book on Mekh.`} />
+        <link rel="canonical" href={`https://mekh.app/technician/${technician.slug}`} />
       </Helmet>
 
       {/* Back to Home Link - Hidden on mobile */}
@@ -539,10 +560,10 @@ const TechnicianProfilePage: React.FC = () => {
                 {/* Edit Profile Button - only for owner */}
                 {isCurrentUser && (
                   <button
-                    onClick={() => setIsEditing(!isEditing)}
+                    onClick={() => navigate('/technician-dashboard?tab=profile')}
                     className="ml-4 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
                   >
-                    {isEditing ? 'Cancel Edit' : 'Edit Profile'}
+                    Edit Profile
                   </button>
                 )}
               </div>
@@ -689,14 +710,14 @@ const TechnicianProfilePage: React.FC = () => {
             </div>
             
             {/* Tablet: 2 columns, Desktop: 4 columns */}
-            <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+            <div className="hidden md:grid grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-4">
               {videos.map((video) => (
                 <div key={video.id}>
                   <div 
                     className="relative w-full overflow-hidden"
                     style={{ 
                       paddingBottom: '177.78%', /* 9:16 ratio */
-                      maxHeight: '300px'
+                      maxHeight: 'clamp(180px, 25vw, 300px)'
                     }}
                   >
                     {video.platform === 'tiktok' ? (
@@ -777,7 +798,7 @@ const TechnicianProfilePage: React.FC = () => {
                         <span className="text-white font-medium">{service.service_name}</span>
                         {variants.length === 0 && service.price && (
                           <span className="text-green-400 font-medium">
-                            KSh {service.price.toLocaleString()}
+                            Ksh {service.price.toLocaleString()}
                           </span>
                         )}
                         {variants.length === 0 && service.negotiable && (
@@ -800,25 +821,30 @@ const TechnicianProfilePage: React.FC = () => {
                     {variants.length > 0 && (
                       <ul className="ml-6 space-y-1">
                         {variants.map((variant) => (
-                          <li key={variant.id} className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="text-blue-300">◦</span>
-                              <span className="text-slate-300">{variant.variant_name}</span>
-                              {variant.price && (
-                                <span className="text-green-400 font-medium">
-                                  KSh {variant.price.toLocaleString()}
-                                </span>
-                              )}
-                              {variant.is_negotiable && (
-                                <span className="bg-yellow-900/50 text-yellow-400 text-xs px-2 py-0.5 rounded border border-yellow-800">
-                                  Negotiable
-                                </span>
-                              )}
-                            </div>
+                          <li key={variant.id} className="flex items-center gap-2 min-w-0">
+                            <span className="text-blue-300 shrink-0">◦</span>
+                            <span
+                              className={`text-slate-300 flex-1 min-w-0 md:truncate${
+                                expandedVariants.has(variant.id) ? '' : ' truncate'
+                              } md:cursor-default cursor-pointer`}
+                              onClick={() => toggleVariantName(variant.id)}
+                            >
+                              {variant.variant_name}
+                            </span>
+                            {variant.price && (
+                              <span className="text-green-400 font-medium shrink-0">
+                                Ksh {variant.price.toLocaleString()}
+                              </span>
+                            )}
+                            {variant.is_negotiable && (
+                              <span className="bg-yellow-900/50 text-yellow-400 text-xs px-2 py-0.5 rounded border border-yellow-800 shrink-0">
+                                Negotiable
+                              </span>
+                            )}
                             <Link
                               to={`#book-${service.id}`}
                               onClick={() => handleBookService(`${service.service_name} - ${variant.variant_name}`)}
-                              className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
+                              className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors shrink-0"
                             >
                               Book →
                             </Link>

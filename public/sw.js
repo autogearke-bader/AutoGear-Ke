@@ -1,6 +1,6 @@
-// AutoGear Ke PWA Service Worker
-const CACHE_NAME = 'autogearke-v3';
-const RUNTIME_CACHE = 'autogearke-runtime';
+// Mekh PWA Service Worker
+const CACHE_NAME = 'mekh-v4';
+const RUNTIME_CACHE = 'mekh-runtime';
 
 // Assets to pre-cache for offline support
 const PRECACHE_ASSETS = [

@@ -1,11 +1,11 @@
 {
-  "name": "autogear-ke---Kenya's Best Car Service Techinicians",
+  "name": "mekh---Kenya's Best Car Service Techinicians",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/generate-sitemap.js && node scripts/copy-sitemap.js && vite build",
+    "build": "vite build && cp public/_routes.json dist/_routes.json",
     "build:only": "vite build",
     "preview": "vite preview",
     "test": "vitest --run",

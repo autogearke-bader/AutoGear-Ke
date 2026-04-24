@@ -55,7 +55,7 @@ export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '', {
     // Detect refresh token timeout and re-authenticate
     detectSessionInUrl: true,
     // Storage key prefix to avoid conflicts
-    storageKey: 'autogear-supabase-auth',
+    storageKey: 'mekh-supabase-auth',
   },
   global: {
     fetch: customFetch,
@@ -67,9 +67,22 @@ export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '', {
 });
 
 // Prevent free-tier cold starts by pinging every 3 minutes
-setInterval(() => {
-  supabase.from('articles').select('id').limit(1).then(() => {});
-}, 3 * 60 * 1000);
+// Only ping when the page is visible to save battery & data on mobile
+if (typeof document !== 'undefined') {
+  let keepAlive: ReturnType<typeof setInterval> | null = null;
+  const ping = () => { supabase.from('articles').select('id').limit(1).then(() => {}); };
+
+  const toggleKeepAlive = () => {
+    if (document.visibilityState === 'visible') {
+      if (!keepAlive) keepAlive = setInterval(ping, 3 * 60 * 1000);
+    } else {
+      if (keepAlive) { clearInterval(keepAlive); keepAlive = null; }
+    }
+  };
+
+  toggleKeepAlive();
+  document.addEventListener('visibilitychange', toggleKeepAlive);
+}
 
 // Security: Add auth state change listener - only log events in dev mode
 supabase.auth.onAuthStateChange((event, session) => {

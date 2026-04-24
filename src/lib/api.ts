@@ -8,43 +8,25 @@ import { getCurrentUser, getUserIdFromSession, getMyClientProfile } from './auth
 /**
  * Update the current client's profile with name and phone.
  * Used for client onboarding and profile updates.
+ * Uses a server-side function to avoid RLS policy issues.
  */
 export const updateMyClientProfile = async (updates: { name?: string; phone?: string }) => {
   const user = await getCurrentUser();
   if (!user) throw new Error('Not authenticated');
 
-  // Check if client profile exists
-  const { data: existingClient } = await supabase
-    .from('clients')
-    .select('id')
-    .eq('user_id', user.id)
-    .maybeSingle();
+  // Get email from session
+  const { data: { session } } = await supabase.auth.getSession();
+  const email = session?.user?.email;
 
-  if (existingClient) {
-    // Update existing profile
-    const { error } = await supabase
-      .from('clients')
-      .update(updates)
-      .eq('user_id', user.id);
+  // Use the server-side upsert function to avoid RLS recursion issues
+  const { error } = await supabase.rpc('upsert_client_profile', {
+    p_user_id: user.id,
+    p_name: updates.name || '',
+    p_phone: updates.phone || '',
+    p_email: email || null,
+  });
 
-    if (error) throw error;
-  } else {
-    // Get session for email
-    const { data: { session } } = await supabase.auth.getSession();
-    const email = session?.user?.email;
-
-    // Insert new profile
-    const { error } = await supabase
-      .from('clients')
-      .insert([{
-        user_id: user.id,
-        name: updates.name || '',
-        phone: updates.phone || '',
-        ...(email ? { email } : {}),
-      }]);
-
-    if (error) throw error;
-  }
+  if (error) throw error;
 
   return true;
 };
@@ -104,13 +86,18 @@ export const getPublicTechnicianBySlug = async (slug: string) => {
       technician_photos(*),
       technician_videos(*),
       technician_payments(*),
+      avg_rating,
+      review_count,
       reviews(*)
     `)
     .eq('slug', slug)
     .eq('status', 'live')
-    .single();
+    .eq('reviews.status', 'approved')
+    .eq('reviews.is_visible', true)
+    .maybeSingle();          // ← was .single()
 
   if (error) throw error;
+  if (!data) throw new Error('Technician not found');
   return data;
 };
 
@@ -222,8 +209,8 @@ export const getMyClientLeads = async (_userId?: string) => {
 };
 
 /**
- * Delete a booking/lead for the current client.
- * Only allows deletion of bookings with status "job_done" or "contacted".
+ * Hide a booking/lead from the current client's view (soft delete).
+ * Only allows hiding of bookings with status "job_done".
  */
 export const deleteBooking = async (leadId: string): Promise<void> => {
   const userId = await getUserIdFromSession();
@@ -248,14 +235,14 @@ export const deleteBooking = async (leadId: string): Promise<void> => {
 
   if (!lead) throw new Error('Booking not found');
 
-  if (lead.status !== 'job_done' && lead.status !== 'contacted') {
-    throw new Error('Only completed or contacted bookings can be removed');
+  if (lead.status !== 'job_done') {
+    throw new Error('Only completed bookings can be removed');
   }
 
-  // Delete the booking
+  // Soft delete: hide the booking from client view
   const { error } = await supabase
     .from('leads')
-    .delete()
+    .update({ hidden_from_client: true })
     .eq('id', leadId);
 
   if (error) throw error;
@@ -270,7 +257,8 @@ export const cleanupOldBookings = async (): Promise<number> => {
   const { data, error } = await supabase.rpc('cleanup_old_bookings');
 
   if (error) throw error;
-  return data ?? 0;
+  // The RPC returns an array of objects: [{cleaned_count: number}]
+  return data?.[0]?.cleaned_count ?? 0;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -304,12 +292,23 @@ export const getMyLeads = async () => {
 
   const { data, error } = await supabase
     .from('leads')
-    .select('*')
+    .select(`
+      *,
+      clients!leads_client_id_fkey (
+        email
+      )
+    `)
     .eq('technician_id', tech.id)
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return data ?? [];
+
+  // Transform data to include client_email
+  // Use joined email if available, otherwise fall back to stored email
+  return (data ?? []).map(lead => ({
+    ...lead,
+    client_email: lead.clients?.email || lead.client_email || null
+  }));
 };
 
 /** Update the status of a lead (technician action). */
@@ -589,18 +588,21 @@ export const submitReview = async (
   const userId = await getUserIdFromSession();
   if (!userId) throw new Error('You must be signed in to submit a review');
 
+  // Use the provided clientId (which should be the auth user ID) or fall back to session user ID
+  const finalClientId = clientId || userId;
+
   // Try to get the client's name for the review
   let clientName = 'Anonymous';
   const { data: clientRow } = await supabase
     .from('clients')
     .select('name')
-    .eq('user_id', userId)
+    .eq('user_id', finalClientId)
     .maybeSingle();
   if (clientRow?.name) clientName = clientRow.name;
 
   const reviewPayload: Record<string, any> = {
     technician_id: technicianId,
-    client_id: clientId || userId,
+    client_id: finalClientId,
     client_name: clientName,
     rating,
     comment,
@@ -835,6 +837,23 @@ export const adminDeclineReview = async (
   if (error) throw error;
 };
 
+/** Revoke an approved review (hide from public without changing status). */
+export const adminRevokeReview = async (
+  reviewId: string,
+  adminNotes: string = 'Revoked by admin'
+): Promise<void> => {
+  const { error } = await supabase
+    .from('reviews')
+    .update({
+      is_visible: false,
+      admin_notes: adminNotes,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', reviewId);
+
+  if (error) throw error;
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // TIKTOK HELPERS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -845,11 +864,21 @@ export const adminDeclineReview = async (
  */
 export const getTikTokThumbnail = async (videoUrl: string): Promise<string | null> => {
   try {
-    const endpoint = `https://www.tiktok.com/oembed?url=${encodeURIComponent(videoUrl)}`;
-    const res = await fetch(endpoint);
-    if (!res.ok) return null;
-    const json = await res.json();
-    return (json.thumbnail_url as string) ?? null;
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/get-tiktok-thumbnail`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': supabaseAnonKey,
+      },
+      body: JSON.stringify({ video_url: videoUrl }),
+    });
+
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data?.thumbnail_url || null;
   } catch {
     return null;
   }

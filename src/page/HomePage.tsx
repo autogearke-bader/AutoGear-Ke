@@ -53,11 +53,11 @@ const HomePage: React.FC = () => {
   const [locationPermission, setLocationPermission] = useState<'granted' | 'denied' | 'prompt'>('prompt');
   const [locationTooltip, setLocationTooltip] = useState(false);
   const [isRequestingLocation, setIsRequestingLocation] = useState(false);
-  
+
   // Location banner state
   const [showLocationBanner, setShowLocationBanner] = useState(false);
   const [bannerDismissed, setBannerDismissed] = useState(false);
-  
+
   // Modal state
   const [selectedTechnician, setSelectedTechnician] = useState<Technician | null>(null);
   const [bookingOpen, setBookingOpen] = useState(false);
@@ -72,6 +72,9 @@ const HomePage: React.FC = () => {
 
   const locationTooltipTimeout = useRef<NodeJS.Timeout | null>(null);
   const bannerTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const techniciansRequestInProgress = useRef(false);
+  const techniciansDebounceTimeout = useRef<NodeJS.Timeout | null>(null);
+  const searchDebounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Derived values from client data
   const isClient = session?.user?.user_metadata?.role === 'client';
@@ -89,56 +92,71 @@ const HomePage: React.FC = () => {
     l => l.status === 'job_done'
   );
 
-  // Fetch technicians on mount and on page visibility/focus
-  useEffect(() => {
-    const fetchTechnicians = async () => {
-      try {
-        const data = await getPublicTechnicians();
-        setTechnicians(data);
-      } catch (error) {
-        console.error('Failed to fetch technicians:', error);
-      } finally {
-        setLoading(false);
+// Fetch technicians on mount and on page visibility/focus
+useEffect(() => {
+  const fetchTechnicians = async () => {
+    // Prevent concurrent requests
+    if (techniciansRequestInProgress.current) {
+      return;
+    }
+
+    techniciansRequestInProgress.current = true;
+
+    try {
+      const [techniciansData, articlesData] = await Promise.all([
+        getPublicTechnicians(),
+        getPublicArticles(),
+      ]);
+      setTechnicians(techniciansData);
+      setArticles(articlesData);
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+    } finally {
+      setLoading(false);
+      setLoadingArticles(false);
+      techniciansRequestInProgress.current = false;
+    }
+  };
+
+  fetchTechnicians();
+
+  // Refetch when tab becomes visible again (e.g. switching back from another tab)
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === 'visible') {
+      // Debounce the request to prevent rapid-fire calls
+      if (techniciansDebounceTimeout.current) {
+        clearTimeout(techniciansDebounceTimeout.current);
       }
-    };
-
-    fetchTechnicians();
-
-    // Refetch when tab becomes visible again (e.g. switching back from another tab)
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
+      techniciansDebounceTimeout.current = setTimeout(() => {
         fetchTechnicians();
-      }
-    };
+      }, 500); // 500ms debounce
+    }
+  };
 
-    // Refetch when window regains focus (e.g. navigating back)
-    const handleFocus = () => {
+  // Refetch when window regains focus (e.g. navigating back)
+  const handleFocus = () => {
+    // Debounce the request to prevent rapid-fire calls
+    if (techniciansDebounceTimeout.current) {
+      clearTimeout(techniciansDebounceTimeout.current);
+    }
+    techniciansDebounceTimeout.current = setTimeout(() => {
       fetchTechnicians();
-    };
+    }, 500); // 500ms debounce
+  };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleFocus);
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+  window.addEventListener('focus', handleFocus);
 
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleFocus);
-    };
-  }, []);
+  return () => {
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+    window.removeEventListener('focus', handleFocus);
+    if (techniciansDebounceTimeout.current) {
+      clearTimeout(techniciansDebounceTimeout.current);
+    }
+  };
+}, []);
 
-  // Fetch articles
-  useEffect(() => {
-    const fetchArticles = async () => {
-      try {
-        const data = await getPublicArticles();
-        setArticles(data);
-      } catch (error) {
-        console.error('Failed to fetch articles:', error);
-      } finally {
-        setLoadingArticles(false);
-      }
-    };
-    fetchArticles();
-  }, []);
+
 
   // Fetch client data on mount
   useEffect(() => {
@@ -180,29 +198,7 @@ const HomePage: React.FC = () => {
     loadClientData();
   }, []);
 
-  // Check for location banner - show after 7-8 seconds on first visit
-  useEffect(() => {
-    const dismissed = localStorage.getItem('location_banner_dismissed');
-    
-    // Show banner if not dismissed yet
-    if (!dismissed && !bannerDismissed) {
-      // Show banner after 7-8 seconds (randomized between 7000-8000ms)
-      const delay = Math.random() * 1000 + 7000;
-      bannerTimeoutRef.current = setTimeout(() => {
-        setShowLocationBanner(true);
-        // Auto-dismiss after 10 seconds
-        setTimeout(() => {
-          setShowLocationBanner(false);
-        }, 10000);
-      }, delay);
-    }
 
-    return () => {
-      if (bannerTimeoutRef.current) {
-        clearTimeout(bannerTimeoutRef.current);
-      }
-    };
-  }, [bannerDismissed]);
 
   // Check location permission status on mount
   useEffect(() => {
@@ -232,13 +228,31 @@ const HomePage: React.FC = () => {
     checkAndRequestLocation();
   }, []);
 
-  // Update search input when location is detected
+
+
+  // Check for location banner - show after 7-8 seconds on first visit
   useEffect(() => {
-    if (detectedLocation) {
-      setSearchInputValue(detectedLocation);
-      setSearchQuery(detectedLocation);
+    const dismissed = localStorage.getItem('location_banner_dismissed');
+
+    // Show banner if not dismissed yet
+    if (!dismissed && !bannerDismissed) {
+      // Show banner after 7-8 seconds (randomized between 7000-8000ms)
+      const delay = Math.random() * 1000 + 7000;
+      bannerTimeoutRef.current = setTimeout(() => {
+        setShowLocationBanner(true);
+        // Auto-dismiss after 10 seconds
+        setTimeout(() => {
+          setShowLocationBanner(false);
+        }, 10000);
+      }, delay);
     }
-  }, [detectedLocation]);
+
+    return () => {
+      if (bannerTimeoutRef.current) {
+        clearTimeout(bannerTimeoutRef.current);
+      }
+    };
+  }, [bannerDismissed]);
 
   // Request location from browser
   const requestUserLocation = () => {
@@ -362,6 +376,8 @@ const HomePage: React.FC = () => {
     localStorage.setItem('location_banner_dismissed', 'true');
   };
 
+
+
   // State for county (internal)
   const [county, setCountyState] = useState('');
 
@@ -371,12 +387,16 @@ const HomePage: React.FC = () => {
       const pendingData = sessionStorage.getItem('pendingBookTechnician');
       if (pendingData) {
         try {
-          const technician = JSON.parse(pendingData) as Technician;
-          const session = await getSession();
-          if (session) {
-            setSelectedTechnician(technician);
-            setBookingOpen(true);
-            setPendingBookTechnician(technician);
+          const parsed = JSON.parse(pendingData);
+          // Verify it looks like a real technician before using it
+          if (parsed && typeof parsed.id === 'string' && typeof parsed.business_name === 'string') {
+            const technician = parsed as Technician;
+            const session = await getSession();
+            if (session) {
+              setSelectedTechnician(technician);
+              setBookingOpen(true);
+              setPendingBookTechnician(technician);
+            }
           }
           sessionStorage.removeItem('pendingBookTechnician');
         } catch (e) {
@@ -450,8 +470,9 @@ const HomePage: React.FC = () => {
 
   // Parse search query to extract service and location
   const parseSearchQuery = useCallback((query: string) => {
+    if (!query || query.length > 100) return { service: '', location: '' }; // Guard against ReDoS
     const lowerQuery = query.toLowerCase().trim();
-    
+
     if (!lowerQuery) return { service: '', location: '' };
     
     // Check for location keywords
@@ -479,127 +500,42 @@ const HomePage: React.FC = () => {
   // Search filtering logic
   const searchFilter = useCallback((techs: Technician[], query: string) => {
     if (!query.trim()) return techs;
-    
-    const { service, location } = parseSearchQuery(query);
+
     const liveTechs = techs.filter(t => t.status === 'live');
     const lowerQuery = query.toLowerCase().trim();
-    
-    if (!service && !location) {
-      // When no location keywords found, prioritize area matching
-      // Try exact match first (highest priority)
-      const exactAreaMatch = liveTechs.filter(t => 
-        t.area?.toLowerCase() === lowerQuery
-      );
-      
-      if (exactAreaMatch.length > 0) {
-        return exactAreaMatch;
-      }
-      
-      // Try prefix match (area starts with search term - e.g., "kasarani" matches "Kasarani location")
-      const prefixAreaMatch = liveTechs.filter(t => 
-        t.area?.toLowerCase().startsWith(lowerQuery)
-      );
-      
-      if (prefixAreaMatch.length > 0) {
-        return prefixAreaMatch;
-      }
-      
-      // Try partial match on area
-      const partialAreaMatch = liveTechs.filter(t => 
-        t.area?.toLowerCase().includes(lowerQuery)
-      );
-      
-      if (partialAreaMatch.length > 0) {
-        return partialAreaMatch;
-      }
-      
-      // Otherwise, do general search (business name, service keywords)
-      // But exclude county matching to prioritize area-based searches
-      return liveTechs.filter(t => 
+
+    // First, check if query matches any technician's area (letter by letter)
+    const areaMatches = liveTechs.filter(t =>
+      t.area?.toLowerCase().includes(lowerQuery)
+    );
+
+    let filtered;
+    if (areaMatches.length > 0) {
+      // If area matches found, show those technicians
+      filtered = areaMatches;
+    } else {
+      // Otherwise, filter by service matches (business name or service names)
+      filtered = liveTechs.filter(t =>
         t.business_name?.toLowerCase().includes(lowerQuery) ||
-        t.technician_services?.some(s => 
+        t.technician_services?.some(s =>
           s.service_name.toLowerCase().includes(lowerQuery)
         )
       );
     }
-    
-    // When we have a service but no explicit location keyword,
-    // check if the service might actually be a location first
-    if (service && !location) {
-      const lowerService = service.toLowerCase().trim();
-      
-      // Try to match as location first (exact, prefix, then partial)
-      const exactAreaMatch = liveTechs.filter(t => 
-        t.area?.toLowerCase() === lowerService
-      );
-      
-      if (exactAreaMatch.length > 0) {
-        return exactAreaMatch;
-      }
-      
-      const prefixAreaMatch = liveTechs.filter(t => 
-        t.area?.toLowerCase().startsWith(lowerService)
-      );
-      
-      if (prefixAreaMatch.length > 0) {
-        return prefixAreaMatch;
-      }
-      
-      const partialAreaMatch = liveTechs.filter(t => 
-        t.area?.toLowerCase().includes(lowerService)
-      );
-      
-      if (partialAreaMatch.length > 0) {
-        return partialAreaMatch;
-      }
-      
-      // If no area matches, treat as service search
-      return liveTechs.filter(t => 
-        t.technician_services?.some(s => 
-          s.service_name.toLowerCase().includes(service)
-        )
-      );
+
+    // If location is active, sort by proximity
+    if (detectedLat && detectedLng) {
+      filtered = filtered
+        .filter(t => t.latitude && t.longitude)
+        .map(t => ({
+          ...t,
+          distance: calculateDistance(detectedLat, detectedLng, t.latitude!, t.longitude!)
+        }))
+        .sort((a, b) => (a.distance || 0) - (b.distance || 0));
     }
-    
-    let filtered = liveTechs;
-    
-    // Filter by service if specified (with explicit location keyword)
-    if (service) {
-      filtered = filtered.filter(t => 
-        t.technician_services?.some(s => 
-          s.service_name.toLowerCase().includes(service)
-        )
-      );
-    }
-    
-    // Filter by location if specified - try exact, prefix, then partial match
-    if (location) {
-      const lowerLocation = location.toLowerCase().trim();
-      
-      // Try exact match first
-      let locationMatches = filtered.filter(t =>
-        t.area?.toLowerCase() === lowerLocation
-      );
-      
-      // If no exact match, try prefix match
-      if (locationMatches.length === 0) {
-        locationMatches = filtered.filter(t =>
-          t.area?.toLowerCase().startsWith(lowerLocation)
-        );
-      }
-      
-      // If still no match, try partial match
-      if (locationMatches.length === 0) {
-        locationMatches = filtered.filter(t =>
-          t.area?.toLowerCase().includes(lowerLocation)
-        );
-      }
-      
-      filtered = locationMatches;
-    }
-    
+
     return filtered;
-  }, [parseSearchQuery]);
+  }, [detectedLat, detectedLng, calculateDistance]);
 
   // Get search results
   const searchResults = useMemo(() => {
@@ -685,7 +621,7 @@ const HomePage: React.FC = () => {
       .filter(t => t.mobile_service === 'yes' || t.mobile_service === 'both')
       .slice(0, 8);
 
-    // New on AutoGear Ke - newly approved
+    // New on Mekh - newly approved
     const newTechs = [...liveTechnicians]
       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       .slice(0, 8);
@@ -696,7 +632,7 @@ const HomePage: React.FC = () => {
         title: 'Near You',
         technicians: nearYouTechs,
         showSeeAll: nearYouTechs.length >= 8,
-        isVisible: nearYouTechs.length > 0
+        isVisible: hasLocation
       },
       {
         id: 'top-rated',
@@ -735,7 +671,7 @@ const HomePage: React.FC = () => {
       },
       {
         id: 'new',
-        title: 'New on AutoGear Ke',
+        title: 'New on Mekh',
         technicians: newTechs,
         showSeeAll: newTechs.length >= 8,
         isVisible: newTechs.length > 0
@@ -775,19 +711,35 @@ const HomePage: React.FC = () => {
     return words.slice(0, 6).join(' ') + '...';
   };
 
-  // Handle search input change
+  // Sanitize search input to prevent XSS and ReDoS
+  const sanitizeSearch = (input: string): string => {
+    return input
+      .replace(/[<>'"`;]/g, '') // strip HTML/script chars
+      .replace(/\s{3,}/g, '  '); // collapse excessive whitespace
+  };
+
+  // Rate-limit debounce more aggressively on mobile
+  const SEARCH_DEBOUNCE_MS = /Mobi|Android/i.test(navigator.userAgent) ? 500 : 300;
+
+  // Handle search input change — debounced to reduce re-renders on low-end devices
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchInputValue(value);
-    setSearchQuery(value);
+    const raw = e.target.value.slice(0, 100);
+    const value = sanitizeSearch(raw);
+    setSearchInputValue(value); // Immediate update for responsive input
+
+    // Debounce the expensive filtering by mobile-aware timing
+    if (searchDebounceTimeout.current) clearTimeout(searchDebounceTimeout.current);
+    searchDebounceTimeout.current = setTimeout(() => {
+      setSearchQuery(value.trim());
+    }, SEARCH_DEBOUNCE_MS);
   };
 
   // Handle share
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: 'AutoGear Ke',
-        text: 'Find the best car technicians in Kenya on AutoGear Ke!',
+        title: 'Mekh',
+        text: 'Find the best car technicians in Kenya on Mekh!',
         url: window.location.href
       });
     } else {
@@ -839,6 +791,7 @@ const HomePage: React.FC = () => {
             type="text"
             value={searchInputValue}
             onChange={handleSearchChange}
+            maxLength={100}
             placeholder="Search services or Location"
             className="w-full px-4 py-3 pr-20 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 text-base"
           />
@@ -1054,9 +1007,16 @@ const HomePage: React.FC = () => {
       {searchQuery.trim().length > 0 && !loading ? (
         <section className="px-4 pb-4">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-white">
-              {hasSearchResults ? `Results for "${searchQuery}"` : 'Search Results'}
-            </h2>
+            <div>
+              <h2 className="text-lg font-bold text-white">
+                {hasSearchResults ? `Results for "${searchQuery}"` : 'Search Results'}
+              </h2>
+              {detectedLocation && (
+                <p className="text-slate-400 text-sm mt-1">
+                  📍 Prioritizing results near {detectedLocation}
+                </p>
+              )}
+            </div>
             {hasSearchResults && (
               <span className="text-slate-400 text-sm">
                 {searchResults.length} technician{searchResults.length !== 1 ? 's' : ''} found
@@ -1102,7 +1062,7 @@ const HomePage: React.FC = () => {
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
                     <path d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75V6z" />
                   </svg>
-                  Share AutoGear Ke with them
+                  Share Mekh with them
                 </button>
               </div>
             </div>

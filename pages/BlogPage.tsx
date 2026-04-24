@@ -46,29 +46,29 @@ const BlogPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-950">
       <Helmet>
-        <title>AutoGear Insights | Car Service Tips & Guides</title>
+        <title>Mekh Insights |  Car Care Tips & Guides for Kenyan Drivers</title>
         {/* Dynamic meta description: use featured article or fallback to generic */}
-        <meta name="description" content={featuredArticle?.meta_description || "Expert tips on car tinting, wrapping, PPF, ceramic coating, and detailing in Kenya. Your go-to source for car care advice from AutoGear Ke."} />
-        <meta property="og:title"       content={featuredArticle?.title || "AutoGear Insights | Car Service Tips & Guides"} />
+        <meta name="description" content={featuredArticle?.meta_description || "Expert tips on car tinting, wrapping, PPF, ceramic coating, and detailing in Kenya. Your go-to source for car care advice from Mekh."} />
+        <meta property="og:title"       content={featuredArticle?.title || "Mekh Insights |  Car Care Tips & Guides for Kenyan Drivers"} />
         <meta property="og:description" content={featuredArticle?.meta_description || featuredArticle?.excerpt || "Expert tips on car tinting, wrapping, PPF, ceramic coating, and detailing in Kenya."} />
         {/* Dynamic OG image: use featured article image or fallback to logo */}
-        <meta property="og:image"       content={featuredArticle?.images?.[0]?.url ? cx(featuredArticle.images[0].url, 'w_1200,h_630,c_fill,q_auto,f_auto') : "https://autogearke.com/assets/logo-4.png"} />
-        <meta property="og:url"         content="https://autogearke.com/blogs" />
+        <meta property="og:image"       content={featuredArticle?.images?.[0]?.url ? cx(featuredArticle.images[0].url, 'w_1200,h_630,c_fill,q_auto,f_auto') : "https://mekh.app/assets/mekhl.png"} />
+        <meta property="og:url"         content="https://mekh.app/blogs" />
         <meta property="og:type"        content="website" />
-        <meta property="og:site_name"   content="AutoGear Ke" />
+        <meta property="og:site_name"   content="Mekh" />
         <meta name="twitter:card"        content="summary_large_image" />
-        <meta name="twitter:title"       content={featuredArticle?.title || "AutoGear Insights | Car Service Tips & Guides"} />
+        <meta name="twitter:title"       content={featuredArticle?.title || "Mekh Insights |  Car Care Tips & Guides for Kenyan Drivers"} />
         <meta name="twitter:description" content={featuredArticle?.meta_description || featuredArticle?.excerpt || "Expert tips on car tinting, wrapping, PPF, ceramic coating, and detailing in Kenya."} />
-        <meta name="twitter:image"       content={featuredArticle?.images?.[0]?.url ? cx(featuredArticle.images[0].url, 'w_1200,h_630,c_fill,q_auto,f_auto') : "https://autogearke.com/assets/logo-4.png"} />
-        <link rel="canonical" href="https://autogearke.com/blogs" />
+        <meta name="twitter:image"       content={featuredArticle?.images?.[0]?.url ? cx(featuredArticle.images[0].url, 'w_1200,h_630,c_fill,q_auto,f_auto') : "https://mekh.app/assets/mekhl.png"} />
+        <link rel="canonical" href="https://mekh.app/blogs" />
         <script type="application/ld+json">
           {JSON.stringify({
             '@context':   'https://schema.org',
             '@type':      'Blog',
-            name:         'AutoGear Insights',
-            description:  'Expert car service tips and guides in Kenya.',
-            publisher:    { '@type': 'Organization', name: 'AutoGear Ke' },
-            url:          'https://autogearke.com/blogs',
+            name:         'Mekh Insights',
+            description:  'Expert  Car Care Tips & Guides for Kenyan Drivers',
+            publisher:    { '@type': 'Organization', name: 'Mekh' },
+            url:          'https://mekh.app/blogs',
             image:        featuredArticle?.images?.[0]?.url ? cx(featuredArticle.images[0].url, 'w_1200,q_auto,f_auto') : undefined,
           })}
         </script>
@@ -79,39 +79,55 @@ const BlogPage: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-slate-950 to-slate-950" />
         <div className="relative max-w-7xl mx-auto text-center">
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-black text-white mb-2 tracking-tight">
-            AutoGear <span className="text-blue-500">Insights</span>
+            Mekh <span className="text-blue-500">Insights</span>
           </h1>
           <p className="text-slate-400 text-sm md:text-base max-w-xl mx-auto">
-            Tinting, wrapping, PPF, detailing — everything you need to know about car care in Kenya.
+            Your guide to car care, maintenance, and everything on Kenyan roads.
           </p>
         </div>
       </section>
 
       {/* ── Featured article (first / latest) ─────────── */}
       {!loading && featuredArticle && (
-        <section className="px-4 md:px-8 pb-10">
+        <section className="px-4 md:px-8 pb-6">
           <div className="max-w-7xl mx-auto">
             <Link to={`/blogs/${featuredArticle.slug}`} className="group block">
-              <div className="relative rounded-3xl overflow-hidden border border-slate-800 hover:border-blue-600/40 transition-all bg-slate-900">
-                {featuredArticle.images?.[0]?.url && (
+              <div className="rounded-3xl overflow-hidden border border-slate-800 hover:border-blue-600/40 transition-all bg-slate-900">
+               {/* Image */}
+               {featuredArticle.images?.[0]?.url && (
+                 <div className="relative">
                   <img
                     src={cx(featuredArticle.images[0].url || '', 'w_1400,h_500,c_fill,q_auto,f_auto')}
                     alt={featuredArticle.images[0].alt || featuredArticle.title}
                     className="w-full h-48 md:h-72 object-cover group-hover:scale-105 transition-transform duration-500"
                     loading="eager"
                   />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
-                  <h2 className="text-xl md:text-2xl lg:text-3xl font-black text-white leading-tight mb-2">
-                    {featuredArticle.title}
-                  </h2>
-                  {featuredArticle.excerpt && (
-                    <p className="text-slate-300 text-sm md:text-base line-clamp-2 max-w-2xl">{featuredArticle.excerpt}</p>
-                  )}
-                  <p className="text-blue-400 text-[11px] font-black uppercase tracking-widest mt-3 group-hover:underline">Read Article →</p>
-                </div>
+                 {/* Gradient overlay — md and up only */}
+                    <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+                      {/* Text overlay — md and up only */}
+                       <div className="hidden md:block absolute bottom-0 left-0 right-0 p-8">
+                        <h2 className="text-2xl lg:text-3xl font-black text-white leading-tight mb-2">
+                           {featuredArticle.title}
+                         </h2>
+                         {featuredArticle.excerpt && (
+                        <p className="text-slate-300 text-base line-clamp-2 max-w-2xl">{featuredArticle.excerpt}</p>
+                         )}
+                       <p className="text-blue-400 text-[11px] font-black uppercase tracking-widest mt-3 group-hover:underline">Read Article →</p>
+           </div>
+          </div>
+            )}
+
+            {/* Text below image — mobile only */}
+             <div className="md:hidden p-5">
+                <h2 className="text-lg font-black text-white leading-tight mb-2">
+                  {featuredArticle.title}
+                </h2>
+                 {featuredArticle.excerpt && (
+                  <p className="text-slate-400 text-sm line-clamp-2">{featuredArticle.excerpt}</p>
+                 )}
+                 <p className="text-blue-400 text-[11px] font-black uppercase tracking-widest mt-3">Read Article →</p>
               </div>
+             </div>
             </Link>
           </div>
         </section>
@@ -135,7 +151,7 @@ const BlogPage: React.FC = () => {
                 {searchQuery || activeCategory !== 'all' ? 'No matching articles' : 'No Articles Yet'}
               </h3>
               <p className="text-slate-400 mb-6">
-                {searchQuery || activeCategory !== 'all' ? 'Try a different search or category.' : 'Check back soon for new insights and guides!'}
+                {searchQuery || activeCategory !== 'all' ? 'Try a different search or category.' : 'Get notified when we publish our articles.'}
               </p>
               {(searchQuery || activeCategory !== 'all') && (
                 <button onClick={() => { setSearchQuery(''); setActiveCategory('all'); }}

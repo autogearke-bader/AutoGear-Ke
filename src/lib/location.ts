@@ -34,7 +34,7 @@ export const reverseGeocode = async (lat: number, lng: number): Promise<string> 
       {
         headers: {
           'Accept-Language': 'en',
-          'User-Agent': 'AutoGear Ke/1.0 (autogearke.com)',
+          'User-Agent': 'Mekh/1.0 (mekh.app)',
         },
       }
     );

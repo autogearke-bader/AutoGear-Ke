@@ -34,8 +34,8 @@ const SIZE_PARAMS: Record<ImageSize, string> = {
   card_thumbnail:  'w_400,h_250,c_fill,q_auto,f_auto',
   portfolio_thumb: 'w_400,h_300,c_fill,q_auto,f_auto',
   portfolio_full:  'w_1200,h_900,c_limit,q_auto,f_auto',
-  article_inline:  'w_900,q_auto,f_auto',
-  article_thumb:   'w_600,h_380,c_fill,q_auto,f_auto',
+  article_inline:  'w_600,h_380,q_auto,f_auto',
+  article_thumb:   'w_400,h_380,c_fill,q_auto,f_auto',
   cover_banner:    'w_1400,h_500,c_fill,q_auto,f_auto',
 };
 

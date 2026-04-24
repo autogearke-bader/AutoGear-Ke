@@ -142,10 +142,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
   return (
     <div className="min-h-screen bg-slate-950 py-8 px-4">
       <Helmet>
-        <title>{activeTab === 'signin' ? 'Sign In' : 'Create Account'} | AutoGear Ke</title>
-        <meta name="description" content={activeTab === 'signin' 
-          ? 'Sign in to your AutoGear Ke account to book car services.' 
-          : 'Create an AutoGear Ke account to book car services from Kenya\'s best technicians.'
+        <title>{activeTab === 'signin' ? 'Sign In' : 'Create Account'} | Mekh</title>
+        <meta name="description" content={activeTab === 'signin'
+          ? 'Sign in to your Mekh account to book car services.'
+          : 'Create a Mekh account to book car services from Kenya\'s best technicians.'
         } />
       </Helmet>
 
@@ -154,7 +154,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
         <div className="text-center mb-8">
           <Link to="/" className="inline-block">
             <h1 className="text-2xl font-black text-white uppercase tracking-tight mb-2">
-              AutoGear Ke
+              Mekh
             </h1>
           </Link>
           <p className="text-slate-400">
@@ -380,7 +380,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
               <h2 className="text-xl font-bold text-white mb-2">Check your email</h2>
               <p className="text-slate-400 text-sm max-w-sm mx-auto">
                 We've sent a confirmation link to <strong className="text-white">{signupEmail}</strong>. 
-                Click the link to activate your AutoGear Ke account.
+                Click the link to activate your Mekh account.
               </p>
               <p className="text-slate-500 text-xs mt-4">
                 Didn't receive it? Check your spam folder or{' '}
@@ -405,7 +405,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
             <div className="relative w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl p-6">
               <h2 className="text-xl font-bold text-white mb-2">Choose Your Role</h2>
               <p className="text-slate-400 text-sm mb-6">
-                How would you like to use AutoGear Ke?
+                How would you like to use Mekh?
               </p>
               <div className="space-y-3">
                 <button

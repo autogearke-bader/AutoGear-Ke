@@ -1,12 +1,12 @@
 
 import {  } from './types.ts';
 
-export const WHATSAPP_NUMBER = "254112493733";
-export const BUSINESS_NAME = "AUTOGEAR KE";
-export const CONTACT_EMAIL = "support@autogearke.com";
-export const TIKTOK_URL = "https://www.tiktok.com/@autogear.ke?_r=1&_t=ZM-92zVNcV4j07";
-export const INSTAGRAM_URL = "https://www.instagram.com/autogearke?igsh=dWJjMTViZmllemtn";
-export const X_URL = "https://x.com/AutogearKe";
+export const WHATSAPP_NUMBER = "254738242743";
+export const BUSINESS_NAME = "Mekh";
+export const CONTACT_EMAIL = "support@mekh.app";
+export const TIKTOK_URL = "https://www.tiktok.com/@mekhapp?_r=1&_t=ZM-92zVNcV4j07";
+export const INSTAGRAM_URL = "https://www.instagram.com/mekh_app?igsh=dWJjMTViZmllemtn";
+export const X_URL = "https://x.com/MekhApp";
 
 
 

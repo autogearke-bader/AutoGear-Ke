@@ -35,6 +35,9 @@ const BookingsPage: React.FC = () => {
     wouldReBook: 'yes',
   });
 
+  // Store the current user ID for reviews
+  const [currentUserId, setCurrentUserId] = useState<string>('');
+
   useEffect(() => {
     const loadBookings = async () => {
       try {
@@ -43,6 +46,9 @@ const BookingsPage: React.FC = () => {
           navigate('/');
           return;
         }
+
+        // Store the current user ID for reviews
+        setCurrentUserId(currentUser.id);
 
         // Load client profile - this handles both email/password and Google OAuth users
         // For Google OAuth users, they may not have role set in metadata but will have a client profile
@@ -113,7 +119,7 @@ const BookingsPage: React.FC = () => {
         reviewModal.comment,
         reviewModal.wouldReBook,
         reviewModal.leadId,
-        reviewModal.clientId
+        currentUserId
       );
 
       // Close modal
@@ -321,7 +327,7 @@ const BookingsPage: React.FC = () => {
                       ✓ Reviewed
                     </span>
                   )}
-                  {(lead.status === 'job_done' || lead.status === 'contacted') && (
+                  {lead.status === 'job_done' && (
                     <button
                       onClick={() => handleRemoveBooking(lead.id)}
                       className="flex items-center justify-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-[11px] font-black uppercase tracking-widest px-3 py-2.5 rounded-xl transition-all border border-red-500/20"

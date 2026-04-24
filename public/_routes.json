@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "include": ["/*"],
+  "exclude": [
+    "/sitemap.xml",
+    "/api/*",
+    "/robots.txt",
+    "/manifest.json",
+    "/assets/*",
+    "/*.js",
+    "/*.css",
+    "/fonts/*",
+    "/_headers",
+    "/_redirects",
+    "/sw.js"
+  ]
+}

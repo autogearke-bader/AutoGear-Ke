@@ -38,6 +38,6 @@ $ LANGUAGE sql STABLE;
 -- INSERT INTO profiles (id, email, role)
 -- SELECT id, email, 'admin'
 -- FROM auth.users
--- WHERE email = 'admin@autogearke.com'
+-- WHERE email = 'admin@mekh.app'
 -- ON CONFLICT (id) DO NOTHING;
 -- =====================================================

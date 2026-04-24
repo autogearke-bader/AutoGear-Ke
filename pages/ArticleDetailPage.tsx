@@ -72,13 +72,13 @@ const ArticleDetailPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-950 overflow-x-hidden">
       <Helmet>
-        <title>{article.title} | AutoGear Insights</title>
-        <link rel="canonical" href={`https://autogearke.com/blogs/${article.slug}`} />
+        <title>{article.title} | Mekh Insights</title>
+        <link rel="canonical" href={`https://mekh.app/blogs/${article.slug}`} />
         <meta name="description" content={article.meta_description || article.excerpt} />
         <meta property="og:title"       content={article.title} />
         <meta property="og:description" content={article.meta_description || article.excerpt} />
         {heroImage && <meta property="og:image" content={cx(heroImage, 'w_1200,h_630,c_fill,q_auto,f_auto')} />}
-        <meta property="og:url"  content={`https://autogearke.com/blogs/${article.slug}`} />
+        <meta property="og:url"  content={`https://mekh.app/blogs/${article.slug}`} />
         <meta property="og:type" content="article" />
         <script type="application/ld+json">
           {JSON.stringify({
@@ -89,7 +89,7 @@ const ArticleDetailPage: React.FC = () => {
             image:          heroImage ? cx(heroImage, 'w_1200,q_auto,f_auto') : undefined,
             datePublished:  article.created_at,
             dateModified:   article.updated_at ?? article.created_at,
-            author: { '@type': 'Organization', name: 'AutoGear KE' },
+            author: { '@type': 'Organization', name: 'Mekh' },
           })}
         </script>
       </Helmet>
@@ -161,7 +161,7 @@ const ArticleDetailPage: React.FC = () => {
         <section className="px-4 md:px-8 pb-10 bg-slate-950">
           <div className="max-w-3xl mx-auto w-full">
             <p className="text-[10px] text-slate-600 font-black uppercase tracking-widest mb-4">Gallery</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {article.images.slice(1).map((img, idx) => (
                 <img
                   key={idx}
@@ -184,7 +184,7 @@ const ArticleDetailPage: React.FC = () => {
               Need a Technician?
             </h2>
             <p className="text-slate-300 text-sm md:text-base mb-6 md:mb-8 max-w-prose mx-auto">
-              Find verified tinting, wrapping, PPF, and detailing professionals near you on AutoGear Ke.
+              Find verified tinting, wrapping, PPF, and detailing professionals near you on Mekh.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-3 md:gap-4">
               <Link

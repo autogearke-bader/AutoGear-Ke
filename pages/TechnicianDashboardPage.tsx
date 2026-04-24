@@ -195,22 +195,28 @@ const TechnicianDashboardPage: React.FC = () => {
         setAvailableServices(ALL_SERVICES);
       }
       
-      // Load videos from technician_videos table
+      // Load videos from technician_videos table (including cached thumbnails)
       const { data: videosData } = await supabase
         .from('technician_videos')
         .select('*')
         .eq('technician_id', techProfile.id)
         .order('sort_order', { ascending: true });
-      
+
       if (videosData && videosData.length > 0) {
         setVideos(videosData);
-        
-        // Fetch TikTok thumbnails
+
+        // Use cached thumbnail_url from DB; fall back to edge function only if missing
         const thumbs: Record<string, string> = {};
         for (const video of videosData) {
           if (video.platform === 'tiktok') {
-            const thumb = await getTikTokThumbnail(video.video_url);
-            if (thumb) thumbs[video.id] = thumb;
+            if (video.thumbnail_url) {
+              // Use the cached value — no network call needed
+              thumbs[video.id] = video.thumbnail_url;
+            } else {
+              // Fallback: fetch live (for videos added before this update)
+              const thumb = await getTikTokThumbnail(video.video_url);
+              if (thumb) thumbs[video.id] = thumb;
+            }
           }
         }
         setVideoThumbnails(thumbs);
@@ -362,23 +368,26 @@ const TechnicianDashboardPage: React.FC = () => {
   
   const handleAddVideo = async () => {
     if (!technician || !newVideoUrl.trim()) return;
-    
+
     try {
       setVideoSaving(true);
       setVideoUrlError('');
-      
+
       const videoInfo = getVideoId(newVideoUrl);
       if (!videoInfo) {
         setVideoUrlError('Invalid video URL. Please enter a valid TikTok, YouTube, or Instagram video URL.');
         return;
       }
-      
+
       // Check for duplicates
       if (videos.some(v => v.video_url === newVideoUrl)) {
         setVideoUrlError('This video link already exists');
         return;
       }
-      
+
+      // Fetch thumbnail at save time so it's cached in DB permanently
+      const thumbnailUrl = videoInfo.platform === 'tiktok' ? await getTikTokThumbnail(newVideoUrl) : null;
+
       const { error: insertError } = await supabase
         .from('technician_videos')
         .insert({
@@ -389,10 +398,11 @@ const TechnicianDashboardPage: React.FC = () => {
           service: '',
           alt_text: '',
           sort_order: videos.length,
+          thumbnail_url: thumbnailUrl,
         });
-      
+
       if (insertError) throw insertError;
-      
+
       setNewVideoUrl('');
       loadData(); // Reload to get updated videos
     } catch (err: any) {
@@ -797,15 +807,42 @@ const TechnicianDashboardPage: React.FC = () => {
   };
 
   const handleLeadStatusChange = async (leadId: string, status: Lead['status']) => {
-    try {
-      await updateLeadStatus(leadId, status);
-      setLeads(leads.map(l => l.id === leadId ? { ...l, status } : l));
-      setSuccess('Lead status updated!');
-    } catch (err: any) {
-      setError(err.message || 'Failed to update status');
-    }
-  };
+  try {
+    await updateLeadStatus(leadId, status);
+    setLeads(leads.map(l => l.id === leadId ? { ...l, status } : l));
 
+    if (status === 'job_done') {
+      const lead = leads.find(l => l.id === leadId);
+
+      let clientEmail = lead?.client_email;
+
+      if (!clientEmail && lead?.client_id) {
+        const { data: clientData } = await supabase
+          .from('clients')
+          .select('email')
+          .eq('id', lead.client_id)
+          .maybeSingle();
+        clientEmail = clientData?.email;
+      }
+
+      if (clientEmail) {
+        const { error: fnError } = await supabase.functions.invoke('send-review-email-resend', {
+          body: {
+            client_email: clientEmail,
+            client_name: lead?.client_name,
+            business_name: technician?.business_name,
+            technician_slug: technician?.slug,
+          }
+        });
+        if (fnError) console.error('Edge function error:', fnError);
+      }
+    }
+
+    setSuccess('Lead status updated!');
+  } catch (err: any) {
+    setError(err.message || 'Failed to update status');
+  }
+};
   const handleDeleteNotification = async (notificationId: string) => {
     try {
       const { deleteNotification } = await import('../src/lib/api');
@@ -923,7 +960,7 @@ const TechnicianDashboardPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-950 text-white">
       <Helmet>
-        <title>My Dashboard | AutoGear Ke</title>
+        <title>My Dashboard | Mekh</title>
       </Helmet>
 
 
@@ -1102,19 +1139,20 @@ const TechnicianDashboardPage: React.FC = () => {
                     className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
                   />
                 </div>
-                <div className="md:col-span-2">
-                  <label htmlFor="bio" className="block text-sm font-medium text-slate-400 mb-1">
-                    Bio
-                  </label>
-                  <textarea
-                    id="bio"
-                    value={profileForm.bio}
-                    onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })}
-                    rows={4}
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                    placeholder="Tell customers about your business..."
-                  />
-                </div>
+                 <div className="md:col-span-2">
+                   <label htmlFor="bio" className="block text-sm font-medium text-slate-400 mb-1">
+                     Bio
+                   </label>
+                   <textarea
+                     id="bio"
+                     value={profileForm.bio}
+                     onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })}
+                     rows={4}
+                     className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                     placeholder="Example: Hi, I'm Brian Mutua, a window tinting specialist based in Westlands. I've been doing this for 6 years working mostly on Japanese imports. I use quality films and don't rush the job. Book me for a clean finish and honest pricing."
+                   />
+                   <p className="text-xs text-slate-500 mt-1">Tell clients your name, what you do, how long you've been doing it, and why they should pick you. Be specific and write like you're talking to someone.</p>
+                 </div>
               </div>
             </div>
 
@@ -1248,7 +1286,7 @@ const TechnicianDashboardPage: React.FC = () => {
             <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
               <h2 className="text-lg font-bold mb-4">Other Technicians</h2>
               <p className="text-slate-400 text-sm mb-6">
-                Browse other technicians in the AutoGear Ke network
+                Browse other technicians in the Mekh network
               </p>
               
               {allTechnicians.length === 0 ? (
@@ -1537,12 +1575,12 @@ const TechnicianDashboardPage: React.FC = () => {
                         alt={photo.alt_text || photo.caption || 'Portfolio'}
                         className="w-full h-full object-cover"
                       />
-                      <button
-                        type="button"
-                        onClick={() => handleRemovePhoto(index)}
-                        className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                        aria-label="Remove photo"
-                      >
+                       <button
+                         type="button"
+                         onClick={() => handleRemovePhoto(index)}
+                         className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+                         aria-label="Remove photo"
+                       >
                         ✕
                       </button>
                     </div>

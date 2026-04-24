@@ -50,28 +50,8 @@ const QuillEditor: React.FC<QuillEditorProps> = ({ value, onChange, className })
         
         // Create image wrapper with remove button
         const img = `
-          <div class="quill-image-container" style="position: relative; display: inline-block; margin: 8px 0; max-width: 100%;">
+          <div class="quill-image-container" style="position: relative; display: block; text-align: center; margin: 8px 0; max-width: 100%;">
             <img src="${optimizedUrl}" alt="Article image" style="max-width: 100%; height: auto; border-radius: 0.5rem; display: block;" />
-            <button type="button" class="quill-image-remove" data-remove="true" title="Remove image" style="
-              position: absolute;
-              top: 8px;
-              right: 8px;
-              width: 28px;
-              height: 28px;
-              padding: 0;
-              border: none;
-              border-radius: 50%;
-              background: rgba(0,0,0,0.7);
-              color: white;
-              font-size: 18px;
-              line-height: 1;
-              cursor: pointer;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              opacity: 0;
-              transition: opacity 0.2s ease;
-            ">×</button>
           </div>
         `;
         

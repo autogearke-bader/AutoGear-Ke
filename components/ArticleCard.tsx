@@ -116,7 +116,7 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
         </div>
 
         {/* Title */}
-        <h3 className="text-white font-bold text-[15px] leading-snug mb-2 line-clamp-2 group-hover:text-blue-400 transition-colors">
+        <h3 className="text-white font-bold text-[6px] sm:text-[15px] leading-snug mb-2 mt-4 line-clamp-2 group-hover:text-blue-400 transition-colors">
           {article.title}
         </h3>
 

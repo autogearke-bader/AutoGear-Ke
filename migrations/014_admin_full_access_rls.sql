@@ -1,6 +1,6 @@
 -- =====================================================
 -- Admin Full Access RLS Policies
--- Grants admin user (email: admin@autogearke.com OR role: 'admin')
+-- Grants admin user (email: admin@mekh.app OR role: 'admin')
 -- full SELECT, INSERT, UPDATE, DELETE access to all tables
 -- =====================================================
 
@@ -328,7 +328,7 @@ BEGIN
         NEW.id,
         NEW.email,
         CASE 
-            WHEN NEW.email = 'admin@autogearke.com' THEN 'admin'
+            WHEN NEW.email = 'admin@mekh.app' THEN 'admin'
             ELSE 'user'
         END
     );
@@ -351,6 +351,6 @@ CREATE TRIGGER on_auth_user_created
 INSERT INTO profiles (id, email, role)
 SELECT id, email, 'admin'
 FROM auth.users
-WHERE email = 'admin@autogearke.com'
+WHERE email = 'admin@mekh.app'
 ON CONFLICT (id) DO UPDATE SET role = 'admin'
 WHERE profiles.role != 'admin';

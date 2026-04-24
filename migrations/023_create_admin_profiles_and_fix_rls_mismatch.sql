@@ -25,12 +25,7 @@ CREATE POLICY "Users can update own profile" ON profiles
 
 DROP POLICY IF EXISTS "Admin can view all profiles" ON profiles;
 CREATE POLICY "Admin can view all profiles" ON profiles
-    FOR SELECT USING (
-        EXISTS (
-            SELECT 1 FROM profiles
-            WHERE id = auth.uid() AND role = 'admin'
-        )
-    );
+    FOR SELECT USING (is_admin() = true);
 
 -- Update is_admin function to ensure it exists and is correct
 CREATE OR REPLACE FUNCTION is_admin()
@@ -54,7 +49,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Insert/update admin user profile (call this after deployment)
--- SELECT set_user_admin_role('admin@autogearke.com');
+-- SELECT set_user_admin_role('admin@mekh.app');
 
 -- Create a trigger to automatically create profile entry for new users
 CREATE OR REPLACE FUNCTION handle_new_user()
@@ -65,7 +60,7 @@ BEGIN
         NEW.id,
         NEW.email,
         CASE 
-            WHEN NEW.email = 'admin@autogearke.com' THEN 'admin'
+            WHEN NEW.email = 'admin@mekh.app' THEN 'admin'
             WHEN NEW.raw_user_meta_data->>'role' = 'admin' THEN 'admin'
             ELSE COALESCE(NEW.raw_user_meta_data->>'role', 'user')
         END
@@ -73,7 +68,7 @@ BEGIN
     ON CONFLICT (id) DO UPDATE SET
         email = EXCLUDED.email,
         role = CASE 
-            WHEN EXCLUDED.email = 'admin@autogearke.com' THEN 'admin'
+            WHEN EXCLUDED.email = 'admin@mekh.app' THEN 'admin'
             WHEN EXCLUDED.raw_user_meta_data->>'role' = 'admin' THEN 'admin'
             ELSE COALESCE(EXCLUDED.raw_user_meta_data->>'role', profiles.role)
         END;
@@ -93,12 +88,12 @@ SELECT
     id, 
     email,
     CASE 
-        WHEN email = 'admin@autogearke.com' THEN 'admin'
+        WHEN email = 'admin@mekh.app' THEN 'admin'
         ELSE COALESCE(raw_user_meta_data->>'role', 'user')
     END
 FROM auth.users
 ON CONFLICT (id) DO UPDATE SET
     role = CASE 
-        WHEN EXCLUDED.email = 'admin@autogearke.com' THEN 'admin'
+        WHEN EXCLUDED.email = 'admin@mekh.app' THEN 'admin'
         ELSE profiles.role
     END;

@@ -32,10 +32,15 @@ CREATE POLICY "admin_full_access_reviews" ON reviews
     USING (is_admin() = true)
     WITH CHECK (is_admin() = true);
 
--- 3b. Public: can only read approved reviews
+-- 3b. Public: can only read approved and visible reviews
 CREATE POLICY "public_view_approved_reviews" ON reviews
     FOR SELECT
-    USING (status = 'approved');
+    USING (status = 'approved' AND is_visible = true);
+
+-- Also add a policy to ensure reviews with wrong visibility don't appear
+CREATE POLICY "public_view_no_pending_reviews" ON reviews
+    FOR SELECT
+    USING (status != 'pending');
 
 -- 3c. Authenticated client: can INSERT a review
 --     client_id must equal auth.uid() (auth user ID)

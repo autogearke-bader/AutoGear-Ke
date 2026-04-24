@@ -99,11 +99,11 @@ const Header: React.FC<HeaderProps> = ({
           <Link to="/" className="text-xl font-black tracking-tighter text-white flex items-center group">
             <div className="relative mr-0 md:mr-4 logo-glow flex items-center justify-center">
               <img
-                src="/assets/logo-4.png"
-                alt="AutoGear Ke Logo"
-                className="h-12 md:h-16 w-auto object-contain transform group-hover:rotate-12 transition-transform duration-500 ease-in-out"
-                loading="lazy"
+                src="/assets/mekhl.png"
+                alt= "Mekh Logo"
+                className="h-7 md:h-12 w-auto object-contain transform group-hover:rotate-12 transition-transform duration-500 ease-in-out"
                 decoding="async"
+                fetchPriority="high"
                 onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
                   (e.target as HTMLImageElement).style.display = 'none';
                 }}

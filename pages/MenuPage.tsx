@@ -116,9 +116,9 @@ const MenuPage: React.FC = () => {
         </div>
       </div>
 
-      {/* AutoGear Ke Section */}
+      {/* Mekh Section */}
       <div className="p-4">
-        <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">AutoGear Ke</h3>
+        <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">Mekh</h3>
         <div className="bg-slate-900 rounded-lg border border-slate-800 overflow-hidden">
           <Link 
             to="/about" 

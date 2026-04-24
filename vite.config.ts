@@ -34,12 +34,12 @@ export default defineConfig(({ mode }) => {
         host: '0.0.0.0',
         proxy: {
           '/api': {
-            target: 'https://autogearke.com',
+            target: 'https://mekh.app',
             changeOrigin: true,
             secure: true,
           },
           '/uploads': {
-            target: 'https://autogearke.com',
+            target: 'https://mekh.app',
             changeOrigin: true,
             secure: true,
           }
@@ -49,83 +49,44 @@ export default defineConfig(({ mode }) => {
         react(),
         tailwindcss(),
         VitePWA({
-          registerType: 'autoUpdate',
-          includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg', 'assets/tiktok-placeholder.png'],
-          manifest: {
-            name: 'AutoGear Ke - Car Services Marketplace',
-            short_name: 'AutoGear',
-            description: 'Kenya\'s Car Services Marketplace - Find the best car service technicians for tinting, wrapping, PPF, ceramic coating, detailing & tuning.',
-            theme_color: '#e8a020',
-            background_color: '#080909',
-            display: 'standalone',
-            orientation: 'any',
-            scope: '/',
-            start_url: '/',
-            lang: 'en',
-            categories: ['business', 'lifestyle', 'shopping'],
-            icons: [
-              {
-                src: '/assets/apple-touch-icon.png',
-                sizes: '180x180',
-                type: 'image/png'
-              },
-              {
-                src: '/assets/favicon-32.png',
-                sizes: '32x32',
-                type: 'image/png'
-              },
-              {
-                src: '/assets/favicon-48.png',
-                sizes: '48x48',
-                type: 'image/png'
-              },
-              {
-                src: '/assets/favicon-64.png',
-                sizes: '64x64',
-                type: 'image/png'
-              },
-              {
-                src: '/assets/logo-4.png',
-                sizes: '192x192',
-                type: 'image/png'
-              },
-              {
-                src: '/assets/logo-4.png',
-                sizes: '512x512',
-                type: 'image/png',
-                purpose: 'maskable'
-              }
-            ],
-            shortcuts: [
-              {
-                name: 'Book a Service',
-                short_name: 'Book',
-                description: 'Find and book a car service technician',
-                url: '/?action=book',
-                icons: [{ src: '/assets/logo-4.png', sizes: '96x96' }]
-              },
-              {
-                name: 'Find Technicians',
-                short_name: 'Find',
-                description: 'Search for car service professionals',
-                url: '/?action=search',
-                icons: [{ src: '/assets/logo-4.png', sizes: '96x96' }]
-              },
-              {
-                name: 'My Bookings',
-                short_name: 'Bookings',
-                description: 'View your service bookings',
-                url: '/?action=bookings',
-                icons: [{ src: '/assets/logo-4.png', sizes: '96x96' }]
-              }
-            ]
-          },
-          workbox: {
-            navigateFallback: 'index.html',
-            globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-            globIgnores: ['**/apple-touch-icon.png', '**/favicon-32.png', '**/favicon-48.png', '**/favicon-64.png', '**/logo-4.png'],
-            navigateFallbackDenylist: [/^\/api/, /^\/rest/],
-            runtimeCaching: [
+          registerType: 'prompt',
+          includeAssets: [], // Images loaded via runtimeCaching instead
+          manifest: false, // disable auto-generation, use public/manifest.json
+          manifestFilename: 'manifest.json',
+            workbox: {
+              navigateFallback: 'index.html',
+              navigateFallbackDenylist: [/^\/api/, /^\/rest/, /^\/sitemap\.xml/],
+              // Only precache the absolute essentials
+              // Only precache small essential files
+              globPatterns: ['**/*.{html,ico,svg}', 'assets/*.css'],
+
+              // Exclude large chunks — let runtimeCaching handle them
+              globIgnores: [
+                '**/AdminPage-*.js',       // 232 KB — admin only
+                '**/vendor-leaflet-*.js',  // 149 KB — map pages only
+                '**/vendor-supabase-*.js', // 166 KB — loaded on demand
+                '**/vendor-react-*.js',    // 188 KB — loaded on demand
+                '**/vendor-misc-*.js',     // 63 KB
+                '**/index-*.js',           // 60 KB
+              ],
+
+              skipWaiting: false,
+              clientsClaim: true,
+              maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
+              runtimeCaching: [
+                // Cache JS and CSS at runtime (served instantly after first visit)
+                {
+                  urlPattern: /\/assets\/.+\.(js|css)$/i,
+                  handler: 'CacheFirst',
+                  options: {
+                    cacheName: 'static-assets',
+                    expiration: {
+                      maxEntries: 60,
+                      maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+                    },
+                    cacheableResponse: { statuses: [0, 200] },
+                  },
+                },
               {
                 urlPattern: /^https:\/\/esm\.sh\/.*/i,
                 handler: 'CacheFirst',
@@ -271,7 +232,7 @@ export default defineConfig(({ mode }) => {
                   }
                 }
               }
-            ]
+            ],
           }
         })
       ],
@@ -294,14 +255,24 @@ export default defineConfig(({ mode }) => {
           },
         },
         rollupOptions: {
-          output: {
-            manualChunks: {
-              'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-              'vendor-supabase': ['@supabase/supabase-js'],
-              'vendor-ui': ['react-helmet-async', 'leaflet', 'dompurify', 'quill'],
-            },
-          },
-        },
+           output: {
+              entryFileNames: 'assets/[name]-[hash].js',
+              chunkFileNames: 'assets/[name]-[hash].js',
+              assetFileNames: 'assets/[name]-[hash].[ext]',
+              manualChunks(id) {
+                if (id.includes('node_modules')) {
+                  if (id.includes('react-dom') || (id.includes('react') && !id.includes('react-router') && !id.includes('react-helmet'))) return 'vendor-react';
+                  if (id.includes('@supabase')) return 'vendor-supabase';
+                  if (id.includes('leaflet')) return 'vendor-leaflet';
+                  if (id.includes('react-router')) return 'vendor-router';
+                  if (id.includes('react-helmet')) return 'vendor-helmet';
+                  // Let quill/dompurify stay in AdminPage chunk — don't catch them here
+                  if (id.includes('quill') || id.includes('dompurify')) return undefined;
+                  return 'vendor-misc';
+                }
+              },
+           },
+         },
       },
       base: '/', // Use absolute paths for root deployment
     };

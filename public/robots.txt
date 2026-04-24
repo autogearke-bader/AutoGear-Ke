@@ -1,11 +1,11 @@
 # =============================================================================
-# AutoGear robots.txt - Production robots.txt Configuration
+# Mekh robots.txt - Production robots.txt Configuration
 # =============================================================================
 # This file controls how search engine crawlers access your website.
 # Proper configuration improves SEO while protecting sensitive areas.
 #
 # Last Updated: 2026-03-28
-# Project: AutoGear (Auto Repair Service Platform)
+# Project: Mekh (Auto Repair Service Platform)
 # =============================================================================
 
 # -----------------------------------------------------------------------------
@@ -102,6 +102,7 @@ Allow: /
 # Admin Dashboard and administrative interfaces
 Disallow: /admin
 Disallow: /admin/
+Disallow: /ag-internal-2026
 
 # Authentication pages - prevent duplicate content issues
 # Allow the login page itself but block processing pages
@@ -151,8 +152,7 @@ Disallow: /dashboard
 # Error pages and server diagnostics
 Disallow: /*?
 Disallow: /*.json
-Disallow: /*.xml
-Disallow: /sitemap.xml
+
 
 # -----------------------------------------------------------------------------
 # SECTION 3: SENSITIVE ENDPOINTS - SECURITY BLOCKS
@@ -170,6 +170,7 @@ Disallow: /*#
 # JSON and configuration endpoints
 Disallow: /*.json$
 Disallow: /*.json?
+
 
 # Backend and server files
 Disallow: /*.sql$
@@ -195,6 +196,9 @@ Disallow: /.env.development
 # Homepage and root
 Allow: /$
 Allow: /$
+
+# Sitemap
+Allow: /sitemap.xml
 
 # Public pages - Articles, Blog, About, Contact, etc.
 Allow: /about$
@@ -253,10 +257,10 @@ Crawl-delay: 1
 # Point to your XML sitemap for better SEO and crawl efficiency.
 # This helps search engines discover all URLs on your site.
 # 
-# Replace autogearke.com with your actual production domain.
+# Replace mekh.app with your actual production domain.
 # For local development, this would be localhost or your dev URL.
 
-Sitemap: https://autogearke.com/sitemap.xml
+Sitemap: https://mekh.app/sitemap.xml
 
 # Alternative: Point to index sitemap if you have multiple sitemaps
 # Sitemap: https://yourdomain.com/sitemap-index.xml
@@ -307,9 +311,9 @@ Sitemap: https://autogearke.com/sitemap.xml
 # Specifies the preferred domain for crawling.
 # Most modern crawlers use canonical URLs instead.
 
-# Host: www.autogearke.com
+# Host: www.mekh.app
 # Or for non-www:
-# Host: autogearke.com
+# Host: mekh.app
 
 # -----------------------------------------------------------------------------
 # END OF ROBOTS.TXT

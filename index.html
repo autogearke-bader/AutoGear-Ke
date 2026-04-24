@@ -12,10 +12,10 @@
     </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>Find Automotive Technicians in Nairobi | AutoGear Ke</title>
+    <title>Find Automotive Technicians in Nairobi | Mekh</title>
     
     <!-- Favicon -->
-    <link rel="icon" href="https://autogearke.com/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
     <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
     <link rel="icon" type="image/png" sizes="64x64" href="/assets/favicon-64.png">
@@ -25,8 +25,8 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="AutoGear Ke">
-    <meta name="application-name" content="AutoGear Ke">
+    <meta name="apple-mobile-web-app-title" content="Mekh">
+    <meta name="application-name" content="Mekh">
     <meta name="theme-color" content="#e8a020">
     <meta name="msapplication-TileColor" content="#080909">
     <meta name="msapplication-tap-highlight" content="no">
@@ -35,13 +35,13 @@
     <meta name="apple-mobile-web-app-capable" content="default">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <!-- Leaflet CSS — loaded async to avoid blocking first paint on non-map pages -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" media="print" onload="this.media='all'">
     
     <!-- SEO Meta Tags - Human-First Optimized -->
-    <meta name="description" content="Find trusted car tinting, wrapping, PPF & ceramic coating technicians in Nairobi. Book on AutoGear Ke today." />
+    <meta name="description" content="Find trusted car tinting, wrapping, PPF & ceramic coating technicians in Nairobi. Book on Mekh today." />
     <meta name="keywords" content="car tinting kenya, car wrapping nairobi, PPF coating kenya, ceramic coating nairobi, car detailing kenya, car tuning nairobi, mobile car service kenya, best car technicians kenya, auto detailing nairobi, car wrap shops kenya" />
-    <link rel="canonical" href="https://autogearke.com/" />
+    <link rel="canonical" href="https://mekh.app/" />
     <meta name="MobileOptimized" content="320">
     <meta name="theme-color" content="#020617">
     <meta name="color-scheme" content="dark only">
@@ -51,27 +51,27 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://cdnjs.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com https://static.cloudflareinsights.com https://unpkg.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; img-src 'self' data: blob: https: https://res.cloudinary.com https://p16-tiktokcdn-com.akamaized.net https://*.tiktokcdn.com https://c.tile.openstreetmap.org https://*.tile.openstreetmap.org; connect-src 'self' blob: data: https://*.supabase.co wss://*.supabase.co https://api.cloudinary.com https://res.cloudinary.com https://*.cloudinary.com https://nominatim.openstreetmap.org https://*.openstreetmap.org https://www.tiktok.com https://*.tiktok.com https://api.allorigins.win https://www.google-analytics.com https://www.google.com https://www.googletagmanager.com; font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com; media-src 'self' blob:; frame-src 'self' https://www.google.com https://accounts.google.com https://www.youtube.com https://www.tiktok.com https://www.instagram.com https://player.vimeo.com;">
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://autogearke.com/" />
-    <meta property="og:title" content="Find Auto Care Technicians in Nairobi | AutoGear Ke" />
-    <meta property="og:description" content="Find trusted car tinting, wrapping, PPF & ceramic coating technicians in Nairobi. Book on AutoGear Ke today." />
-    <meta property="og:image" content="/assets/logo-4.png" />
+    <meta property="og:url" content="https://mekh.app/" />
+    <meta property="og:title" content="Find Auto Care Technicians in Nairobi | Mekh" />
+    <meta property="og:description" content="Find trusted car tinting, wrapping, PPF & ceramic coating technicians in Nairobi. Book on Mekh today." />
+    <meta property="og:image" content="/assets/mekhl.png" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@autogear_ke">
-    <meta name="twitter:url" content="https://autogearke.com/" />
-    <meta name="twitter:title" content="Find Auto Care Technicians in Nairobi | AutoGear Ke" />
-    <meta name="twitter:description" content="Find trusted car tinting, wrapping, PPF & ceramic coating technicians in Nairobi. Book on AutoGear Ke today." />
-    <meta name="twitter:image" content="/assets/logo-4.png" />
+    <meta name="twitter:site" content="@MekhApp" />
+    <meta name="twitter:url" content="https://mekh.app/" />
+    <meta name="twitter:title" content="Find Auto Care Technicians in Nairobi | Mekh" />
+    <meta name="twitter:description" content="Find trusted car tinting, wrapping, PPF & ceramic coating technicians in Nairobi. Book on Mekh today." />
+    <meta name="twitter:image" content="/assets/mekhl.png" />
 
     <!-- Structured Data: Service Business -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "Service",
-      "name": "AutoGear Ke",
+      "name": "Mekh",
       "description": "Kenya's car service technician marketplace connecting clients with expert professionals for tinting, wrapping, PPF, ceramic coating, detailing & tuning.",
-      "url": "https://autogearke.com",
+      "url": "https://mekh.app",
       "areaServed": {
         "@type": "Country",
         "name": "Kenya"
@@ -82,19 +82,8 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <script type="importmap">
-  {
-    "imports": {
-      "react": "https://esm.sh/react@19.0.0",
-      "react-dom": "https://esm.sh/react-dom@19.0.0",
-      "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
-      "react-router-dom": "https://esm.sh/react-router-dom@7.1.1?deps=react@19.0.0,react-dom@19.0.0",
-      "react/": "https://esm.sh/react@^19.2.3/",
-      "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
-    }
-  }
-  </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..900&display=swap" rel="stylesheet">
+
   </head>
   <body class="bg-slate-950 text-slate-50">
     <div id="root"></div>
@@ -128,14 +117,6 @@
         border-color: #1e293b !important;
       }
     </style>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then(reg => console.log('SW registered:', reg))
-            .catch(err => console.log('SW error:', err));
-        });
-      }
-    </script>
+
   </body>
 </html>

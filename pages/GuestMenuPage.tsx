@@ -16,9 +16,9 @@ const GuestMenuPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50 pb-24">
-      {/* AutoGear Ke Section */}
+      {/* Mekh Section */}
       <div className="p-4">
-        <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">AutoGear Ke</h3>
+        <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">Mekh</h3>
         <div className="bg-slate-900 rounded-lg border border-slate-800 overflow-hidden">
           <Link 
             to="/about" 

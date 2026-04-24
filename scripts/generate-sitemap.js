@@ -1,5 +1,5 @@
 /**
- * AutoGear Ke - Sitemap Generator
+ * Mekh - Sitemap Generator
  * 
  * This script fetches live technicians and published articles from Supabase
  * and generates a sitemap.xml file for SEO purposes.
@@ -67,7 +67,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Base URL for the website
-const BASE_URL = 'https://autogearke.com';
+const BASE_URL = 'https://mekh.app';
 
 // Service slugs for programmatic SEO pages
 const SERVICE_SLUGS = [
@@ -75,31 +75,30 @@ const SERVICE_SLUGS = [
   'car-wrapping',
   'ppf',
   'ceramic-coating',
-  'car-buffing',
+  'face-lifting',
   'car-detailing',
   'headlight-restoration',
-  'car-tuning',
+  'chrome-deletion',
 ];
 
 // Location slugs for programmatic SEO pages
 const LOCATION_SLUGS = [
   'nairobi',
-  'mombasa',
-  'kisumu',
-  'nakuru',
-  'eldoret',
-  'kiambu',
-  'thika',
-  'machakos',
-  'nyeri',
-  'meru',
-  'kisii',
-  'kakamega',
+  'kileleshwa',
+  'thika-road',
+  'parklands',
+  'lavington',
+  'park-rd',
   'westlands',
   'karen',
   'kilimani',
+  'Garden Estate',
+  'langata',
+  'waiyaki way',
+  'dagoretti corner',
+  'wambugu road',
   'ruiru',
-  'mombasa-road',
+  'industrial-area',
   'ngong-road',
 ];
 

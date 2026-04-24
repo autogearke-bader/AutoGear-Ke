@@ -76,10 +76,13 @@ const ClientOnboardingPage: React.FC = () => {
         name: name.trim(),
         phone: phone.trim(),
       });
-      
+
+      // Signal Layout to refresh isClient immediately
+      window.dispatchEvent(new Event('client-profile-complete'));
+
       // Mark profile as complete in localStorage
       localStorage.setItem('clientProfileComplete', 'true');
-      
+
       // Redirect to home
       navigate('/');
     } catch (err: any) {

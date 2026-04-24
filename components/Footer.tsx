@@ -72,7 +72,7 @@ const Footer: React.FC = () => {
       {/* Only social icons + copyright. Links are in bottom nav Menu */}
       <div className="sm:hidden px-6 py-6 flex flex-col items-center gap-4">
         <Link to="/" className="text-white font-black text-sm uppercase tracking-widest">
-          AutoGear <span className="text-blue-500">Ke</span>
+          Mekh <span className="text-blue-500">Ke</span>
         </Link>
         <SocialIcons size="sm" />
         <p className="text-slate-600 text-[10px] font-black uppercase tracking-widest text-center">
@@ -90,10 +90,10 @@ const Footer: React.FC = () => {
             {/* Column 1 — Brand */}
             <div>
               <Link to="/" className="text-white font-black text-lg uppercase tracking-widest mb-3 inline-block">
-                AutoGear <span className="text-blue-500">Ke</span>
+                Mekh <span className="text-blue-500">Ke</span>
               </Link>
               <p className="text-slate-400 text-sm leading-relaxed mb-5">
-                Kenya's car service marketplace. Connect with verified tinting, wrapping, PPF, ceramic coating, and detailing professionals near you.
+                Kenya's automotive services marketplace. Connect with verified tinting, wrapping, PPF, ceramic coating, and detailing professionals near you.
               </p>
               <SocialIcons size="lg" />
             </div>
@@ -133,14 +133,14 @@ const Footer: React.FC = () => {
                 Contact
               </p>
               <div className="space-y-4">
-                <a href="tel:0112493733"
+                <a href="tel:0738242743"
                   className="flex items-center gap-3 text-slate-400 hover:text-white text-sm font-semibold transition-colors group">
                   <div className="w-8 h-8 rounded-xl bg-blue-600/10 border border-blue-600/20 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-600/20 transition-all">
                     <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                     </svg>
                   </div>
-                  0112493733
+                  0738242743
                 </a>
                 <a href={`mailto:${CONTACT_EMAIL}`}
                   className="flex items-center gap-3 text-slate-400 hover:text-white text-sm font-semibold transition-colors group">

@@ -73,7 +73,7 @@ const getEmbedUrl = (videoId: string): string => {
 };
 
 // LocalStorage keys for wizard persistence
-const WIZARD_STORAGE_KEY = 'autogear_wizard_state';
+const WIZARD_STORAGE_KEY = 'mekh_wizard_state';
 
 interface ProfileFormData {
   first_name: string;
@@ -233,21 +233,53 @@ const JoinPage: React.FC = () => {
         }
         
         setUser(session.user);
-        
+
+        // Check if user already has a technician profile
+        const { data: existingTech } = await supabase
+          .from('technicians')
+          .select('id, status')
+          .eq('user_id', session.user.id)
+          .single();
+
+        if (existingTech) {
+          console.log('[WIZARD] Existing technician found:', existingTech.id, existingTech.status);
+
+          if (existingTech.status === 'live') {
+            // Already live — redirect to their dashboard/profile
+            clearWizardState();
+            navigate(`/dashboard`); // or wherever your technician dashboard is
+            return;
+          }
+
+          if (existingTech.status === 'pending') {
+            // Already submitted — show waiting message instead of wizard
+            clearWizardState();
+            navigate('/join/pending'); // or setCurrentStep('complete')
+            return;
+          }
+
+          // In-progress technician — restore with the CORRECT ID from DB
+          // This overwrites any stale localStorage technicianId
+          setTechnicianId(existingTech.id);
+
+          const savedState = loadWizardState();
+          if (savedState) {
+            savedState.technicianId = existingTech.id; // force correct ID
+            // ... restore rest of state
+          }
+        }
+
         // Try to restore wizard state from localStorage
         const savedState = loadWizardState();
         if (savedState) {
           console.log('[WIZARD] Restoring saved state:', savedState.currentStep);
           setCurrentStep(savedState.currentStep);
           setCompletedSteps(new Set(savedState.completedSteps));
-          if (savedState.technicianId) {
-            setTechnicianId(savedState.technicianId);
-          }
-          // Restore form data
-          setProfileForm(prev => ({
-            ...prev,
-            ...savedState.profileForm
-          }));
+
+          // Always use the DB-verified ID, never the one from localStorage
+          // technicianId already set above from existingTech.id if exists
+
+          setProfileForm(prev => ({ ...prev, ...savedState.profileForm }));
           setSelectedServices(savedState.selectedServices);
           setServicePrices(savedState.servicePrices);
           setServiceVariants(savedState.serviceVariants || {});
@@ -255,8 +287,7 @@ const JoinPage: React.FC = () => {
           setOtherServices(savedState.otherServices || []);
           setPhotoSlots(savedState.photoSlots);
           setVideoLinks(savedState.videoLinks);
-          // Restore business hours or use default
-          if (savedState.businessHours && savedState.businessHours.length > 0) {
+          if (savedState.businessHours?.length > 0) {
             setBusinessHours(savedState.businessHours);
           }
         }
@@ -612,7 +643,27 @@ const JoinPage: React.FC = () => {
     setError('');
 
     try {
-      const slug = generateSlug(profileForm.business_name);
+      const baseSlug = generateSlug(profileForm.business_name);
+      let uniqueSlug = baseSlug;
+      let counter = 1;
+      while (true) {
+        const { data, error } = await supabase
+          .from('technicians')
+          .select('id')
+          .eq('slug', uniqueSlug)
+          .single();
+        if (error && error.code === 'PGRST116') { // No rows found
+          break;
+        }
+        if (data) {
+          uniqueSlug = `${baseSlug}-${counter}`;
+          counter++;
+        } else {
+          break;
+        }
+      }
+      console.log('[WIZARD] Generated unique slug:', uniqueSlug);
+      const slug = uniqueSlug;
       const userEmail = user.email;
       
       if (!userEmail) {
@@ -643,7 +694,7 @@ const JoinPage: React.FC = () => {
         experience_years: profileForm.experience_years || '1-2 years',
         area: profileForm.area?.trim() ? profileForm.area : 'Nairobi',
         slug,
-        status: 'pending',
+        status: 'live',
       };
 
       console.log('[WIZARD] User ID from auth:', user.id);
@@ -659,7 +710,7 @@ const JoinPage: React.FC = () => {
         .then((result): Promise<ProfileInsertResult> => Promise.resolve({ data: result.data, error: result.error }));
       
       const insertTimeout = new Promise<ProfileInsertResult>((resolve) =>
-        setTimeout(() => resolve({ data: null, error: new Error('Profile save timed out. Please check your connection and try again.') }), 15000)
+        setTimeout(() => resolve({ data: null, error: new Error('Profile save timed out. Please check your connection and try again.') }), 30000)
       );
 
       const { data: technician, error: techError } = await Promise.race([insertQuery, insertTimeout]);
@@ -676,6 +727,18 @@ const JoinPage: React.FC = () => {
       }
 
       setTechnicianId(technician.id);
+
+      // Update profile role to 'technician'
+      const { error: roleError } = await supabase
+        .from('profiles')
+        .update({ role: 'technician' })
+        .eq('id', user.id);
+
+      if (roleError) {
+        console.warn('[WIZARD] Could not update profile role:', roleError);
+        // Non-fatal — don't block the wizard
+      }
+
       return true;
     } catch (err: any) {
       console.error('Error saving profile:', err);
@@ -736,6 +799,7 @@ const JoinPage: React.FC = () => {
 
   // Step 3: Save Services
   const saveServicesStep = async (): Promise<boolean> => {
+    console.log('Starting saveServicesStep, technicianId:', technicianId);
     if (!technicianId) {
       setError('Please complete previous sections first');
       return false;
@@ -751,8 +815,18 @@ const JoinPage: React.FC = () => {
     setError('');
 
     try {
+      console.log('Deleting existing services for technicianId:', technicianId);
       // Delete existing services and insert new ones
-      await supabase.from('technician_services').delete().eq('technician_id', technicianId);
+      const { error: deleteError } = await supabase
+        .from('technician_services')
+        .delete()
+        .eq('technician_id', technicianId);
+
+      if (deleteError) {
+        console.error('Delete services error:', deleteError);
+        throw new Error(`Failed to clear existing services: ${deleteError.message}`);
+      }
+      console.log('Delete completed successfully');
 
       // Prepare services for upsert (since all new, will insert)
       const servicesToUpsert = [];
@@ -762,32 +836,46 @@ const JoinPage: React.FC = () => {
         // Check if service has variants (Window Tinting always has tint types, or custom variants)
         const hasVariants = serviceName === 'Window Tinting' || (serviceVariants[serviceName] || []).length > 0;
 
+        let price = null;
+        if (!hasVariants && priceData?.price) {
+          const parsed = parseInt(priceData.price);
+          price = !isNaN(parsed) ? parsed : null;
+        }
+
         servicesToUpsert.push({
           technician_id: technicianId,
           service_name: serviceName,
-          price: hasVariants ? null : (priceData?.price ? parseInt(priceData.price) : null),
+          price: price,
           negotiable: hasVariants ? false : (priceData?.negotiable || false),
         });
       }
 
-      // Upsert all services at once
+      console.log('servicesToUpsert:', servicesToUpsert);
+
+      // Insert all services at once
       const { data: savedServices, error: upsertError } = await supabase
         .from('technician_services')
-        .upsert(servicesToUpsert)
+        .insert(servicesToUpsert)
         .select();
+
+      console.log('Insert result:', { data: savedServices, error: upsertError });
 
       if (upsertError) {
         console.error('Upsert services error:', upsertError);
         throw upsertError;
       }
 
-      if (!savedServices) throw new Error('Failed to upsert services');
+      if (!savedServices) throw new Error('Failed to insert services');
+
+      console.log('Services inserted, savedServices length:', savedServices.length);
 
       // Map service names to IDs
       const serviceIdMap: Record<string, string> = {};
       savedServices.forEach(s => {
         serviceIdMap[s.service_name] = s.id;
       });
+
+      console.log('Service ID map:', serviceIdMap);
 
       // Collect ALL variants from ALL services, not just Window Tinting
       const allVariants: { service_id: string; variant_name: string; price: number | null; is_negotiable: boolean }[] = [];
@@ -800,11 +888,12 @@ const JoinPage: React.FC = () => {
         if (serviceName === 'Window Tinting') {
           WINDOW_TINT_TYPES.forEach(tintType => {
             const tintPriceData = windowTintPrices[tintType.name];
-            if (tintPriceData?.price) {
+            const price = tintPriceData?.price ? parseInt(tintPriceData.price) : null;
+            if (price && !isNaN(price)) {
               allVariants.push({
                 service_id: serviceId,
                 variant_name: tintType.name,
-                price: parseInt(tintPriceData.price),
+                price: price,
                 is_negotiable: tintPriceData.negotiable || false
               });
             }
@@ -815,15 +904,18 @@ const JoinPage: React.FC = () => {
         const variants = serviceVariants[serviceName] || [];
         variants.forEach(variant => {
           if (variant.variant_name.trim()) {
+            const price = variant.price ? parseInt(variant.price) : null;
             allVariants.push({
               service_id: serviceId,
               variant_name: variant.variant_name.trim(),
-              price: variant.price ? parseInt(variant.price) : null,
+              price: price && !isNaN(price) ? price : null,
               is_negotiable: variant.negotiable
             });
           }
         });
       });
+
+      console.log('allVariants:', allVariants);
 
       // Batch insert ALL variants at once
       if (allVariants.length > 0) {
@@ -835,15 +927,21 @@ const JoinPage: React.FC = () => {
           console.error('[SERVICES SAVE] Variants insert error:', variantError);
           throw variantError;
         }
+        console.log('Variants inserted successfully');
+      } else {
+        console.log('No variants to insert');
       }
 
+      console.log('saveServicesStep completed successfully');
       return true;
     } catch (err: any) {
       console.error('Error saving services:', err);
+      console.error('Error details:', err.details, err.hint, err.code);
       setError(err.message || 'Failed to save services');
       setTimeout(() => setError(''), 5000);
       return false;
     } finally {
+      console.log('Finally block: setting saving to false');
       setSaving(false);
     }
   };
@@ -1008,7 +1106,7 @@ const JoinPage: React.FC = () => {
           pricing_notes: profileForm.pricing_notes || '',
           latitude: lat,
           longitude: lng,
-          status: 'pending', // Mark as pending review
+          status: 'live', // Auto-approved for immediate visibility
         })
         .eq('id', technicianId);
 
@@ -1092,7 +1190,7 @@ const JoinPage: React.FC = () => {
       } else {
         // All steps complete
         setCurrentStep('complete');
-        setSuccess('Profile created successfully! Waiting for admin approval.');
+        setSuccess('Profile created successfully!');
         setTimeout(() => {
           navigate('/');
         }, 3000);
@@ -1226,7 +1324,7 @@ const JoinPage: React.FC = () => {
                 type="tel"
                 value={profileForm.phone}
                 onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
-                placeholder="e.g., +254712345678"
+                placeholder="e.g., 0712345678"
                 className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
               />
             </div>
@@ -1262,16 +1360,17 @@ const JoinPage: React.FC = () => {
               />
             </div>
 
-            <div>
-              <label className="block text-sm text-slate-300 mb-1">Bio/Description</label>
-              <textarea
-                value={profileForm.bio}
-                onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })}
-                rows={3}
-                placeholder="Tell customers about your services and experience..."
-                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
-              />
-            </div>
+             <div>
+               <label className="block text-sm text-slate-300 mb-1">Bio/Description</label>
+               <textarea
+                 value={profileForm.bio}
+                 onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })}
+                 rows={3}
+                 placeholder="Example: Hi, I'm Brian Mutua, a window tinting specialist based in Westlands. I've been doing this for 6 years working mostly on Japanese imports. I use quality films and don't rush the job. Book me for a clean finish and honest pricing."
+                 className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+               />
+               <p className="text-xs text-slate-500 mt-1">Tell clients your name, what you do, how long you've been doing it, and why they should pick you. Be specific and write like you're talking to someone.</p>
+             </div>
           </div>
         );
 
@@ -1281,7 +1380,7 @@ const JoinPage: React.FC = () => {
             <h2 className="text-xl font-bold text-white mb-4">Location & Experience</h2>
             <p className="text-slate-400 text-sm mb-6">Where do you operate and how experienced are you?</p>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full overflow-hidden">
               <div>
                 <label className="block text-sm text-slate-300 mb-1">Area/Location *</label>
                 <input
@@ -1303,25 +1402,25 @@ const JoinPage: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm text-slate-300 mb-1">Google Maps Link</label>
-                <div className="flex gap-2">
+                <div className="flex gap-2 w-full">
                   <input
                     type="url"
                     value={profileForm.google_maps_link}
                     onChange={(e) => setProfileForm({ ...profileForm, google_maps_link: e.target.value })}
                     placeholder="https://maps.google.com/..."
-                    className="flex-1 px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                    className="flex-1 min-w-0 px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
                   />
                   <button
                     type="button"
                     onClick={handleGetCurrentLocation}
                     disabled={locationLoading || geocodingLoading}
-                    className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center justify-center disabled:opacity-50"
+                    className="flex-shrink-0 w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center justify-center disabled:opacity-50"
                     title="Use current location"
                   >
                     {locationLoading || geocodingLoading ? (
                       <span className="animate-spin">↻</span>
                     ) : (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
@@ -1423,87 +1522,99 @@ const JoinPage: React.FC = () => {
                       <div className="mb-4 p-4 bg-slate-800 rounded-lg border border-slate-700">
                         <h4 className="text-white font-medium mb-3 text-sm">Window Tint Types & Pricing</h4>
                         <div className="space-y-2">
-                          {WINDOW_TINT_TYPES.map(tintType => (
-                            <div key={tintType.name} className="flex gap-2 items-center">
-                              <span className="w-24 text-slate-300 text-sm">{tintType.name}</span>
-                              <input
-                                type="number"
-                                value={windowTintPrices[tintType.name]?.price || ''}
-                                onChange={(e) => setWindowTintPrices({
-                                  ...windowTintPrices,
-                                  [tintType.name]: { ...windowTintPrices[tintType.name], price: e.target.value }
-                                })}
-                                placeholder={`Price (KSh, e.g. ${tintType.minPrice})`}
-                                className="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm"
-                              />
-                              <label className="flex items-center gap-1 text-xs text-slate-400 whitespace-nowrap">
-                                <input
-                                  type="checkbox"
-                                  checked={windowTintPrices[tintType.name]?.negotiable || false}
-                                  onChange={(e) => setWindowTintPrices({
-                                    ...windowTintPrices,
-                                    [tintType.name]: { ...windowTintPrices[tintType.name], negotiable: e.target.checked }
-                                  })}
-                                  className="w-4 h-4"
-                                />
-                                Negotiable
-                              </label>
-                            </div>
-                          ))}
+                          
+                       {WINDOW_TINT_TYPES.map(tintType => (
+                         <div key={tintType.name} className="flex flex-col sm:flex-row sm:items-center gap-2">
+                          <span className="w-full sm:w-24 text-slate-300 text-sm font-medium">{tintType.name}</span>
+                            <input
+                               type="number"
+                               value={windowTintPrices[tintType.name]?.price || ''}
+                               onChange={(e) => setWindowTintPrices({
+                              ...windowTintPrices,
+                              [tintType.name]: { ...windowTintPrices[tintType.name], price: e.target.value }
+                           })}
+                            placeholder={`Price (KSh, e.g. ${tintType.minPrice})`}
+                            className="w-full sm:flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm"
+                          />
+                       <label className="flex items-center gap-2 text-xs text-slate-400 cursor-pointer sm:whitespace-nowrap">
+                          <input
+                             type="checkbox"
+                             checked={windowTintPrices[tintType.name]?.negotiable || false}
+                             onChange={(e) => setWindowTintPrices({
+                            ...windowTintPrices,
+                            [tintType.name]: { ...windowTintPrices[tintType.name], negotiable: e.target.checked }
+                            })}
+                            className="w-4 h-4 rounded"
+                         />
+                        Negotiable
+                      </label>
+                       </div>
+                        ))}
                         </div>
                       </div>
-                    ) : (
-                      /* Regular services - Always show service name, show price only if no variants */
-                      <div className="mb-3">
-                        <div className="flex gap-2 items-center">
-                          <span className="w-32 text-slate-300 text-sm">{serviceName}</span>
-                          {(serviceVariants[serviceName] || []).length === 0 ? (
-                            <>
-                              <input
-                                type="number"
-                                value={servicePrices[serviceName]?.price || ''}
-                                onChange={(e) => setServicePrices({
-                                  ...servicePrices,
-                                  [serviceName]: { ...servicePrices[serviceName], price: e.target.value }
-                                })}
-                                placeholder="Price (KSh)"
-                                className="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm"
-                              />
-                              <label className="flex items-center gap-1 text-xs text-slate-400">
-                                <input
-                                  type="checkbox"
-                                  checked={servicePrices[serviceName]?.negotiable || false}
-                                  onChange={(e) => setServicePrices({
-                                    ...servicePrices,
-                                    [serviceName]: { ...servicePrices[serviceName], negotiable: e.target.checked }
-                                  })}
-                                  className="w-4 h-4"
-                                />
-                                Negotiable
-                              </label>
-                            </>
-                          ) : null}
-                        </div>
-                      </div>
-                    )}
+                     ) : (
+                       /* Regular services - Always show service name, show price only if no variants */
+                       <div className="mb-3">
+                         <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                           <div className="flex items-center gap-2 sm:w-32">
+                             <span className="text-slate-300 text-sm">{serviceName}</span>
+                             <button
+                               type="button"
+                               onClick={() => handleServiceToggle(serviceName)}
+                               className="flex-shrink-0 w-5 h-5 flex items-center justify-center rounded-full bg-slate-600 hover:bg-red-500 text-white text-xs transition-colors"
+                               title="Remove service"
+                             >
+                               ×
+                             </button>
+                           </div>
+                           {(serviceVariants[serviceName] || []).length === 0 ? (
+                             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                               <input
+                                 type="number"
+                                 value={servicePrices[serviceName]?.price || ''}
+                                 onChange={(e) => setServicePrices({
+                                   ...servicePrices,
+                                   [serviceName]: { ...servicePrices[serviceName], price: e.target.value }
+                                 })}
+                                 placeholder="Price (KSh)"
+                                 className="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm"
+                               />
+                               <label className="flex items-center gap-1 text-xs text-slate-400">
+                                 <input
+                                   type="checkbox"
+                                   checked={servicePrices[serviceName]?.negotiable || false}
+                                   onChange={(e) => setServicePrices({
+                                     ...servicePrices,
+                                     [serviceName]: { ...servicePrices[serviceName], negotiable: e.target.checked }
+                                   })}
+                                   className="w-4 h-4"
+                                 />
+                                 Negotiable
+                               </label>
+                             </div>
+                           ) : null}
+                         </div>
+                       </div>
+                     )}
 
                     {/* Variants for regular services (optional) */}
+                  {/* Variants for regular services (optional) */}
                     {serviceName !== 'Window Tinting' && (
-                      <div className="ml-32 mb-3">
+                      <div className="mb-3 mt-1">
                         {(serviceVariants[serviceName] || []).map((variant, variantIndex) => (
-                          <div key={variantIndex} className="flex flex-col gap-2 p-2 bg-slate-700 rounded-lg mb-2">
+                          <div key={variantIndex} className="flex flex-col gap-2 p-3 bg-slate-700 rounded-lg mb-2 border border-slate-600">
                             <div className="flex items-center gap-2">
                               <input
                                 type="text"
                                 value={variant.variant_name}
                                 onChange={(e) => handleUpdateVariant(serviceName, variantIndex, 'variant_name', e.target.value)}
                                 placeholder="Variant name (e.g. Basic, Premium)"
-                                className="flex-1 px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg text-white text-sm"
+                                className="flex-1 min-w-0 px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg text-white text-sm"
                               />
                               <button
                                 type="button"
                                 onClick={() => handleRemoveVariant(serviceName, variantIndex)}
-                                className="p-2 text-red-400 hover:text-red-300 flex-shrink-0"
+                                className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-slate-600 hover:bg-red-500 text-white text-lg transition-colors"
                               >
                                 ×
                               </button>
@@ -1512,15 +1623,15 @@ const JoinPage: React.FC = () => {
                               type="number"
                               value={variant.price}
                               onChange={(e) => handleUpdateVariant(serviceName, variantIndex, 'price', e.target.value)}
-                              placeholder="Price"
+                              placeholder="Price (KSh)"
                               className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg text-white text-sm"
                             />
-                            <label className="flex items-center gap-2 text-sm text-slate-400">
+                            <label className="flex items-center gap-2 text-sm text-slate-400 cursor-pointer">
                               <input
                                 type="checkbox"
                                 checked={variant.negotiable}
                                 onChange={(e) => handleUpdateVariant(serviceName, variantIndex, 'negotiable', e.target.checked)}
-                                className="w-4 h-4"
+                                className="w-4 h-4 rounded"
                               />
                               Negotiable
                             </label>
@@ -1529,13 +1640,14 @@ const JoinPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleAddVariant(serviceName)}
-                          className="text-blue-400 hover:text-blue-300 text-sm"
+                          className="text-blue-400 hover:text-blue-300 text-sm font-medium"
                         >
                           + Add Variant
                         </button>
                       </div>
                     )}
                   </div>
+                
                 ))}
               </div>
             )}
@@ -1773,7 +1885,7 @@ const JoinPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-950 py-8 px-4">
       <Helmet>
-        <title>Complete Your Technician Profile | AutoGear Ke</title>
+        <title>Complete Your Technician Profile | Mekh</title>
       </Helmet>
 
       <div className="max-w-3xl mx-auto">

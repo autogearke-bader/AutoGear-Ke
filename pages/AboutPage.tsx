@@ -16,7 +16,7 @@ const AboutPage: React.FC = () => {
         <header className="border-b border-slate-800 sticky top-0 bg-slate-950/80 backdrop-blur-md z-50">
           <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
             <Link to="/" className="text-xl font-black text-white tracking-tight">
-              <span className="text-blue-500">Auto</span>Gear Ke
+              <span className="text-blue-500">Mekh</span>
             </Link>
             <Link to="/" className="text-sm font-medium text-blue-400 hover:text-blue-300 transition">
               ← Back to Home
@@ -26,7 +26,7 @@ const AboutPage: React.FC = () => {
 
         <main className="max-w-4xl mx-auto px-4 py-12">
           <h1 className="text-3xl md:text-4xl font-black text-white mb-4">About Us</h1>
-          <p className="text-slate-400 mb-8">Learn more about {BUSINESS_NAME} - Kenya's Premier Car Service Marketplace</p>
+          <p className="text-slate-400 mb-8">Learn more about {BUSINESS_NAME} - Kenya's Automotive Services Marketplace</p>
 
           {/* Introduction */}
           <section className="mb-12">
@@ -34,7 +34,7 @@ const AboutPage: React.FC = () => {
               <h2 className="text-2xl font-bold text-white mb-4">Connecting Kenya's Best Technicians with Car Owners</h2>
               <div className="space-y-4 text-slate-400">
                 <p>
-                  {BUSINESS_NAME} is Kenya's premier online marketplace that connects car owners with verified, 
+                  {BUSINESS_NAME} is Kenya's Automotive Services marketplace that connects car owners with verified, 
                   professional automotive technicians. Whether you need window tinting, car wrapping, PPF (Paint 
                   Protection Film), ceramic coating, or detailing services, we've got you covered.
                 </p>
@@ -124,7 +124,7 @@ const AboutPage: React.FC = () => {
                 {BUSINESS_NAME} connects car owners with technicians across Kenya, including:
               </p>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {['Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Thika', 'Malindi', 'Kitale', 'Garissa', 'Nyeri', 'Meru', 'Machakos'].map((city) => (
+                {['Nairobi', 'Mombasa', 'Karen', 'Kilimani', 'Kiambu Road', 'Thika-Road', 'Ngong-Road', 'Parklands', 'Westlands'].map((city) => (
                   <div key={city} className="flex items-center gap-2 text-slate-300">
                     <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />

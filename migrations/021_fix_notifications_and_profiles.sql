@@ -117,11 +117,11 @@ CREATE POLICY "admin_insert_notifications" ON notifications
 CREATE POLICY "admin_update_all_notifications" ON notifications
     FOR UPDATE USING (is_admin() = true);
 
--- STEP 6: Ensure admin profile exists for admin@autogearke.com
+-- STEP 6: Ensure admin profile exists for admin@mekh.app
 INSERT INTO profiles (id, email, role)
 SELECT id, email, 'admin'
 FROM auth.users
-WHERE email = 'admin@autogearke.com'
+WHERE email = 'admin@mekh.app'
 ON CONFLICT (id) DO NOTHING;
 
 DO $$ 

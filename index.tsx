@@ -3,6 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
 import './src/index.css';
+import { registerSW } from 'virtual:pwa-register';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -15,3 +16,14 @@ root.render(
     <App />
   </React.StrictMode>
 );
+
+registerSW({
+  onRegistered(r) {
+    // Check for updates every 60 seconds in the background
+    r && setInterval(() => r.update(), 60 * 1000);
+  },
+  onOfflineReady() {
+    console.log('Mekh ready for offline use');
+  },
+  immediate: true,
+});

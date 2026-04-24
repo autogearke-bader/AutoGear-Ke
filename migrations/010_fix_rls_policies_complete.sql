@@ -126,7 +126,7 @@ RETURNS BOOLEAN AS $$
   SELECT EXISTS (
     SELECT 1 FROM auth.users
     WHERE id = auth.uid()
-    AND email = 'admin@autogearke.com'
+    AND email = 'admin@mekh.app'
   );
 $$ LANGUAGE sql STABLE;
 

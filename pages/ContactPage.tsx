@@ -82,7 +82,7 @@ ${formData.message}
     <>
       <Helmet>
         <title>Contact Us - {BUSINESS_NAME}</title>
-        <meta name="description" content="Contact AutoGear KE for inquiries, complaints, or claims. We're here to help with any questions about our car service marketplace." />
+        <meta name="description" content="Contact Mekh for inquiries, complaints, or claims. We're here to help with any questions about our car service marketplace." />
       </Helmet>
 
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-12 px-4">
@@ -132,11 +132,11 @@ ${formData.message}
                   </div>
                   <div>
                     <p className="text-slate-400 text-sm font-medium mb-1">Call Us</p>
-                    <a 
-                      href="tel:0112493733"
+                    <a
+                      href="tel:0738242743"
                       className="text-white text-lg font-bold hover:text-green-400 transition-colors"
                     >
-                      0112493733
+                      0738242743
                     </a>
                     <p className="text-slate-500 text-xs mt-1">Mon - Fri, 8am - 6pm</p>
                   </div>

@@ -57,8 +57,8 @@ interface ServiceContent {
 
 export const SERVICE_CONTENT: Record<string, ServiceContent> = {
   'window-tinting': {
-    metaDescription: `Find the best window tinting services in {location}, Kenya. Compare ceramic tint, 3M & Llumar options. View prices, portfolios & book a certified technician on AutoGear Ke.`,
-    intro: `Looking for professional window tinting in {location}? AutoGear Ke connects you with certified technicians offering premium window tinting solutions — from carbon dyed and 3M films to high-performance ceramic tints. Enhance your vehicle's look, block UV rays, and stay cooler on the road.`,
+    metaDescription: `Find the best window tinting services in {location}, Kenya. Compare ceramic tint, 3M & Llumar options. View prices, portfolios & book a certified technician on Mekh.`,
+    intro: `Looking for professional window tinting in {location}? Mekh connects you with certified technicians offering premium window tinting solutions — from carbon dyed and 3M films to high-performance ceramic tints. Enhance your vehicle's look, block UV rays, and stay cooler on the road.`,
     faqs: [
       {
         question: 'How much does car tinting cost in {location}?',
@@ -97,8 +97,8 @@ export const SERVICE_CONTENT: Record<string, ServiceContent> = {
   },
 
   'car-wrapping': {
-    metaDescription: `Professional car wrapping services in {location}, Kenya. Full wraps, partial wraps & commercial branding. Compare prices, view portfolios & book on AutoGear Ke.`,
-    intro: `Transform your vehicle with professional car wrapping in {location}. AutoGear Ke connects you with expert wrap installers offering full vehicle wraps, partial wraps, and custom designs using premium vinyl films from 3M, Avery, and more. Protect your original paint while turning heads on the road.`,
+    metaDescription: `Professional car wrapping services in {location}, Kenya. Full wraps, partial wraps & commercial branding. Compare prices, view portfolios & book on Mekh.`,
+    intro: `Transform your vehicle with professional car wrapping in {location}. Mekh connects you with expert wrap installers offering full vehicle wraps, partial wraps, and custom designs using premium vinyl films from 3M, Avery, and more. Protect your original paint while turning heads on the road.`,
     faqs: [
       {
         question: 'How much does car wrapping cost in {location}?',
@@ -137,8 +137,8 @@ export const SERVICE_CONTENT: Record<string, ServiceContent> = {
   },
 
   'ppf': {
-    metaDescription: `PPF installation in {location}, Kenya. Paint Protection Film for new & used cars. Self-healing film, transparent protection. Book a certified installer on AutoGear Ke.`,
-    intro: `Protect your vehicle's paint with professional PPF (Paint Protection Film) installation in {location}. AutoGear Ke connects you with certified PPF installers offering self-healing urethane films that guard against stone chips, scratches, road debris, and environmental damage — keeping your car looking showroom-fresh for years.`,
+    metaDescription: `PPF installation in {location}, Kenya. Paint Protection Film for new & used cars. Self-healing film, transparent protection. Book a certified installer on Mekh.`,
+    intro: `Protect your vehicle's paint with professional PPF (Paint Protection Film) installation in {location}. Mekh connects you with certified PPF installers offering self-healing urethane films that guard against stone chips, scratches, road debris, and environmental damage — keeping your car looking showroom-fresh for years.`,
     faqs: [
       {
         question: 'How much does PPF cost in {location}?',
@@ -177,8 +177,8 @@ export const SERVICE_CONTENT: Record<string, ServiceContent> = {
   },
 
   'ceramic-coating': {
-    metaDescription: `Ceramic coating services in {location}, Kenya. Long-lasting nano-ceramic protection for your car. Compare prices, technicians & book on AutoGear Ke.`,
-    intro: `Get long-lasting protection and a stunning shine with professional ceramic coating in {location}. AutoGear Ke connects you with nano-ceramic coating specialists whose products bond with your vehicle's paint to deliver years of protection against UV rays, chemical damage, and environmental contaminants — with hydrophobic properties that make washing effortless.`,
+    metaDescription: `Ceramic coating services in {location}, Kenya. Long-lasting nano-ceramic protection for your car. Compare prices, technicians & book on Mekh.`,
+    intro: `Get long-lasting protection and a stunning shine with professional ceramic coating in {location}. Mekh connects you with nano-ceramic coating specialists whose products bond with your vehicle's paint to deliver years of protection against UV rays, chemical damage, and environmental contaminants — with hydrophobic properties that make washing effortless.`,
     faqs: [
       {
         question: 'How much does ceramic coating cost in {location}?',
@@ -217,8 +217,8 @@ export const SERVICE_CONTENT: Record<string, ServiceContent> = {
   },
 
   'car-buffing': {
-    metaDescription: `Car buffing & paint polishing in {location}, Kenya. Remove swirl marks, scratches & oxidation. Find professional detailers & book on AutoGear Ke.`,
-    intro: `Restore your vehicle's shine with professional car buffing and polishing in {location}. AutoGear Ke connects you with skilled technicians who use machine buffing to remove swirl marks, oxidation, light scratches, and water spots — bringing your paint back to showroom condition.`,
+    metaDescription: `Car buffing & paint polishing in {location}, Kenya. Remove swirl marks, scratches & oxidation. Find professional detailers & book on Mekh.`,
+    intro: `Restore your vehicle's shine with professional car buffing and polishing in {location}. Mekh connects you with skilled technicians who use machine buffing to remove swirl marks, oxidation, light scratches, and water spots — bringing your paint back to showroom condition.`,
     faqs: [
       {
         question: 'How much does car buffing cost in {location}?',
@@ -249,8 +249,8 @@ export const SERVICE_CONTENT: Record<string, ServiceContent> = {
   },
 
   'car-detailing': {
-    metaDescription: `Professional car detailing in {location}, Kenya. Interior deep clean, exterior polish & full detailing packages. Find trusted detailers & book on AutoGear Ke.`,
-    intro: `Experience the ultimate car detailing services in {location}. AutoGear Ke connects you with professional detailers offering everything from interior deep cleaning and leather conditioning to exterior paint correction and show-car preparation. We use professional-grade products and techniques to restore your vehicle inside and out.`,
+    metaDescription: `Professional car detailing in {location}, Kenya. Interior deep clean, exterior polish & full detailing packages. Find trusted detailers & book on Mekh.`,
+    intro: `Experience the ultimate car detailing services in {location}. Mekh connects you with professional detailers offering everything from interior deep cleaning and leather conditioning to exterior paint correction and show-car preparation. We use professional-grade products and techniques to restore your vehicle inside and out.`,
     faqs: [
       {
         question: 'How much does car detailing cost in {location}?',
@@ -283,12 +283,12 @@ export const SERVICE_CONTENT: Record<string, ServiceContent> = {
 
 // ─── Default Content Fallback ──────────────────────────────────────────────────
 const getDefaultContent = (service: string, location: string): ServiceContent => ({
-  metaDescription: `Find professional ${service.toLowerCase()} services in ${location}, Kenya. Browse certified technicians, compare prices & book on AutoGear Ke.`,
-  intro: `Looking for professional ${service.toLowerCase()} services in ${location}? AutoGear Ke connects you with certified automotive technicians in your area. Browse profiles, compare services, and book with confidence.`,
+  metaDescription: `Find professional ${service.toLowerCase()} services in ${location}, Kenya. Browse certified technicians, compare prices & book on Mekh.`,
+  intro: `Looking for professional ${service.toLowerCase()} services in ${location}? Mekh connects you with certified automotive technicians in your area. Browse profiles, compare services, and book with confidence.`,
   faqs: [
     {
       question: `How much does ${service.toLowerCase()} cost in ${location}?`,
-      answer: `Pricing varies depending on your vehicle type and specific requirements. Browse technician profiles on AutoGear Ke to see rates and request quotes directly.`,
+      answer: `Pricing varies depending on your vehicle type and specific requirements. Browse technician profiles on Mekh to see rates and request quotes directly.`,
     },
     {
       question: 'How long does the service take?',
@@ -296,10 +296,10 @@ const getDefaultContent = (service: string, location: string): ServiceContent =>
     },
     {
       question: 'Do technicians offer mobile services?',
-      answer: 'Many AutoGear Ke technicians offer mobile services and can come to your location. Check individual profiles for mobile availability.',
+      answer: 'Many Mekh technicians offer mobile services and can come to your location. Check individual profiles for mobile availability.',
     },
   ],
-  pricingContext: `Contact technicians in ${location} directly on AutoGear Ke for a customised quote based on your specific vehicle and requirements.`,
+  pricingContext: `Contact technicians in ${location} directly on Mekh for a customised quote based on your specific vehicle and requirements.`,
   benefits: [
     'Verified professional technicians',
     'Transparent pricing and portfolios',
@@ -411,8 +411,8 @@ const ServiceLocationPage: React.FC = () => {
     },
     provider: {
       '@type': 'Organization',
-      name: 'AutoGear Ke',
-      url: 'https://autogearke.com',
+      name: 'Mekh',
+      url: 'https://mekh.app',
     },
   }), [serviceName, locationName, serviceContent]);
 
@@ -435,9 +435,9 @@ const ServiceLocationPage: React.FC = () => {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://autogearke.com' },
-      { '@type': 'ListItem', position: 2, name: serviceName, item: `https://autogearke.com/${service}/nairobi` }, // Link to service in a default location
-      { '@type': 'ListItem', position: 3, name: locationName, item: `https://autogearke.com/${service}/${location}` },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mekh.app' },
+      { '@type': 'ListItem', position: 2, name: serviceName, item: `https://mekh.app/${service}/nairobi` }, // Link to service in a default location
+      { '@type': 'ListItem', position: 3, name: locationName, item: `https://mekh.app/${service}/${location}` },
     ],
   }), [serviceName, locationName, service, location]);
 
@@ -449,24 +449,24 @@ const ServiceLocationPage: React.FC = () => {
       {/* ─── SEO Head ─────────────────────────────────────────────────────── */}
       <Helmet>
         {/* Title: Primary keyword + location | Brand */}
-        <title>{serviceName} in {locationName} | AutoGear Ke</title>
+        <title>{serviceName} in {locationName} | Mekh</title>
 
         {/* Meta description: 150–160 chars, includes location + service + CTA */}
         <meta name="description" content={serviceContent?.metaDescription || ''} />
 
         {/* Canonical URL */}
-        <link rel="canonical" href={`https://autogearke.com/${service}/${location}`} />
+        <link rel="canonical" href={`https://mekh.app/${service}/${location}`} />
 
         {/* Open Graph */}
-        <meta property="og:title" content={`${serviceName} in ${locationName} | AutoGear Ke`} />
+        <meta property="og:title" content={`${serviceName} in ${locationName} | Mekh`} />
         <meta property="og:description" content={serviceContent?.metaDescription || ''} />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content={`https://autogearke.com/services/${service}/${location}`} />
-        <meta property="og:site_name" content="AutoGear Ke" />
+        <meta property="og:url" content={`https://mekh.app/services/${service}/${location}`} />
+        <meta property="og:site_name" content="Mekh" />
 
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${serviceName} in ${locationName} | AutoGear Ke`} />
+        <meta name="twitter:title" content={`${serviceName} in ${locationName} | Mekh`} />
         <meta name="twitter:description" content={serviceContent?.metaDescription || ''} />
 
         {/* Structured Data */}
@@ -620,7 +620,7 @@ const ServiceLocationPage: React.FC = () => {
               </h3>
               <p className="text-slate-400 mb-6 max-w-sm mx-auto text-sm">
                 We're growing in {locationName}. Be the first {serviceName.toLowerCase()} specialist 
-                to list your business on AutoGear Ke and reach customers in your area.
+                to list your business on Mekh and reach customers in your area.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Link
@@ -692,7 +692,7 @@ const ServiceLocationPage: React.FC = () => {
                 More questions about {serviceName.toLowerCase()} in {locationName}?
               </p>
               <Link to="/contact" className="text-blue-400 hover:underline font-medium text-sm">
-                Contact AutoGear Ke →
+                Contact Mekh →
               </Link>
             </div>
           </div>
@@ -751,7 +751,7 @@ const ServiceLocationPage: React.FC = () => {
             Are You a {serviceName} Specialist in {locationName}?
           </h2>
           <p className="text-slate-300 mb-6 max-w-xl mx-auto">
-            Join AutoGear Ke to connect with customers actively searching for {serviceName.toLowerCase()} 
+            Join Mekh to connect with customers actively searching for {serviceName.toLowerCase()} 
             services in {locationName}. Create your free profile and start receiving leads today.
           </p>
           <Link

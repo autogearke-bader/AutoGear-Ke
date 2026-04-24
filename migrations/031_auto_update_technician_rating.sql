@@ -57,12 +57,12 @@ CREATE TRIGGER trg_reviews_update_rating
   AFTER INSERT OR UPDATE OR DELETE ON reviews
   FOR EACH ROW EXECUTE FUNCTION public.trg_update_technician_rating();
 
--- Backfill existing approved reviews immediately
+-- Backfill existing approved and visible reviews immediately
 DO $$
 DECLARE
   r RECORD;
 BEGIN
-  FOR r IN SELECT DISTINCT technician_id FROM reviews WHERE status = 'approved' LOOP
+  FOR r IN SELECT DISTINCT technician_id FROM reviews WHERE status = 'approved' AND is_visible = true LOOP
     PERFORM public.refresh_technician_rating(r.technician_id);
   END LOOP;
 END $$;

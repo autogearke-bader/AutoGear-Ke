@@ -16,7 +16,7 @@ const TermsPage: React.FC = () => {
         <header className="border-b border-slate-800 sticky top-0 bg-slate-950/80 backdrop-blur-md z-50">
           <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
             <Link to="/" className="text-xl font-black text-white tracking-tight">
-              <span className="text-blue-500">Auto</span>Gear Ke
+              <span className="text-blue-500">Mekh</span>
             </Link>
             <Link to="/" className="text-sm font-medium text-blue-400 hover:text-blue-300 transition">
               ← Back to Home
@@ -63,7 +63,7 @@ const TermsPage: React.FC = () => {
               Acceptance of Terms
             </h2>
             <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
-              <p className="text-slate-400 mb-4">By accessing, browsing, or using the {BUSINESS_NAME} platform (https://autogearke.com), you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions, including our Privacy Policy.</p>
+              <p className="text-slate-400 mb-4">By accessing, browsing, or using the {BUSINESS_NAME} platform (https://mekh.app), you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions, including our Privacy Policy.</p>
               <p className="text-slate-400">If you do not agree to these terms, please do not use our platform or services.</p>
             </div>
           </section>
@@ -138,8 +138,8 @@ const TermsPage: React.FC = () => {
               Payments
             </h2>
             <div className="bg-slate-900 rounded-xl border border-slate-800 p-6 space-y-4">
-              <p className="text-slate-400">Payments for services are arranged directly between clients and technicians. AutoGear Ke facilitates the connection but does not process payments.</p>
-              <p className="text-slate-400"><strong className="text-white">Important:</strong> AutoGear Ke is a free platform for connecting clients with technicians. We do not charge any fees for using our service.</p>
+              <p className="text-slate-400">Payments for services are arranged directly between clients and technicians. Mekh facilitates the connection but does not process payments.</p>
+              <p className="text-slate-400"><strong className="text-white">Important:</strong> Mekh is a free platform for connecting clients with technicians. We do not charge any fees for using our service.</p>
             </div>
           </section>
 
@@ -174,7 +174,7 @@ const TermsPage: React.FC = () => {
                   </svg>
                   <div>
                     <div className="font-semibold text-white">WhatsApp Us</div>
-                    <div className="text-sm text-slate-400">+254 112 493 733</div>
+                    <div className="text-sm text-slate-400">+254 738 242 743</div>
                   </div>
                 </a>
                 <a href={`mailto:${CONTACT_EMAIL}`} className="flex items-center gap-4 p-4 bg-purple-600/10 border border-purple-600/20 rounded-xl hover:bg-purple-600/20 transition">

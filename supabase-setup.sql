@@ -1,5 +1,5 @@
 -- ============================================================================
--- AutoGear Ke - Supabase Database Setup
+-- Mekh - Supabase Database Setup
 -- Run this SQL in your Supabase SQL Editor to set up the database
 -- ============================================================================
 
@@ -19,7 +19,8 @@ CREATE TABLE IF NOT EXISTS clients (
     name TEXT NOT NULL,
     phone TEXT NOT NULL,
     email TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Technicians table
@@ -396,5 +397,5 @@ CREATE INDEX IF NOT EXISTS idx_articles_created_at ON articles(created_at);
 
 DO $$ 
 BEGIN
-    RAISE NOTICE 'AutoGear Ke database setup completed successfully!';
+    RAISE NOTICE 'Mekh database setup completed successfully!';
 END $$;

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { supabase } from '../src/lib/supabase';
 
 declare global {
   interface Navigator {
@@ -8,77 +7,13 @@ declare global {
   }
 }
 
-const ClientBottomNav: React.FC = () => {
+const ClientBottomNav: React.FC<{ isClient: boolean }> = ({ isClient }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isVisible, setIsVisible]     = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-  const [isClient, setIsClient]       = useState(false);
 
-  // ── Auth check ────────────────────────────────────────────────────────────
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        setIsClient(false);
-        return;
-      }
-      
-      // Check role from metadata first (for email/password signups)
-      const role = session?.user?.user_metadata?.role;
-      
-      // If role is explicitly 'client', allow access
-      if (role === 'client') {
-        setIsClient(true);
-        return;
-      }
-      
-      // For Google OAuth users or users without explicit role,
-      // check if they exist in the clients table
-      try {
-        const { data: clientProfile } = await supabase
-          .from('clients')
-          .select('id')
-          .eq('user_id', session.user.id)
-          .maybeSingle();
-        
-        setIsClient(!!clientProfile);
-      } catch (err) {
-        // If table doesn't exist or query fails, fall back to role check
-        console.warn('Client profile check failed:', err);
-        setIsClient(false);
-      }
-    };
 
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
-        setIsClient(false);
-        return;
-      }
-      
-      const role = session?.user?.user_metadata?.role;
-      
-      if (role === 'client') {
-        setIsClient(true);
-        return;
-      }
-      
-      // For Google OAuth users, check clients table
-      supabase
-        .from('clients')
-        .select('id')
-        .eq('user_id', session.user.id)
-        .maybeSingle()
-        .then(({ data: clientProfile }) => {
-          setIsClient(!!clientProfile);
-        });
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
 
   // ── Scroll hide / show ────────────────────────────────────────────────────
   useEffect(() => {
@@ -138,7 +73,7 @@ const ClientBottomNav: React.FC = () => {
         border-t border-slate-800
         rounded-t-2xl
         flex justify-around items-end
-        transition-transform duration-300
+        transition-transform duration-100
         ${isVisible ? 'translate-y-0' : 'translate-y-full pointer-events-none'}
       `}
       style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}

@@ -24,12 +24,34 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [technician,   setTechnician]   = useState<Technician | null>(null);
   const [loading,      setLoading]      = useState(true);
   const [isPWA,        setIsPWA]        = useState(false);
+  const [isClient,     setIsClient]     = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
 
   const fetchingProfile = useRef(false);
   const mounted         = useRef(true);
+
+  const checkClient = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setIsClient(false);
+        return;
+      }
+
+      const { data: clientProfile } = await supabase
+        .from('clients')
+        .select('id')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+
+      setIsClient(!!clientProfile);
+    } catch (error) {
+      console.error('Layout: Error checking client status:', error);
+      setIsClient(false);
+    }
+  };
 
   useEffect(() => {
     const checkPWA = () => {
@@ -103,12 +125,13 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               if (clientProfile) {
                 role = 'client';
               }
-            } catch (dbError) {
-              // Could not check client table
-            }
-          }
-          
+             } catch (dbError) {
+               // Could not check client table
+             }
+           }
+
           setUserRole(role);
+          setIsClient(role === 'client');
           await resolveTechnicianProfile(role, s.user.id);
         }
       } catch (error) {
@@ -154,12 +177,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             } catch (dbError) {
               // Silent fail - role remains null
             }
-          }
-          
+           }
+
           setUserRole(role);
+          setIsClient(role === 'client');
           await resolveTechnicianProfile(role, s.user.id);
         } else {
           setUserRole(null);
+          setIsClient(false);
           setIsTechnician(false);
           setTechnician(null);
         }
@@ -170,6 +195,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       mounted.current = false;
       subscription.unsubscribe();
     };
+  }, []);
+
+  useEffect(() => {
+    const handleProfileComplete = () => checkClient();
+    window.addEventListener('client-profile-complete', handleProfileComplete);
+    return () => window.removeEventListener('client-profile-complete', handleProfileComplete);
   }, []);
 
   const showTechnicianSidebar =
@@ -209,7 +240,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <div className="sm:hidden">
           {isTechnician && !loading && <TechnicianBottomNav />}
           {!isTechnician && !loading && (
-            isLoggedIn ? <ClientBottomNav /> : <GuestBottomNav />
+            isLoggedIn ? <ClientBottomNav isClient={isClient} /> : <GuestBottomNav />
           )}
         </div>
       )}

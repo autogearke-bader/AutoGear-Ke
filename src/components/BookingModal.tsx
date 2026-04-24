@@ -30,6 +30,7 @@ export const BookingModal = ({
   const [clientName, setClientName] = useState('');
   const [clientPhone, setClientPhone] = useState('');
   const [selectedService, setSelectedService] = useState(preSelectedService || '');
+  const [selectedVariants, setSelectedVariants] = useState<string[]>([]);
   const [serviceDetails, setServiceDetails] = useState('');
   const [vehicleModel, setVehicleModel] = useState('');
   const [locationText, setLocationText] = useState('');
@@ -38,6 +39,7 @@ export const BookingModal = ({
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [clientId, setClientId] = useState<string | null>(null);
+  const [clientEmail, setClientEmail] = useState('');
 
   // Check auth and pre-fill data on open
   useEffect(() => {
@@ -56,6 +58,7 @@ export const BookingModal = ({
         setClientName(client.name);
         setClientPhone(client.phone);
         setClientId(client.id);
+        setClientEmail(session.user.email); // Use session user email
       }
     };
 
@@ -65,9 +68,20 @@ export const BookingModal = ({
   // Pre-select service if provided
   useEffect(() => {
     if (preSelectedService) {
-      setSelectedService(preSelectedService);
+      if (preSelectedService.includes(' - ')) {
+        const [serviceName, variantName] = preSelectedService.split(' - ', 2);
+        setSelectedService(serviceName);
+        setSelectedVariants([variantName]);
+      } else {
+        setSelectedService(preSelectedService);
+      }
     }
   }, [preSelectedService]);
+
+  // Reset variants when service changes
+  useEffect(() => {
+    setSelectedVariants([]);
+  }, [selectedService]);
 
   const handleDetectLocation = async () => {
     try {
@@ -94,7 +108,6 @@ export const BookingModal = ({
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!clientName.trim()) newErrors.name = 'Name is required';
-    if (!clientPhone.trim()) newErrors.phone = 'Phone is required';
     if (!selectedService) newErrors.service = 'Please select a service';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -106,13 +119,19 @@ export const BookingModal = ({
 
     setLoading(true);
 
+    // Build service string with variants
+    const serviceWithVariants = selectedVariants.length > 0
+      ? `${selectedService} (${selectedVariants.join(', ')})`
+      : selectedService;
+
     // Save lead to Supabase
     const leadData = {
       technician_id: technician.id,
       client_id: clientId,
       client_name: clientName,
+      client_email: clientEmail,
       client_phone: formatPhoneForWhatsApp(clientPhone),
-      service_requested: selectedService,
+      service_requested: serviceWithVariants,
       client_location: locationText,
       client_lat: locationLat,
       client_lng: locationLng,
@@ -122,11 +141,23 @@ export const BookingModal = ({
     // Insert lead silently in background
     supabase.from('leads').insert([leadData]).then(({ error }) => {
       if (!error) {
+        // Notify technician via email
+        supabase.functions.invoke('send-lead-notification', {
+          body: {
+            technician_id: technician.id,
+            client_name: clientName,
+            client_phone: formatPhoneForWhatsApp(clientPhone),
+            service_requested: serviceWithVariants,
+            client_location: locationText || undefined,
+            vehicle_model: vehicleModel || undefined,
+          }
+        });
+
         // Insert notification for technician
         supabase.from('notifications').insert([{
           technician_id: technician.id,
           type: 'new_lead',
-          message: `New lead: ${clientName} from ${locationText || 'unknown location'} is interested in ${selectedService}. Check your WhatsApp.`,
+          message: `New lead: ${clientName} from ${locationText || 'unknown location'} is interested in ${serviceWithVariants}. Check your WhatsApp.`,
         }]);
       }
     });
@@ -135,8 +166,8 @@ export const BookingModal = ({
     const vehicleInfo = vehicleModel ? ` I have a ${vehicleModel}.` : '';
     const location = locationText ? ` I am located in ${locationText}.` : '';
     const details = serviceDetails ? ` ${serviceDetails}.` : '';
-    const msg = `Hi, I found you on AutoGear. My name is ${clientName}.${vehicleInfo}${location}${details} I am interested in your ${selectedService} service. Can we talk?`;
-    const url = `https://wa.me/${formatPhoneForWhatsApp(technician.phone)}?text=${encodeURIComponent(msg)}`;
+    const msg = `Hi, I found you on Mekh. My name is ${clientName}.${vehicleInfo}${location}${details} I am interested in your ${serviceWithVariants} service. Can we talk?`;
+    const url = `https://api.whatsapp.com/send/?phone=${formatPhoneForWhatsApp(technician.phone)}&text=${encodeURIComponent(msg)}&type=phone_number&app_absent=0`;
     window.open(url, '_blank');
 
     setLoading(false);
@@ -147,6 +178,10 @@ export const BookingModal = ({
 
   // Get services from technician
   const services = technician.technician_services || [];
+
+  // Get selected service object and its variants
+  const selectedServiceObj = services.find(s => s.service_name === selectedService);
+  const serviceVariants = technician.service_variants?.filter(v => v.service_id === selectedServiceObj?.id) || [];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -197,24 +232,7 @@ export const BookingModal = ({
             {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
           </div>
 
-          {/* Phone */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">WhatsApp Number *</label>
-            <div className="flex">
-              <span className="px-4 py-3 bg-slate-800 border border-r-0 border-slate-700 rounded-l-lg text-slate-400">
-                🇰🇪 +254
-              </span>
-              <input
-                type="tel"
-                value={clientPhone}
-                onChange={(e) => setClientPhone(e.target.value.replace(/\D/g, '').slice(0, 9))}
-                required
-                className="flex-1 px-4 py-3 bg-slate-800 border border-slate-700 rounded-r-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
-                placeholder="712345678"
-              />
-            </div>
-            {errors.phone && <p className="text-red-400 text-xs mt-1">{errors.phone}</p>}
-          </div>
+
 
           {/* Service */}
           <div>
@@ -236,6 +254,37 @@ export const BookingModal = ({
             {errors.service && <p className="text-red-400 text-xs mt-1">{errors.service}</p>}
           </div>
 
+          {/* Service Variants - if available */}
+          {serviceVariants.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Select Options
+                <span className="text-slate-500 font-normal ml-1">(optional)</span>
+              </label>
+              <div className="space-y-2">
+                {serviceVariants.map((variant) => (
+                  <label key={variant.id} className="flex items-center gap-2 text-slate-300 min-w-0">
+                    <input
+                      type="checkbox"
+                      checked={selectedVariants.includes(variant.variant_name)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedVariants((prev) => [...prev, variant.variant_name]);
+                        } else {
+                          setSelectedVariants((prev) => prev.filter((v) => v !== variant.variant_name));
+                        }
+                      }}
+                      className="text-blue-600 focus:ring-blue-500 shrink-0"
+                    />
+                    <span className="flex-1 min-w-0 truncate">{variant.variant_name}</span>
+                    {variant.price && (<span className="text-green-400 font-medium shrink-0">Ksh {variant.price.toLocaleString()}</span>)}
+                    {variant.is_negotiable && (<span className="bg-yellow-900/50 text-yellow-400 text-xs px-2 py-0.5 rounded border border-yellow-800 shrink-0">Negotiable</span>)}
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Service Details - Always visible */}
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1">
@@ -256,7 +305,7 @@ export const BookingModal = ({
 
           {/* Vehicle Model */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">Vehicle Model (Optional)</label>
+            <label className="block text-sm font-medium text-slate-300 mb-1">Vehicle Model</label>
             <input
               type="text"
               value={vehicleModel}
@@ -272,25 +321,13 @@ export const BookingModal = ({
           {/* Location */}
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1">Your Location</label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={locationText}
-                onChange={(e) => setLocationText(e.target.value)}
-                className="flex-1 px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
-                placeholder="e.g. Kilimani, Nairobi"
-              />
-              <button
-                type="button"
-                onClick={handleDetectLocation}
-                aria-label="Detect my location"
-                className="px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-300 hover:text-white hover:border-slate-600 transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                  <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
-                </svg>
-              </button>
-            </div>
+            <input
+              type="text"
+              value={locationText}
+              onChange={(e) => setLocationText(e.target.value)}
+              className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+              placeholder="e.g. Kilimani, Nairobi"
+            />
           </div>
 
           {/* Trust note */}

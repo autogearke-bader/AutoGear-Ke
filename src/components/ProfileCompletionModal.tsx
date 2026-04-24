@@ -766,7 +766,7 @@ export const ProfileCompletionModal = ({ isOpen, userType, onClose }: ProfileCom
           </h2>
           <p className="text-xs sm:text-sm text-slate-400 mt-2">
             {userType === 'client' 
-              ? 'Please provide your details to continue using AutoGear.'
+              ? 'Please provide your details to continue using Mekh.'
               : `Step ${step} of 4 - ${step === 1 ? 'Personal Details' : step === 2 ? 'Services' : step === 3 ? 'Portfolio' : 'Pricing'}`
             }
           </p>

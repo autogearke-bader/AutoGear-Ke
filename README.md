@@ -1,4 +1,4 @@
-# AutoGear Ke - Kenya's Best Car Technicians & Accessories Marketplace
+# Mekh - Kenya's Best Car Technicians & Accessories Marketplace
 
 A modern, responsive web application for Automotive professional car services marketplace in Kenya. Built with React, TypeScript, and Vite for the frontend, with Supabase for authentication, user management, and database.
 
@@ -9,8 +9,7 @@ A modern, responsive web application for Automotive professional car services ma
 - **Browse Services**: View technician profiles, portfolios, pricing, and reviews
 - **Client Booking**: Book appointments with verified technicians
 - **Article Blog**: Read articles about car care, new products, and service guides
-- **Product Catalog**: Browse premium car accessories and gadgets
-- **Value Bundles**: Discover discounted product bundles
+
 
 ### For Technicians
 - **Join as Technician**: Professional registration with portfolio, services, and pricing
@@ -20,10 +19,8 @@ A modern, responsive web application for Automotive professional car services ma
 
 ### For Administrators
 - **Admin Panel**: Secure admin interface for managing all content
-- **Product Management**: Add, edit, delete products with images
-- **Bundle Management**: Create and manage product bundles
 - **Article Management**: Create and manage blog articles with rich text editor (Quill)
-- **Featured Content**: Control trending products, value bundles, and featured articles
+
 
 ### Platform Features
 - **Responsive Design**: Mobile-first design optimized for all devices
@@ -36,7 +33,7 @@ A modern, responsive web application for Automotive professional car services ma
 
 ## 🛠 Tech Stack
 
-### Frontend (AutoGearKe/)
+### Frontend (Mekh/)
 - **React 19** - Modern React with hooks and concurrent features
 - **TypeScript** - Type-safe JavaScript
 - **Vite** - Fast build tool and development server
@@ -50,8 +47,8 @@ A modern, responsive web application for Automotive professional car services ma
 ## 📁 Project Structure
 
 ```
-AutoGear/
-├── AutoGearKe/                      # React Frontend Application
+Mekh/
+├── Mekh/                      # React Frontend Application
 │   ├── .env                         # Environment configuration
 │   ├── .gitignore                   # Git ignore rules
 │   ├── index.html                   # HTML template with CSP
@@ -71,7 +68,7 @@ AutoGear/
 │   │   ├── favicon-32.png
 │   │   ├── favicon-48.png
 │   │   ├── favicon-64.png
-│   │   └── logo-4.png
+│   │   └── mekh.png
 │   │
 │   ├── components/                  # Shared components (root level)
 │   │   ├── ArticleCard.tsx          # Blog article card
@@ -123,28 +120,13 @@ AutoGear/
 │   └── docs/                        # Documentation
 │       └── ADMIN_PAGE_README.md     # Admin panel documentation
 │
-├── AutoGear_upload/                 # Production Build (Deployed)
-│   ├── .htaccess                    # Apache security config
-│   ├── favicon.ico                  # Site favicon
-│   ├── google-feed.php              # Google Shopping feed
-│   ├── robots.txt                   # Search engine directives
-│   ├── return-policy.html           # Return policy page
-│   ├── sitemap.php                   # XML sitemap generator
-│   │
-│   ├── assets/                      # Built JavaScript & images
-│   │   ├── index-*.js               # Bundled React app (multiple versions)
-│   │   ├── logo-*.png               # Optimized logo
-│   │   └── favicon-*.{ico,png}      # Favicons
-│   │
-│   └── uploads/                     # User uploaded content
-│       └── .htaccess               # Directory protection
-│
+
 └── README.md                        # This file
 ```
 
 ## 🔧 Environment Configuration
 
-### Required Variables (AutoGearKe/.env)
+### Required Variables (Mekh/.env)
 
 ```env
 # Supabase Configuration (Database & Auth)
@@ -181,7 +163,7 @@ VITE_NOMINATIM_URL=https://nominatim.openstreetmap.org
 
 ```bash
 # Navigate to frontend directory
-cd AutoGearKe
+cd Mekh
 
 # Install dependencies
 npm install

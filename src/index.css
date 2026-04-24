@@ -107,6 +107,14 @@ body {
   animation-play-state: paused;
 }
 
+/* Respect user preference for reduced motion — also saves GPU on low-end devices */
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee,
+  .animate-marquee-reverse {
+    animation: none;
+  }
+}
+
 .marquee-container {
   position: relative;
   overflow: hidden;
