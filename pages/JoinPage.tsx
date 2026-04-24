@@ -1790,7 +1790,7 @@ const JoinPage: React.FC = () => {
                             setSlotInputs(newSlotInputs);
                           }
                         }}
-                        className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-slate-600 hover:bg-red-500 text-white transition-colors"
+                        className={"shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-slate-600 hover:bg-red-500 text-white transition-colors " + (isValid && !isDuplicate ? "hidden sm:flex" : "flex")}
                         title="Clear"
                       >
                         ×
@@ -1807,7 +1807,7 @@ const JoinPage: React.FC = () => {
                           setSlotInputs(newSlotInputs);
                         }}
                         disabled={videoLinks.length >= 3}
-                        className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm disabled:opacity-50 shrink-0"
+                        className="hidden sm:block px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm disabled:opacity-50 shrink-0"
                       >
                         Add
                       </button>
@@ -1815,17 +1815,31 @@ const JoinPage: React.FC = () => {
                   </div>
                   
                   {urlValue && (
-                    <div className="ml-10 mt-1">
-                      {isValid === true && !isDuplicate && (
-                        <p className="text-green-400 text-xs">✓ Valid TikTok URL</p>
-                      )}
-                      {hasInvalidUrl && (
-                        <p className="text-red-400 text-xs">✗ Invalid TikTok URL - Please enter a valid TikTok link</p>
-                      )}
-                      {isDuplicate && (
-                        <p className="text-red-400 text-xs">✗ This link is already used - Please use a different URL</p>
-                      )}
+                   <div className="ml-10 mt-1">
+                    {isValid === true && !isDuplicate && (
+                   <>
+                   {/* Desktop: text only */}
+                       <p className="hidden sm:block text-green-400 text-xs">✓ Valid TikTok URL</p>
+                        {/* Mobile: text + buttons in same row */}
+                          <div className="sm:hidden flex items-center justify-between">
+                            <p className="text-green-400 text-xs">✓ Valid TikTok URL</p>
+                              <div className="flex items-center gap-2">
+                                <button type="button" onClick={() => { if (video) { setVideoLinks(videoLinks.filter(v => v.id !== video.id)); } else { const s = { ...slotInputs }; delete s[index]; setSlotInputs(s); } }}
+                                  className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-600 hover:bg-red-500 text-white transition-colors">×</button>
+                              {!video && (
+                            <button type="button" onClick={() => { addVideoLink(urlValue); const s = { ...slotInputs }; delete s[index]; setSlotInputs(s); }}
+                            disabled={videoLinks.length >= 3}
+                          className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold disabled:opacity-50">
+                        Add
+                       </button>
+                        )}
+                     </div>
                     </div>
+                     </>
+                    )}
+                      {hasInvalidUrl && <p className="text-red-400 text-xs">✗ Invalid TikTok URL - Please enter a valid TikTok link</p>}
+                     {isDuplicate && <p className="text-red-400 text-xs">✗ This link is already used - Please use a different URL</p>}
+                   </div>
                   )}
                   
                   {video && video.videoId && (
