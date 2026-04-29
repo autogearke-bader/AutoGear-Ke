@@ -5,7 +5,7 @@ const PrivacyPolicyPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Privacy Policy | Mekh</title>
+        <title>Privacy Policy | How We Protect Your Data | Mekh</title>
         <meta name="description" content="Mekh Privacy Policy - Learn how we collect, use, and protect your data." />
       </Helmet>
       

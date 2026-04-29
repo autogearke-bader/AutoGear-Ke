@@ -7,7 +7,7 @@ const AboutPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>About Us | {BUSINESS_NAME}</title>
+        <title>About Mekh | Our Mission, Vision, and Team | Mekh</title>
         <meta name="description" content={`Learn about ${BUSINESS_NAME} - Kenya's premier car service marketplace connecting clients with verified professional technicians.`} />
       </Helmet>
 

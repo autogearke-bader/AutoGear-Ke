@@ -142,7 +142,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
   return (
     <div className="min-h-screen bg-slate-950 py-8 px-4">
       <Helmet>
-        <title>{activeTab === 'signin' ? 'Sign In' : 'Create Account'} | Mekh</title>
+        <title>{activeTab === 'signin' ? 'Sign In | Mekh' : 'Join Mekh | Create Your Account Today | Mekh'}</title>
         <meta name="description" content={activeTab === 'signin'
           ? 'Sign in to your Mekh account to book car services.'
           : 'Create a Mekh account to book car services from Kenya\'s best technicians.'

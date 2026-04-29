@@ -109,10 +109,6 @@ const Header: React.FC<HeaderProps> = ({
                 }}
               />
             </div>
-            <span className="flex tracking-tighter text-base md:text-2xl font-[900] mr-0 md:mr-4 pl-2 md:pl-0">
-              <span className="text-white font-black">{BUSINESS_NAME.split(' ')[0]}</span>
-              <span className="text-blue-500 ml-1 font-black">{BUSINESS_NAME.split(' ')[1]}</span>
-            </span>
           </Link>
         )}
 

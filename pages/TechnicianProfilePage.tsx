@@ -852,6 +852,13 @@ const TechnicianProfilePage: React.FC = () => {
                         ))}
                       </ul>
                     )}
+
+                    {/* Service note */}
+                    {service.notes && (
+                      <p className="ml-6 text-slate-400 text-xs italic leading-relaxed">
+                        {service.notes}
+                      </p>
+                    )}
                   </li>
                 );
               })}

@@ -466,6 +466,60 @@ const SERVICE_SEARCH_TERMS: Record<string, string[]> = {
 };
 
 // ─── Component ─────────────────────────────────────────────────────────────────
+
+// Helper to get custom title based on service and location
+const getCustomTitle = (service: string, locationName: string): string => {
+  const key = `${service}-${location}`;
+  const customTitles: Record<string, string> = {
+    'car-wrapping-karen': 'Car Wrapping in Karen | Professional Vehicle Wraps | Mekh',
+    'car-detailing-karen': 'Professional Car Detailing in Karen | Mekh',
+    'car-detailing-nairobi': 'Professional Car Detailing Services in Nairobi',
+    'car-wrapping-nairobi': 'Professional Car Wrapping Services in Nairobi',
+    'car-detailing-thika-road': 'Professional Car Detailing Services on Thika Road',
+    'car-wrapping-thika-road': 'Professional Car Wrapping Services in Thika Road, Nairobi',
+    'car-detailing-lavington': 'Professional Car Detailing Services in Lavington, Nairobi',
+    'car-wrapping-lavington': 'Professional Car Wrapping Services in Lavington, Nairobi',
+    'car-detailing-langata': 'Professional Car Detailing Services in Langata',
+    'car-detailing-ngong-road': 'Professional Car Detailing Services on Ngong Road, Nairobi',
+    'car-detailing-westlands': 'Professional Car Detailing Services in Westlands, Nairobi',
+    'car-wrapping-westlands': 'Professional Car Wrapping Services in Westlands, Nairobi',
+    'car-detailing-kiambu-road': 'Professional Mobile Car Detailing Services on Kiambu Road',
+    'car-wrapping-kiambu-road': 'Professional Car Wrapping Services on Kiambu Road, Nairobi',
+    'car-detailing-ruaka': 'Professional Car Detailing Services in Ruaka, Nairobi',
+    'ceramic-coating-nairobi': 'Professional Ceramic Coating Services in Nairobi',
+    'ceramic-coating-westlands': 'Professional Ceramic Coating Services in Westlands, Nairobi',
+    'ceramic-coating-kiambu-road': 'Professional Ceramic Coating Services on Kiambu Road',
+  };
+  return customTitles[key] || `${serviceName} in ${locationName} | Mekh`;
+};
+
+// Helper to get custom H1 based on service and location
+const getCustomH1 = (service: string, locationName: string): string => {
+  const key = `${service}-${location}`;
+  const customH1s: Record<string, string> = {
+    'car-detailing-karen': 'Professional Car Detailing Services in Karen, Nairobi',
+    'car-wrapping-thika-road': 'Professional Car Wrapping Services in Thika Road, Nairobi',
+    'car-wrapping-wambugu-road': 'Professional Car Wrapping Services on Wambugu Road, Nairobi',
+    'car-wrapping-nairobi': 'Professional Car Wrapping Services in Nairobi',
+    'car-detailing-nairobi': 'Professional Car Detailing Services in Nairobi',
+    'car-detailing-thika-road': 'Professional Car Detailing Services on Thika Road',
+    'car-wrapping-karen': 'Professional Car Wrapping Services in Nairobi',
+    'ceramic-coating-nairobi': 'Professional Ceramic Coating Services in Nairobi',
+    'ceramic-coating-westlands': 'Professional Ceramic Coating Services in Westlands, Nairobi',
+    'car-detailing-lavington': 'Professional Car Detailing Services in Lavington, Nairobi',
+    'car-detailing-langata': 'Professional Car Detailing Services in Langata',
+    'car-detailing-ngong-road': 'Professional Car Detailing Services on Ngong Road, Nairobi',
+    'car-wrapping-kiambu-road': 'Professional Car Wrapping Services on Kiambu Road, Nairobi',
+    'car-wrapping-westlands': 'Professional Car Wrapping Services in Westlands, Nairobi',
+    'car-wrapping-lavington': 'Professional Car Wrapping Services in Lavington, Nairobi',
+    'ceramic-coating-kiambu-road': 'Professional Ceramic Coating Services on Kiambu Road',
+    'car-detailing-kiambu-road': 'Professional Mobile Car Detailing Services on Kiambu Road',
+    'car-detailing-ruaka': 'Professional Car Detailing Services in Ruaka, Nairobi',
+    'car-detailing-westlands': 'Professional Car Detailing Services in Westlands, Nairobi',
+  };
+  return customH1s[key] || (service === 'window-tinting' ? `Car Window Tinting in ${locationName} — Mobile Service Near You` : `${serviceName} in ${locationName}`);
+};
+
 const ServiceLocationPage: React.FC = () => {
   const { service, location } = useParams<{ service: string; location: string }>();
   const navigate = useNavigate();
@@ -523,7 +577,7 @@ const ServiceLocationPage: React.FC = () => {
         const terms = SERVICE_SEARCH_TERMS[serviceName];
         const search = terms ? terms[0] : serviceName.toLowerCase();
         const data = await getPublicTechnicians({
-          county: locationName,
+          area: locationName,  // Changed from county to area
           service: search,
         });
         setTechnicians(data);
@@ -604,7 +658,7 @@ const ServiceLocationPage: React.FC = () => {
       {/* ─── SEO Head ─────────────────────────────────────────────────────── */}
       <Helmet>
         {/* Title: Primary keyword + location | Brand */}
-        <title>{service === 'window-tinting' ? `Car Tinting in ${locationName} | Prices & Mobile Service Near You | Mekh` : `${serviceName} in ${locationName} | Mekh`}</title>
+        <title>{getCustomTitle(service!, locationName)}</title>
 
         {/* Meta description: 150–160 chars, includes location + service + CTA */}
         <meta name="description" content={serviceContent?.metaDescription || ''} />
@@ -670,7 +724,7 @@ const ServiceLocationPage: React.FC = () => {
 
           {/* H1 — primary keyword: Service in Location */}
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4 tracking-tight">
-            {service === 'window-tinting' ? `Car Window Tinting in ${locationName} — Mobile Service Near You` : `${serviceName} in ${locationName}`}
+            {getCustomH1(service!, locationName)}
           </h1>
 
           <p className="text-slate-300 text-lg md:text-xl max-w-2xl mx-auto mb-6 leading-relaxed intro-paragraph">

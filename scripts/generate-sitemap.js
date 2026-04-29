@@ -215,12 +215,12 @@ const generate = async () => {
   }));
 
   // Generate service-location page URLs (Programmatic SEO)
-  // Uses /:service/:location pattern
+  // Uses /services/:service/:location pattern
   const serviceLocationUrls = [];
   for (const service of SERVICE_SLUGS) {
     for (const location of LOCATION_SLUGS) {
       serviceLocationUrls.push({
-        url: `/${service}/${location}`,
+        url: `/services/${service}/${location}`,
         priority: '0.8',
         changefreq: 'weekly',
         lastmod: null,

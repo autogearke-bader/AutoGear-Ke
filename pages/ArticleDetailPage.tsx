@@ -90,6 +90,19 @@ const ArticleDetailPage: React.FC = () => {
             datePublished:  article.created_at,
             dateModified:   article.updated_at ?? article.created_at,
             author: { '@type': 'Organization', name: 'Mekh' },
+            ...(article.faqs && article.faqs.length > 0 ? {
+              mainEntity: {
+                '@type': 'FAQPage',
+                mainEntity: article.faqs.map(faq => ({
+                  '@type': 'Question',
+                  name: faq.question,
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: faq.answer
+                  }
+                }))
+              }
+            } : {}),
           })}
         </script>
       </Helmet>
@@ -136,6 +149,15 @@ const ArticleDetailPage: React.FC = () => {
               {article.excerpt}
             </p>
           )}
+
+          {/* Author Bio */}
+          {article.author_bio && (
+            <div className="flex flex-col gap-3 mb-6 border-l-4 border-blue-600 pl-4 md:pl-6">
+              <p className="text-sm text-slate-400 italic">
+                {article.author_bio}
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -155,6 +177,41 @@ const ArticleDetailPage: React.FC = () => {
           />
         </div>
       </section>
+
+      {/* ── Related Links ─────────────────────────────── */}
+      {article.internal_links && article.internal_links.length >= 2 && (
+        <section className="px-4 md:px-8 pb-10 bg-slate-950">
+          <div className="max-w-3xl mx-auto w-full">
+            <h2 className="text-xl font-bold text-white mb-6">Related Links</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {article.internal_links.map((link, idx) => (
+                <Link
+                  key={idx}
+                  to={link.url}
+                  className="bg-slate-900 border border-slate-700 rounded-2xl p-4 hover:bg-slate-800 transition-colors"
+                >
+                  <p className="text-white font-semibold">{link.title}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── FAQs ─────────────────────────────────────── */}
+      {article.faqs && article.faqs.length > 0 && (
+        <section className="px-4 md:px-8 pb-10 bg-slate-950">
+          <div className="max-w-3xl mx-auto w-full">
+            <h2 className="text-xl font-bold text-white mb-6">Frequently Asked Questions</h2>
+            {article.faqs.map((faq, idx) => (
+              <details key={idx} className="mb-4">
+                <summary className="text-white font-semibold cursor-pointer">{faq.question}</summary>
+                <p className="text-slate-300 mt-2">{faq.answer}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ── Gallery (remaining images after hero) ─────── */}
       {article.images && article.images.length > 1 && (

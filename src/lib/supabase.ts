@@ -12,58 +12,22 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-// Custom fetch with error handling for CORS and network issues
-// Security: Only log method and path, never credentials
-const customFetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-  let urlStr = '';
-  if (typeof input === 'string') {
-    urlStr = input;
-  } else if ('url' in input) {
-    urlStr = (input as Request).url;
-  }
-  const method = init?.method || 'GET';
-  
-  // Security: Only log in development mode
-  if (import.meta.env.DEV) {
-    console.log(`[SUPABASE FETCH] ${method} ${urlStr}`);
-  }
-  
-  try {
-    const response = await fetch(input, init);
-    
-    // Log CORS-related errors
-    if (!response.ok && response.type === 'opaque') {
-      console.error('[SUPABASE FETCH] CORS Error or network failure:', {
-        url: urlStr,
-        status: response.status,
-        statusText: response.statusText,
-        type: response.type
-      });
-    }
-    
-    return response;
-  } catch (error) {
-    console.error('[SUPABASE FETCH] Network error:', error);
-    throw error;
-  }
-};
+
 
 export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '', {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
-    // Detect refresh token timeout and re-authenticate
     detectSessionInUrl: true,
-    // Storage key prefix to avoid conflicts
     storageKey: 'mekh-supabase-auth',
   },
   global: {
-    fetch: customFetch,
     headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
     },
   },
+  // Remove the global.fetch override completely
 });
 
 // Prevent free-tier cold starts by pinging every 3 minutes

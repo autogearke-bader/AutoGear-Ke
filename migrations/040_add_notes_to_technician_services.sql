@@ -1,0 +1,1 @@
+ALTER TABLE technician_services ADD COLUMN IF NOT EXISTS notes text;

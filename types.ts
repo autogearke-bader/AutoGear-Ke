@@ -2,8 +2,10 @@ export interface TechnicianService {
   id: string;
   technician_id: string;
   service_name: string;
+  category: ServiceCategory;
   price: number | null;
   negotiable: boolean;
+  notes: string | null;
 }
 
 export interface ServiceVariant {
@@ -141,8 +143,10 @@ export interface Client {
 }
 
 export type ServiceCategory =
-  | 'all' | 'tinting' | 'wrapping' | 'ppf'
-  | 'ceramic' | 'buffing' | 'detailing' | 'tuning' | 'riveting' | 'identity';
+  | 'body_exterior'
+  | 'car_electricals_security'
+  | 'mechanical_repair'
+  | 'interior_detailing';
 
 export const SERVICE_CATEGORIES: {
   value: ServiceCategory;
@@ -150,16 +154,30 @@ export const SERVICE_CATEGORIES: {
   icon: string;
   keywords: string[];
 }[] = [
-  { value: 'all', label: 'All Services', icon: '', keywords: [] },
-  { value: 'tinting', label: 'Window Tinting', icon: '', keywords: ['tinting', 'tint', 'window'] },
-  { value: 'wrapping', label: 'Car Wrapping', icon: '', keywords: ['wrapping', 'wrap'] },
-  { value: 'ppf', label: 'PPF Installation', icon: '', keywords: ['ppf', 'paint protection', 'film'] },
-  { value: 'ceramic', label: 'Ceramic Coating', icon: '', keywords: ['ceramic', 'coating'] },
-  { value: 'buffing', label: 'Car Buffing', icon: '', keywords: ['buffing', 'buff', 'polish'] },
-  { value: 'detailing', label: 'Car Detailing', icon: '', keywords: ['detailing', 'detail', 'wash'] },
-  { value: 'tuning', label: 'Car Tuning', icon: '', keywords: ['tuning', 'tune', 'ecu', 'performance'] },
-  { value: 'riveting', label: 'Car Riveting', icon: '', keywords: ['riveting', 'rivet'] },
-  {value: 'identity', label: 'Car Identity', icon: '', keywords: ['identity']}
+  {
+    value: 'body_exterior',
+    label: 'Body & Exterior',
+    icon: '',
+    keywords: ['painting', 'wrapping', 'tinting', 'ppf', 'ceramic', 'buffing']
+  },
+  {
+    value: 'car_electricals_security',
+    label: 'Car Electricals & Security',
+    icon: '',
+    keywords: ['audio', 'security', 'alarms', 'key programming', 'ecu', 'lighting']
+  },
+  {
+    value: 'mechanical_repair',
+    label: 'Mechanical & Repair',
+    icon: '',
+    keywords: ['engine', 'brakes', 'tyres', 'suspension', 'diagnostics', 'greasing']
+  },
+  {
+    value: 'interior_detailing',
+    label: 'Interior & Detailing',
+    icon: '',
+    keywords: ['upholstery', 'seats', 'carpet', 'detailing', 'cleaning']
+  }
 ];
 
 export const PAYMENT_METHODS = ['M-Pesa', 'Cash', 'Bank Transfer', 'Airtel Money'];
@@ -221,6 +239,9 @@ export interface Article {
   updated_at: string;
   featuredImage?: string;
   publishedAt?: string;
+  internal_links?: { title: string; url: string }[] | null;  // Add this for internal links
+  author_bio?: string | null;  // Add this for author bio
+  faqs?: { question: string; answer: string }[] | null;  // Add this for FAQs
 }
 
 // Admin dashboard types

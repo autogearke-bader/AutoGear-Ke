@@ -14,7 +14,8 @@ import {
   EXPERIENCE_OPTIONS,
   PAYMENT_METHODS,
   DAYS_OF_WEEK,
-  WINDOW_TINT_TYPES
+  WINDOW_TINT_TYPES,
+  ServiceCategory
 } from '../types';
 import { 
   getMyTechnicianProfile, 
@@ -85,7 +86,7 @@ const TechnicianDashboardPage: React.FC = () => {
   const [serviceVariants, setServiceVariants] = useState<ServiceVariant[]>([]);
   const [availableServices, setAvailableServices] = useState<string[]>([]);
   const [editingServices, setEditingServices] = useState(false);
-  const [servicesForm, setServicesForm] = useState<{ id?: string; service_name: string; price: string; negotiable: boolean; variants: { id?: string; service_id?: string; variant_name: string; price: string; is_negotiable: boolean }[] }[]>([]);
+  const [servicesForm, setServicesForm] = useState<{ id?: string; service_name: string; category: ServiceCategory; price: string; negotiable: boolean; notes?: string; variants: { id?: string; service_id?: string; variant_name: string; price: string; is_negotiable: boolean }[] }[]>([]);
   const [dirtyServiceIndices, setDirtyServiceIndices] = useState<Set<number>>(new Set());
   const [photos, setPhotos] = useState<TechnicianPhoto[]>([]);
   const [selectedPayments, setSelectedPayments] = useState<string[]>([]);
@@ -510,6 +511,14 @@ const TechnicianDashboardPage: React.FC = () => {
         return;
       }
 
+      // Validate all services have categories
+      const missingCategories = servicesForm.filter(service => !service.category);
+      if (missingCategories.length > 0) {
+        const serviceNames = missingCategories.map(s => s.service_name).join(', ');
+        setError(`Please select a category for: ${serviceNames}`);
+        return;
+      }
+
       // Helper function for safe price parsing
       const safeParseInt = (str: string) => {
         if (!str || !str.trim()) return null;
@@ -541,8 +550,10 @@ const TechnicianDashboardPage: React.FC = () => {
             id: s.id || uuidv4(),
             technician_id: technician!.id,
             service_name: s.service_name,
+            category: s.category,
             price: null,
             negotiable: false,
+            notes: s.notes || null,
           });
         } else {
           // Regular service without variants
@@ -550,8 +561,10 @@ const TechnicianDashboardPage: React.FC = () => {
             id: s.id || uuidv4(),
             technician_id: technician!.id,
             service_name: s.service_name,
+            category: s.category,
             price: safeParseInt(s.price),
             negotiable: s.negotiable,
+            notes: s.notes || null,
           });
         }
       });
@@ -679,6 +692,7 @@ const TechnicianDashboardPage: React.FC = () => {
       service_name: '',
       price: '',
       negotiable: false,
+      notes: '',
       variants: []
     };
     setServicesForm(prev => [...prev, newService]);
@@ -763,7 +777,7 @@ const TechnicianDashboardPage: React.FC = () => {
     const initialCustomInputs: Record<number, string> = {};
 
     // Initialize services with variants
-    const servicesWithVariants: { id?: string; service_name: string; price: string; negotiable: boolean; variants: { id?: string; service_id?: string; variant_name: string; price: string; is_negotiable: boolean }[] }[] = [];
+    const servicesWithVariants: { id?: string; service_name: string; category: ServiceCategory; price: string; negotiable: boolean; variants: { id?: string; service_id?: string; variant_name: string; price: string; is_negotiable: boolean }[] }[] = [];
 
     services.forEach((s) => {
       const isCustom = !availableServices.includes(s.service_name);
@@ -794,8 +808,10 @@ const TechnicianDashboardPage: React.FC = () => {
       servicesWithVariants.push({
         id: s.id,
         service_name: s.service_name,
+        category: s.category,
         price: s.price?.toString() || '',
         negotiable: s.negotiable,
+        notes: s.notes || '',
         variants: variants,
       });
     });
@@ -1433,22 +1449,59 @@ const TechnicianDashboardPage: React.FC = () => {
                           </button>
                         )}
                       </div>
-                       {service.variants.length === 0 && (
-                         <div className="mt-2 flex items-center gap-2">
-                           <input
-                             type="checkbox"
-                             checked={service.negotiable}
-                             onChange={(e) => handleServiceChange(index, 'negotiable', e.target.checked)}
-                             className="rounded"
-                             id={`negotiable-${index}`}
-                           />
-                           <label htmlFor={`negotiable-${index}`} className="text-sm text-slate-400">
-                             Price is negotiable
-                           </label>
-                         </div>
-                       )}
-                      
-                       {/* Variants Section */}
+                        {service.variants.length === 0 && (
+                          <div className="mt-2 flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={service.negotiable}
+                              onChange={(e) => handleServiceChange(index, 'negotiable', e.target.checked)}
+                              className="rounded"
+                              id={`negotiable-${index}`}
+                            />
+                            <label htmlFor={`negotiable-${index}`} className="text-sm text-slate-400">
+                              Price is negotiable
+                            </label>
+                          </div>
+                        )}
+
+                        {/* Category Selection - Required */}
+                        <div className="mt-3">
+                          <label className="block text-xs text-slate-500 mb-1">
+                            Category <span className="text-red-400">*</span>
+                          </label>
+                          <select
+                            value={service.category || ''}
+                            onChange={(e) => handleServiceChange(index, 'category', e.target.value)}
+                            className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                            required
+                          >
+                            <option value="">Select category</option>
+                            <option value="body_exterior">Body & Exterior</option>
+                            <option value="car_electricals_security">Car Electricals & Security</option>
+                            <option value="mechanical_repair">Mechanical & Repair</option>
+                            <option value="interior_detailing">Interior & Detailing</option>
+                          </select>
+                          {!service.category && (
+                            <p className="text-red-500 text-xs mt-1">Required</p>
+                          )}
+                        </div>
+
+                        {/* Service Notes */}
+                        <div className="mt-3">
+                          <label htmlFor={`notes-${index}`} className="block text-xs text-slate-500 mb-1">Service Notes (Optional)</label>
+                          <textarea
+                            id={`notes-${index}`}
+                            value={service.notes || ''}
+                            onChange={(e) => handleServiceChange(index, 'notes', e.target.value)}
+                            placeholder="Optional: e.g. Price varies by vehicle size. Sedans start at Ksh 13,000."
+                            rows={2}
+                            maxLength={150}
+                            className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none"
+                          />
+                          <p className="text-slate-500 text-xs mt-1">{(service.notes || '').length}/150 characters</p>
+                        </div>
+
+                        {/* Variants Section */}
                        <div className="mt-4 pt-4 border-t border-slate-700">
                          <div className="flex items-center justify-between mb-3">
                            <h4 className="text-white font-medium text-sm">Add Variants (Optional)</h4>

@@ -55,7 +55,7 @@ export default defineConfig(({ mode }) => {
           manifestFilename: 'manifest.json',
             workbox: {
               navigateFallback: 'index.html',
-              navigateFallbackDenylist: [/^\/api/, /^\/rest/, /^\/sitemap\.xml/],
+              navigateFallbackDenylist: [/^\/api/, /^\/rest\/v1\//, /^\/sitemap\.xml/],
               // Only precache the absolute essentials
               // Only precache small essential files
               globPatterns: ['**/*.{html,ico,svg}', 'assets/*.css'],
@@ -68,6 +68,7 @@ export default defineConfig(({ mode }) => {
                 '**/vendor-react-*.js',    // 188 KB — loaded on demand
                 '**/vendor-misc-*.js',     // 63 KB
                 '**/index-*.js',           // 60 KB
+                '**/supabase/**',          // Never cache Supabase files
               ],
 
               skipWaiting: false,
@@ -159,19 +160,15 @@ export default defineConfig(({ mode }) => {
                 }
               },
               {
-                // Cache Supabase REST API requests but not auth
+                // Always fetch fresh data for Supabase REST API requests (technicians, etc.)
                 urlPattern: /^https:\/\/.*supabase\.co\/rest\/.*/i,
-                handler: 'NetworkFirst',
+                handler: 'NetworkOnly',
                 options: {
                   cacheName: 'supabase-api',
                   expiration: {
-                    maxEntries: 50,
-                    maxAgeSeconds: 60 * 5 // 5 minutes
-                  },
-                  cacheableResponse: {
-                    statuses: [0, 200]
-                  },
-                  networkTimeoutSeconds: 10
+                    maxEntries: 0,
+                    maxAgeSeconds: 0
+                  }
                 }
               },
               {
@@ -258,7 +255,14 @@ export default defineConfig(({ mode }) => {
            output: {
               entryFileNames: 'assets/[name]-[hash].js',
               chunkFileNames: 'assets/[name]-[hash].js',
-              assetFileNames: 'assets/[name]-[hash].[ext]',
+              assetFileNames: (assetInfo) => {
+                // Prevent hashing of favicon files — they need predictable URLs
+                const name = assetInfo.name;
+                if (name && (name.includes('favicon') || name === 'favicon.ico')) {
+                  return '[name].[ext]'; // No hash for favicons
+                }
+                return 'assets/[name]-[hash].[ext]';
+              },
               manualChunks(id) {
                 if (id.includes('node_modules')) {
                   if (id.includes('react-dom') || (id.includes('react') && !id.includes('react-router') && !id.includes('react-helmet'))) return 'vendor-react';

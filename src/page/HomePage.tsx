@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Technician, ServiceCategory, SERVICE_CATEGORIES, Article } from '../../types';
 import { getPublicTechnicians, getPublicArticles, getMyClientLeads, getMyClientNotifications, deleteNotification } from '../lib/api';
 import { getSession, getMyClientProfile } from '../lib/auth';
@@ -9,18 +10,16 @@ import { reverseGeocode } from '../lib/location';
 import { Avatar } from '../components/Avatar';
 import { profileFull } from '../lib/cloudinary';
 
-// Service keywords for each category
-const TINTING_SERVICES = ['tinting', 'tint', 'window', 'headlight restoration', 'tail light smoking', 'tail light', 'headlight'];
-const WRAPPING_SERVICES = ['wrapping', 'wrap', 'ppf', 'paint protection', 'film', 'ceramic', 'coating', 'buffing', 'buff', 'polish'];
-const DETAILING_SERVICES = ['detailing', 'detail', 'wash', 'clean', 'interior', 'exterior', 'polish'];
-
-// All service keywords for search
+// Service keywords for search (keeping for now, may update later)
 const ALL_SERVICE_KEYWORDS = [
-  ...TINTING_SERVICES,
-  ...WRAPPING_SERVICES,
-  ...DETAILING_SERVICES,
+  'tinting', 'tint', 'window', 'headlight restoration', 'tail light smoking', 'tail light', 'headlight',
+  'wrapping', 'wrap', 'ppf', 'paint protection', 'film', 'ceramic', 'coating', 'buffing', 'buff', 'polish',
+  'detailing', 'detail', 'wash', 'clean', 'interior', 'exterior', 'polish',
   'tuning', 'tune', 'ecu', 'performance',
-  'riveting', 'rivet', 'identity', 'chrome', 'rim', 'license plate'
+  'riveting', 'rivet', 'identity', 'chrome', 'rim', 'license plate',
+  'painting', 'audio', 'security', 'alarms', 'key programming', 'lighting',
+  'engine', 'brakes', 'tyres', 'suspension', 'diagnostics', 'greasing',
+  'upholstery', 'seats', 'carpet', 'cleaning'
 ];
 
 interface Section {
@@ -601,20 +600,28 @@ useEffect(() => {
       }
     }
 
-    // Top Rated - highest ratings with 3+ reviews
+    // Top Rated - highest ratings with at least 1 review
     const topRatedTechs = [...liveTechnicians]
-      .filter(t => (t.review_count || 0) >= 3)
+      .filter(t => (t.review_count || 0) >= 1)
       .sort((a, b) => (b.avg_rating || 0) - (a.avg_rating || 0))
       .slice(0, 8);
 
-    // Tinting, Head Restoration and Tail Light Smoking Specialists
-    const tintingTechs = filterByService(liveTechnicians, TINTING_SERVICES).slice(0, 8);
+    // New category-based sections
+    const bodyExteriorTechs = liveTechnicians.filter(t =>
+      t.technician_services?.some(s => s.category === 'body_exterior')
+    ).slice(0, 8);
 
-    // Wrapping, PPF, Buffing and Ceramic Coating Specialists
-    const wrappingTechs = filterByService(liveTechnicians, WRAPPING_SERVICES).slice(0, 8);
+    const electricalsTechs = liveTechnicians.filter(t =>
+      t.technician_services?.some(s => s.category === 'car_electricals_security')
+    ).slice(0, 8);
 
-    // Car Detailing Nairobi Specialists
-    const detailingTechs = filterByService(liveTechnicians, DETAILING_SERVICES).slice(0, 8);
+    const mechanicalTechs = liveTechnicians.filter(t =>
+      t.technician_services?.some(s => s.category === 'mechanical_repair')
+    ).slice(0, 8);
+
+    const interiorTechs = liveTechnicians.filter(t =>
+      t.technician_services?.some(s => s.category === 'interior_detailing')
+    ).slice(0, 8);
 
     // They Come To You - mobile technicians
     const mobileTechs = liveTechnicians
@@ -639,28 +646,35 @@ useEffect(() => {
         title: 'Top Rated',
         technicians: topRatedTechs,
         showSeeAll: topRatedTechs.length >= 8,
-        isVisible: topRatedTechs.length >= 3
+        isVisible: topRatedTechs.length >= 1
       },
       {
-        id: 'tinting',
-        title: 'Tinting Specialists - Windows, Headlights & Tail Light Smoking',
-        technicians: tintingTechs,
-        showSeeAll: tintingTechs.length >= 8,
-        isVisible: tintingTechs.length > 0
+        id: 'body_exterior',
+        title: 'Body & Exterior',
+        technicians: bodyExteriorTechs,
+        showSeeAll: bodyExteriorTechs.length >= 8,
+        isVisible: bodyExteriorTechs.length > 0
       },
       {
-        id: 'wrapping',
-        title: 'Car Wrapping, PPF & Ceramic Coating Specialists',
-        technicians: wrappingTechs,
-        showSeeAll: wrappingTechs.length >= 8,
-        isVisible: wrappingTechs.length > 0
+        id: 'car_electricals_security',
+        title: 'Car Electricals & Security',
+        technicians: electricalsTechs,
+        showSeeAll: electricalsTechs.length >= 8,
+        isVisible: electricalsTechs.length > 0
       },
       {
-        id: 'detailing',
-        title: 'Professional Detailing & Interior Care Experts',
-        technicians: detailingTechs,
-        showSeeAll: detailingTechs.length >= 8,
-        isVisible: detailingTechs.length > 0
+        id: 'mechanical_repair',
+        title: 'Mechanical & Repair',
+        technicians: mechanicalTechs,
+        showSeeAll: mechanicalTechs.length >= 8,
+        isVisible: mechanicalTechs.length > 0
+      },
+      {
+        id: 'interior_detailing',
+        title: 'Interior & Detailing',
+        technicians: interiorTechs,
+        showSeeAll: interiorTechs.length >= 8,
+        isVisible: interiorTechs.length > 0
       },
       {
         id: 'mobile',
@@ -677,7 +691,7 @@ useEffect(() => {
         isVisible: newTechs.length > 0
       }
     ];
-  }, [technicians, locationPermission, detectedLat, detectedLng, detectedLocation, county, filterByService]);
+  }, [technicians, locationPermission, detectedLat, detectedLng, detectedLocation, county]);
 
   // Get filtered technicians when a service is selected
   const filteredTechnicians = useMemo(() => {
@@ -748,7 +762,13 @@ useEffect(() => {
   };
 
   return (
-    <div className="pb-20">
+    <>
+      <Helmet>
+        <title>Find Reliable Automotive Technicians in Nairobi | Mekh</title>
+        <meta name="description" content="Find automotive technicians in Nairobi. Book verified car detailing, window tinting, car wrapping, ceramic coating, PPF, and tuning services. Mobile technicians come to you." />
+        <link rel="canonical" href="https://mekh.app/" />
+      </Helmet>
+      <div className="pb-20">
       {/* Location Banner - Slim notification that slides in from top */}
       {showLocationBanner && (
         <div className="fixed top-0 left-0 right-0 z-50 animate-slide-down">
@@ -788,6 +808,8 @@ useEffect(() => {
         </h1>
         <div className="relative">
           <input
+            id="search-input"
+            name="search"
             type="text"
             value={searchInputValue}
             onChange={handleSearchChange}
@@ -983,7 +1005,8 @@ useEffect(() => {
         </section>
       )}
 
-      {/* Service Filter Chips */}
+      {/* Service Filter Chips - Temporarily hidden */}
+      {/*
       <section className="px-4 pb-4 mt-4 overflow-x-auto">
         <div className="flex gap-2 min-w-max">
           {SERVICE_CATEGORIES.map((category) => (
@@ -1002,6 +1025,7 @@ useEffect(() => {
           ))}
         </div>
       </section>
+      */}
 
       {/* Search Results - Show when searching */}
       {searchQuery.trim().length > 0 && !loading ? (
@@ -1229,6 +1253,7 @@ useEffect(() => {
         />
       )}
     </div>
+    </>
   );
 };
 

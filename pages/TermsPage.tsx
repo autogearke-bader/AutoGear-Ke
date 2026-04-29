@@ -7,7 +7,7 @@ const TermsPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Terms and Conditions | {BUSINESS_NAME}</title>
+        <title>Terms and Conditions | Mekh Legal Agreement</title>
         <meta name="description" content={`${BUSINESS_NAME} Terms and Conditions - Terms of service for our car service marketplace connecting clients with professional technicians in Kenya.`} />
       </Helmet>
 

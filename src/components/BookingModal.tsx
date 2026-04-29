@@ -140,26 +140,32 @@ export const BookingModal = ({
 
     // Insert lead silently in background
     supabase.from('leads').insert([leadData]).then(({ error }) => {
-      if (!error) {
-        // Notify technician via email
+      if (error) {
+        console.error('Failed to insert lead:', error);
+      } else {
+        // Notify technician via email and insert notification
         supabase.functions.invoke('send-lead-notification', {
           body: {
             technician_id: technician.id,
+            client_id: clientId,
             client_name: clientName,
             client_phone: formatPhoneForWhatsApp(clientPhone),
             service_requested: serviceWithVariants,
             client_location: locationText || undefined,
             vehicle_model: vehicleModel || undefined,
           }
+        }).then(({ data, error }) => {
+          if (error) {
+            console.error('Failed to send lead notification:', error);
+          } else {
+            console.log('Lead notification sent successfully:', data);
+          }
+        }).catch((err) => {
+          console.error('Error invoking send-lead-notification function:', err);
         });
-
-        // Insert notification for technician
-        supabase.from('notifications').insert([{
-          technician_id: technician.id,
-          type: 'new_lead',
-          message: `New lead: ${clientName} from ${locationText || 'unknown location'} is interested in ${serviceWithVariants}. Check your WhatsApp.`,
-        }]);
       }
+    }).catch((err) => {
+      console.error('Error inserting lead:', err);
     });
 
     // Build WhatsApp URL

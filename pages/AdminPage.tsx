@@ -56,6 +56,9 @@ interface Article {
   images: { url: string; alt: string }[];
   meta_description: string; keywords: string;
   is_published: boolean; created_at: string;
+  internal_links: { title: string; url: string }[];
+  author_bio: string;
+  faqs: { question: string; answer: string }[];
 }
 
 interface Technician {
@@ -180,8 +183,8 @@ const AdminPage: React.FC = () => {
 
   // ── Articles ───────────────────────────────────────────────
   const [localArticles,      setLocalArticles]      = useState<Article[]>([]);
-  const [editingArticleId,   setEditingArticleId]   = useState<string|null>(null);
-  const [selectedArticleIds, setSelectedArticleIds] = useState<string[]>([]);
+  const [editingArticleId,   setEditingArticleId]   = useState<number|null>(null);
+  const [selectedArticleIds, setSelectedArticleIds] = useState<number[]>([]);
   const [articleSearch,      setArticleSearch]      = useState('');
 
   // Article form
@@ -193,6 +196,9 @@ const AdminPage: React.FC = () => {
   const [altTextError,         setAltTextError]         = useState<string | null>(null);
   const [articleIsPublished,   setArticleIsPublished]   = useState(true);
   const [articleImgUploading,  setArticleImgUploading]  = useState(false);
+  const [articleInternalLinks, setArticleInternalLinks] = useState<{title: string, url: string}[]>([]);
+  const [articleAuthorBio,     setArticleAuthorBio]     = useState('');
+  const [articleFaqs,          setArticleFaqs]          = useState<{question: string, answer: string}[]>([]);
 
   // ════════════════════════════════════════════════
   // EFFECTS
@@ -779,16 +785,16 @@ const AdminPage: React.FC = () => {
 
   const resetArticleForm = () => {
     setEditingArticleId(null); setArticleTitle(''); setArticleContent('');
-    setArticleExcerpt('');     setArticleImages([]); 
+    setArticleExcerpt('');     setArticleImages([]);
     setArticleMetaDesc(''); setAltTextError(null);
-    setArticleIsPublished(true);
+    setArticleIsPublished(true); setArticleInternalLinks([]); setArticleAuthorBio(''); setArticleFaqs([]);
   };
 
   const handleEditArticle = (a: Article) => {
     setEditingArticleId(a.id); setArticleTitle(a.title); setArticleContent(a.content ?? '');
     setArticleExcerpt(a.excerpt ?? ''); setArticleImages(a.images ?? []);
     setArticleMetaDesc(a.meta_description ?? ''); setAltTextError(null);
-    setArticleIsPublished(a.is_published);
+    setArticleIsPublished(a.is_published); setArticleInternalLinks(a.internal_links ?? []); setArticleAuthorBio(a.author_bio ?? ''); setArticleFaqs(a.faqs ?? []);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -806,33 +812,71 @@ const AdminPage: React.FC = () => {
     }
   };
 
+  const updateArticleLinks = async (links: typeof articleInternalLinks) => {
+    if (!editingArticleId) return;
+    const cleaned = links.filter(link => link.title.trim() && link.url.trim());
+    try {
+      await supabase.from('articles').update({ internal_links: cleaned }).eq('id', editingArticleId);
+    } catch (err) {
+      console.error('Error updating article links:', err);
+    }
+  };
+
   const handleSaveArticle = async (e: React.FormEvent) => {
-    console.log('handleSaveArticle called, isSaving:', isSaving, 'articleIsPublished:', articleIsPublished);
     e.preventDefault();
+
     if (!articleTitle.trim()) {
       setStatus({ message: 'Title is required.', type: 'error' });
       return;
     }
 
-    // Validate alt text
     const missingAltText = articleImages.some(img => !img.alt.trim());
     if (missingAltText) {
       setAltTextError('Please add alt text for all images before publishing');
       return;
     }
-    setAltTextError(null);
 
-    // Validate image URLs
     const invalidImages = articleImages.filter(img => !img.url.includes('cloudinary.com'));
     if (invalidImages.length > 0) {
       setStatus({ message: 'One or more images have invalid URLs. Please re-upload them.', type: 'error' });
       return;
     }
 
-    // Wake up Supabase instance before the actual write
     setStatus({ message: 'Connecting...', type: 'warning' });
     await supabase.from('articles').select('id').limit(1);
     setStatus(null);
+
+    // Filter out completely blank link rows (both title and url empty)
+    const nonBlankLinks = articleInternalLinks.filter(
+      link => link.title.trim() || link.url.trim()
+    );
+
+    // Check for incomplete links (title without url, or url without title)
+    const incompleteLinks = nonBlankLinks.filter(
+      link => !link.title.trim() || !link.url.trim()
+    );
+    if (incompleteLinks.length > 0) {
+      setStatus({ message: 'Each internal link must have both a title and a URL.', type: 'error' });
+      return;
+    }
+
+    // cleanedLinks now only contains fully valid entries (both title and url present)
+    const cleanedLinks = nonBlankLinks;
+
+    if (!editingArticleId) {
+      if (cleanedLinks.length < 2) {
+        setStatus({ message: 'At least 2 internal links are required for new articles.', type: 'error' });
+        return;
+      }
+    }
+
+    if (cleanedLinks.length > 0) {
+      const invalidUrls = cleanedLinks.some(link => !link.url.trim().startsWith('/'));
+      if (invalidUrls) {
+        setStatus({ message: 'All internal links must start with "/" for valid internal paths.', type: 'error' });
+        return;
+      }
+    }
 
     setIsSaving(true);
 
@@ -846,17 +890,16 @@ const AdminPage: React.FC = () => {
         meta_description: articleMetaDesc.trim(),
         keywords:         '',
         is_published:     articleIsPublished,
+        internal_links:   cleanedLinks,
+        author_bio:       articleAuthorBio.trim(),
+        faqs:             articleFaqs,
         updated_at:       new Date().toISOString(),
       };
-
-      console.log('AdminPage: ARTICLE_SAVE_START', payload);
 
       // Direct await with timeout to prevent infinite hanging
       const savePromise = editingArticleId
         ? supabase.from('articles').update(payload).eq('id', editingArticleId)
         : supabase.from('articles').insert([payload]);
-
-      console.log('About to execute savePromise');
 
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Request timed out after 30 seconds')), 30000)
@@ -864,10 +907,7 @@ const AdminPage: React.FC = () => {
 
       const { error } = await Promise.race([savePromise, timeoutPromise]) as any;
 
-      console.log('Save promise resolved, error:', error);
-
       if (error) {
-        console.error('AdminPage: ARTICLE_SAVE_ERROR', error);
         if (error.code === '42501' || error.message?.includes('row-level security')) {
           setStatus({ message: 'Permission denied. Please log out and log back in.', type: 'error' });
         } else if (error.code === '23505') {
@@ -876,13 +916,11 @@ const AdminPage: React.FC = () => {
           setStatus({ message: `Failed to save: ${error.message || 'Unknown error'}`, type: 'error' });
         }
       } else {
-        console.log('AdminPage: ARTICLE_SAVE_SUCCESS');
         setStatus({ message: `Article "${articleTitle}" ${editingArticleId ? 'updated' : 'created'}.`, type: 'success' });
         resetArticleForm();
         fetchArticles();
       }
     } catch (err) {
-      console.error('AdminPage: Article save unexpected error:', err);
       setStatus({ message: `Unexpected error: ${err instanceof Error ? err.message : 'Unknown'}`, type: 'error' });
     } finally {
       setIsSaving(false);
@@ -1630,6 +1668,121 @@ const AdminPage: React.FC = () => {
                         <p className={`text-[10px] mt-1 ${articleMetaDesc.length > 160 ? 'text-red-400' : 'text-slate-600'}`}>{articleMetaDesc.length}/160</p>
                       </div>
 
+                      {/* Author Bio */}
+                      <div>
+                        <label className="block text-[10px] text-slate-500 font-black uppercase tracking-widest mb-2">Author Bio</label>
+                        <textarea value={articleAuthorBio} onChange={e => setArticleAuthorBio(e.target.value)} rows={3} placeholder="e.g., Written by John Doe, expert in window tinting with 5 years experience..."
+                          className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-3 text-white outline-none focus:border-blue-500 resize-none" />
+                      </div>
+
+                      {/* FAQs */}
+                      <div>
+                        <label className="block text-[10px] text-slate-500 font-black uppercase tracking-widest mb-2">FAQs</label>
+                        <p className="text-[10px] text-slate-600 mb-3">Add frequently asked questions to improve SEO and user engagement.</p>
+                        {articleFaqs.map((faq, idx) => (
+                          <div key={idx} className="mb-4 border border-slate-800 rounded-lg p-3">
+                            <input
+                              type="text"
+                              value={faq.question}
+                              onChange={e => {
+                                const newFaqs = [...articleFaqs];
+                                newFaqs[idx].question = e.target.value;
+                                setArticleFaqs(newFaqs);
+                              }}
+                              placeholder="Question"
+                              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white outline-none focus:border-blue-500 mb-2"
+                            />
+                            <textarea
+                              value={faq.answer}
+                              onChange={e => {
+                                const newFaqs = [...articleFaqs];
+                                newFaqs[idx].answer = e.target.value;
+                                setArticleFaqs(newFaqs);
+                              }}
+                              placeholder="Answer"
+                              rows={2}
+                              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white outline-none focus:border-blue-500 resize-none"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setArticleFaqs(articleFaqs.filter((_, i) => i !== idx))}
+                              className="mt-2 px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-sm"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => setArticleFaqs([...articleFaqs, { question: '', answer: '' }])}
+                          className="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm"
+                        >
+                          + Add FAQ
+                        </button>
+                      </div>
+
+                      {/* Internal Links */}
+                      <div>
+                        <label className="block text-[10px] text-slate-500 font-black uppercase tracking-widest mb-2">
+                          Internal Links <span className="text-slate-700 normal-case font-normal tracking-normal">· At least 2 required</span>
+                        </label>
+                        <p className="text-[10px] text-slate-600 mb-3">Add at least 2 relevant internal links (e.g., to service pages like /services/tinting, location pages like /locations/nairobi, or related blogs like /blogs/car-wrapping-tips).</p>
+                        {articleInternalLinks.map((link, idx) => (
+                          <div key={idx} className="flex gap-2 mb-2">
+                            <input
+                              type="text"
+                              value={link.title}
+                              onChange={e => setArticleInternalLinks(
+                                articleInternalLinks.map((item, i) =>
+                                  i === idx ? { ...item, title: e.target.value } : item
+                                )
+                              )}
+                              onBlur={() => {
+                                if (link.title.trim() && link.url.trim()) {
+                                  updateArticleLinks(articleInternalLinks);
+                                }
+                              }}
+                              placeholder="Link title (e.g., Find Window Tinting Services in Nairobi)"
+                              className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white outline-none focus:border-blue-500 text-sm"
+                            />
+                            <input
+                              type="text"
+                              value={link.url}
+                              onChange={e => setArticleInternalLinks(
+                                articleInternalLinks.map((item, i) =>
+                                  i === idx ? { ...item, url: e.target.value } : item
+                                )
+                              )}
+                              onBlur={() => {
+                                if (link.title.trim() && link.url.trim()) {
+                                  updateArticleLinks(articleInternalLinks);
+                                }
+                              }}
+                              placeholder="URL (e.g., /services/tinting?location=nairobi)"
+                              className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white outline-none focus:border-blue-500 text-sm"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newLinks = articleInternalLinks.filter((_, i) => i !== idx);
+                                setArticleInternalLinks(newLinks);
+                                updateArticleLinks(newLinks);
+                              }}
+                              className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => setArticleInternalLinks([...articleInternalLinks, { title: '', url: '' }])}
+                          className="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm"
+                        >
+                          + Add Link
+                        </button>
+                      </div>
+
                     </div>
 
                     {/* Published toggle */}
@@ -1643,9 +1796,12 @@ const AdminPage: React.FC = () => {
                       </span>
                     </div>
 
-                    <button type="submit" disabled={isSaving}
-                      className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-800 disabled:text-slate-600 text-white font-black py-4 rounded-2xl uppercase tracking-widest text-[11px] transition-all">
-                      {isSaving ? 'Saving…' : editingArticleId ? 'Update Article' : 'Publish Article'}
+                    <button
+                      type="submit"
+                      disabled={isSaving}
+                      className={`w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-800 disabled:text-slate-600 text-white font-black py-4 rounded-2xl uppercase tracking-widest text-[11px] transition-all ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      {isSaving ? 'Saving...' : editingArticleId ? 'Update Article' : 'Publish Article'}
                     </button>
                   </form>
                 </div>

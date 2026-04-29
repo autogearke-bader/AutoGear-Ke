@@ -51,15 +51,101 @@ export const isClientOnboardingComplete = async (): Promise<boolean> => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Fetch all live technicians (with services, photos, payments). */
-export const getPublicTechnicians = async () => {
-  const { data, error } = await supabase
+export const getPublicTechnicians = async (filters?: { area?: string; service?: string }) => {
+  // First, try to get technicians from the specific area
+  let query = supabase
     .from('technicians')
-    .select('*, technician_services(*), technician_photos(*), technician_videos(*), technician_payments(*), avg_rating, review_count')
+    .select(`
+      *,
+      technician_services(
+        *,
+        service_variants(*)
+      ),
+      technician_photos(*),
+      technician_videos(*),
+      technician_payments(*),
+      avg_rating,
+      review_count
+    `)
     .eq('status', 'live')
     .order('created_at', { ascending: false });
 
+  if (filters?.area) {
+    query = query.eq('area', filters.area);
+  }
+
+  let { data, error } = await query;
   if (error) throw error;
-  return data ?? [];
+
+  let technicians = data ?? [];
+
+  // Client-side filtering for service matching
+  if (filters?.service) {
+    const searchTerm = filters.service.toLowerCase();
+    technicians = technicians.filter(technician => {
+      return technician.technician_services?.some((service: any) => {
+        // Check service name
+        const serviceMatch = service.service_name?.toLowerCase().includes(searchTerm);
+
+        // Check variant names
+        const variantMatch = service.service_variants?.some((variant: any) =>
+          variant.variant_name?.toLowerCase().includes(searchTerm)
+        );
+
+        return serviceMatch || variantMatch;
+      });
+    });
+  }
+
+  // If we have less than 4 technicians and area was specified, get more from other areas
+  if (technicians.length < 4 && filters?.area && filters?.service) {
+    const remainingSlots = 4 - technicians.length;
+
+    // Query technicians from other areas offering the same service
+    let fallbackQuery = supabase
+      .from('technicians')
+      .select(`
+        *,
+        technician_services(
+          *,
+          service_variants(*)
+        ),
+        technician_photos(*),
+        technician_videos(*),
+        technician_payments(*),
+        avg_rating,
+        review_count
+      `)
+      .eq('status', 'live')
+      .neq('area', filters.area) // Exclude the original area
+      .order('created_at', { ascending: false });
+
+    const { data: fallbackData, error: fallbackError } = await fallbackQuery;
+    if (fallbackError) throw fallbackError;
+
+    let fallbackTechnicians = fallbackData ?? [];
+
+    // Filter fallback technicians by service
+    const searchTerm = filters.service.toLowerCase();
+    fallbackTechnicians = fallbackTechnicians.filter(technician => {
+      return technician.technician_services?.some((service: any) => {
+        const serviceMatch = service.service_name?.toLowerCase().includes(searchTerm);
+        const variantMatch = service.service_variants?.some((variant: any) =>
+          variant.variant_name?.toLowerCase().includes(searchTerm)
+        );
+        return serviceMatch || variantMatch;
+      });
+    });
+
+    // Add fallback technicians up to the remaining slots
+    technicians = [...technicians, ...fallbackTechnicians.slice(0, remainingSlots)];
+  }
+
+  // Only limit to 4 technicians when filters are applied
+  if (filters?.area || filters?.service) {
+    return technicians.slice(0, 4);
+  }
+  return technicians;
 };
 
 /** Fetch all technicians (including non-live) — used by admin / dashboard. */
@@ -92,8 +178,6 @@ export const getPublicTechnicianBySlug = async (slug: string) => {
     `)
     .eq('slug', slug)
     .eq('status', 'live')
-    .eq('reviews.status', 'approved')
-    .eq('reviews.is_visible', true)
     .maybeSingle();          // ← was .single()
 
   if (error) throw error;

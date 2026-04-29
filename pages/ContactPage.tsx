@@ -81,7 +81,7 @@ ${formData.message}
   return (
     <>
       <Helmet>
-        <title>Contact Us - {BUSINESS_NAME}</title>
+        <title>Contact Mekh | Get in Touch with Our Team</title>
         <meta name="description" content="Contact Mekh for inquiries, complaints, or claims. We're here to help with any questions about our car service marketplace." />
       </Helmet>
 
