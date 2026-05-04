@@ -22,6 +22,22 @@ registerSW({
     // Check for updates every 60 seconds in the background
     r && setInterval(() => r.update(), 60 * 1000);
   },
+  onNeedRefresh() {
+    // ✅ Only notify if user is in PWA mode — browser users get silent update
+    const isStandalone    = window.matchMedia('(display-mode: standalone)').matches;
+    const isTabbed        = window.matchMedia('(display-mode: tabbed)').matches;
+    const isIOSStandalone = (window.navigator as any).standalone === true;
+    const isPWA           = isStandalone || isTabbed || isIOSStandalone;
+
+    if (isPWA) {
+      // PWA: prompt user to update
+      window.dispatchEvent(new CustomEvent('swUpdateAvailable'));
+    } else {
+      // Browser: silently activate the new SW — no disruption since
+      // the browser tab will naturally reload on next navigation
+      // (skipWaiting: false means it only activates when all tabs close)
+    }
+  },
   onOfflineReady() {
     console.log('Mekh ready for offline use');
   },

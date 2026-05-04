@@ -63,25 +63,25 @@ const ClientProfilePage: React.FC = () => {
         <div className="flex items-center gap-3 mb-4">
           <button
             onClick={() => navigate(-1)}
-            className="w-8 h-8 bg-slate-800 rounded-lg flex items-center justify-center"
+            className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center"
             aria-label="Go back"
           >
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h1 className="text-xl font-bold text-white">Profile</h1>
+          <h1 className="text-xl font-bold text-blue-500">Profile</h1>
         </div>
 
         {/* Avatar & Basic Info */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center">
+        <div className="border border-slate-800 rounded-2xl p-6 text-center">
           <Avatar
             imageUrl={client?.profile_image ? profileFull(client.profile_image) : null}
             name={client?.name || 'User'}
             size="xl"
             className="mx-auto mb-3"
           />
-          <h2 className="text-lg font-bold text-white mb-1">
+          <h2 className="text-lg font-bold text-blue-500 mb-1">
             {client?.name || 'Your Name'}
           </h2>
           <p className="text-slate-400 text-sm">{email}</p>
@@ -91,7 +91,7 @@ const ClientProfilePage: React.FC = () => {
       {/* Profile Info - Read Only */}
       <section className="px-4 pb-4">
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-          <h3 className="text-sm font-black text-white uppercase tracking-widest mb-4">
+          <h3 className="text-sm font-black text-blue-500 uppercase tracking-widest mb-4">
             Profile Information
           </h3>
 
@@ -121,7 +121,7 @@ const ClientProfilePage: React.FC = () => {
       <section className="px-4">
         <button
           onClick={handleSignOut}
-          className="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-red-400 text-sm font-black uppercase tracking-widest py-3 rounded-xl transition-all"
+          className="w-full bg-red-600 hover:bg-red-700 border border-slate-700 text-white text-sm font-black uppercase tracking-widest py-3 rounded-xl transition-all"
         >
           Sign Out
         </button>

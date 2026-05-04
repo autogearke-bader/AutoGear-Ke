@@ -75,10 +75,9 @@ const SERVICE_SLUGS = [
   'car-wrapping',
   'ppf',
   'ceramic-coating',
-  'face-lifting',
   'car-detailing',
   'headlight-restoration',
-  'chrome-deletion',
+  'car-tuning',
 ];
 
 // Location slugs for programmatic SEO pages
@@ -88,18 +87,15 @@ const LOCATION_SLUGS = [
   'thika-road',
   'parklands',
   'lavington',
-  'park-rd',
   'westlands',
   'karen',
   'kilimani',
-  'Garden Estate',
+  'garden-estate',
   'langata',
-  'waiyaki way',
-  'dagoretti corner',
-  'wambugu road',
   'ruiru',
   'industrial-area',
   'ngong-road',
+  'kiambu-road',
 ];
 
 // Static pages that always exist

@@ -155,6 +155,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           return;
         }
 
+        // ✅ NEW: Ignore INITIAL_SESSION — checkAuth() above already ran on mount
+        if (event === 'INITIAL_SESSION') {
+          return;
+        }
+
         setSession(s);
         setIsLoggedIn(!!s);
 
@@ -181,7 +186,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
           setUserRole(role);
           setIsClient(role === 'client');
-          await resolveTechnicianProfile(role, s.user.id);
+          
+          // ✅ Only fetch technician profile on genuine sign-in, not on every event
+          if (event === 'SIGNED_IN') {
+            await resolveTechnicianProfile(role, s.user.id);
+          }
         } else {
           setUserRole(null);
           setIsClient(false);
@@ -211,7 +220,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     window.matchMedia('(min-width: 640px)').matches;
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-950 text-slate-50 relative">
+    <div className="flex flex-col min-h-screen bg-[#f8fafc] text-slate-900 relative">
 
       {/* Header gets auth state as props — no duplicate auth calls */}
       <Header
@@ -231,7 +240,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       )}
 
       {!showTechnicianSidebar && (
-        <main className="flex-grow w-full max-w-7xl mx-auto pb-20 lg:pb-0">
+        <main className="grow w-full max-w-7xl mx-auto pb-20 lg:pb-0">
           {children}
         </main>
       )}

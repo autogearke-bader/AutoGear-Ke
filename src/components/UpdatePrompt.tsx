@@ -1,38 +1,48 @@
 // src/components/UpdatePrompt.tsx
-import React from 'react';
-import { useServiceWorker } from '../hooks/useServiceWorker';
+import { useEffect, useState } from 'react';
 
-export const UpdatePrompt: React.FC = () => {
-  const { needRefresh, update } = useServiceWorker();
+export const UpdatePrompt = () => {
+  const [showPrompt, setShowPrompt] = useState(false);
+  const [isPWA, setIsPWA] = useState(false);
 
-  if (!needRefresh) return null;
+  // ✅ Detect if running as installed PWA
+  useEffect(() => {
+    const checkPWA = () => {
+      const isStandalone    = window.matchMedia('(display-mode: standalone)').matches;
+      const isTabbed        = window.matchMedia('(display-mode: tabbed)').matches;
+      const isIOSStandalone = (window.navigator as any).standalone === true;
+      setIsPWA(isStandalone || isTabbed || isIOSStandalone);
+    };
+    checkPWA();
+  }, []);
+
+  useEffect(() => {
+    const handler = () => setShowPrompt(true);
+    window.addEventListener('swUpdateAvailable', handler);
+    return () => window.removeEventListener('swUpdateAvailable', handler);
+  }, []);
+
+  // ✅ Only render if running as PWA AND update is available
+  if (!isPWA || !showPrompt) return null;
 
   return (
-    <div className="fixed bottom-36 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
-      <div className="bg-slate-800 border border-blue-500/50 rounded-xl shadow-2xl p-4 flex items-center gap-4 max-w-sm w-full pointer-events-auto animate-slide-up">
-        {/* Icon */}
-        <div className="flex-shrink-0 w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
-            />
-          </svg>
-        </div>
-
-        {/* Text */}
-        <div className="flex-1 min-w-0">
-          <p className="text-white text-sm font-semibold">Update Available</p>
-          <p className="text-slate-400 text-xs mt-0.5">A new version of Mekh is ready</p>
-        </div>
-
-        {/* Button */}
-        <button
-          onClick={update}
-          className="flex-shrink-0 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-lg transition-colors"
-        >
-          Update
-        </button>
+    <div className="fixed bottom-20 left-4 right-4 bg-slate-900 border border-blue-600 rounded-2xl p-4 flex items-center gap-3 z-50 shadow-xl">
+      <div className="flex-1">
+        <p className="text-white font-bold text-sm">Update Available</p>
+        <p className="text-slate-400 text-xs">A new version of Mekh is ready</p>
       </div>
+      <button
+        onClick={() => window.location.reload()}
+        className="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-full"
+      >
+        Update
+      </button>
+      <button
+        onClick={() => setShowPrompt(false)}
+        className="text-slate-500 text-xs"
+      >
+        ✕
+      </button>
     </div>
   );
 };

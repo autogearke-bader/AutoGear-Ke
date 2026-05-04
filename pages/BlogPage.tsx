@@ -44,7 +44,7 @@ const BlogPage: React.FC = () => {
   const featuredArticle = articles[0] ?? null;
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen w-full bg-slate-950">
       <Helmet>
         <title>Mekh Insights |  Car Care Tips & Guides for Kenyan Drivers</title>
         {/* Dynamic meta description: use featured article or fallback to generic */}
@@ -52,14 +52,14 @@ const BlogPage: React.FC = () => {
         <meta property="og:title"       content={featuredArticle?.title || "Mekh Insights |  Car Care Tips & Guides for Kenyan Drivers"} />
         <meta property="og:description" content={featuredArticle?.meta_description || featuredArticle?.excerpt || "Expert tips on car tinting, wrapping, PPF, ceramic coating, and detailing in Kenya."} />
         {/* Dynamic OG image: use featured article image or fallback to logo */}
-        <meta property="og:image"       content={featuredArticle?.images?.[0]?.url ? cx(featuredArticle.images[0].url, 'w_1200,h_630,c_fill,q_auto,f_auto') : "https://mekh.app/assets/mekhl.png"} />
+        <meta property="og:image"       content={featuredArticle?.images?.[0]?.url ? cx(featuredArticle.images[0].url, 'w_1200,h_630,c_fill,q_auto,f_auto') : "https://mekh.app/assets/mekh.png"} />
         <meta property="og:url"         content="https://mekh.app/blogs" />
         <meta property="og:type"        content="website" />
         <meta property="og:site_name"   content="Mekh" />
         <meta name="twitter:card"        content="summary_large_image" />
         <meta name="twitter:title"       content={featuredArticle?.title || "Mekh Insights |  Car Care Tips & Guides for Kenyan Drivers"} />
         <meta name="twitter:description" content={featuredArticle?.meta_description || featuredArticle?.excerpt || "Expert tips on car tinting, wrapping, PPF, ceramic coating, and detailing in Kenya."} />
-        <meta name="twitter:image"       content={featuredArticle?.images?.[0]?.url ? cx(featuredArticle.images[0].url, 'w_1200,h_630,c_fill,q_auto,f_auto') : "https://mekh.app/assets/mekhl.png"} />
+        <meta name="twitter:image"       content={featuredArticle?.images?.[0]?.url ? cx(featuredArticle.images[0].url, 'w_1200,h_630,c_fill,q_auto,f_auto') : "https://mekh.app/assets/mekh.png"} />
         <link rel="canonical" href="https://mekh.app/blogs" />
         <script type="application/ld+json">
           {JSON.stringify({
@@ -75,11 +75,11 @@ const BlogPage: React.FC = () => {
       </Helmet>
 
       {/* ── Hero ──────────────────────────────────────── */}
-      <section className="relative py-10 md:py-14 px-4 md:px-8 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-slate-950 to-slate-950" />
+      <section className="relative py-2 md:py-10 px-4 md:px-8 overflow-hidden">
+        <div className="absolute inset-0" />
         <div className="relative max-w-7xl mx-auto text-center">
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-black text-white mb-2 tracking-tight">
-            Mekh <span className="text-blue-500">Insights</span>
+            <span className="text-blue-500">Mekh Insights</span>
           </h1>
           <p className="text-slate-400 text-sm md:text-base max-w-xl mx-auto">
             Your guide to car care, maintenance, and everything on Kenyan roads.
@@ -110,16 +110,16 @@ const BlogPage: React.FC = () => {
                            {featuredArticle.title}
                          </h2>
                          {featuredArticle.excerpt && (
-                        <p className="text-slate-300 text-base line-clamp-2 max-w-2xl">{featuredArticle.excerpt}</p>
+                        <p className="text-slate-500 text-base line-clamp-2 max-w-2xl">{featuredArticle.excerpt}</p>
                          )}
-                       <p className="text-blue-400 text-[11px] font-black uppercase tracking-widest mt-3 group-hover:underline">Read Article →</p>
+                       <p className="text-blue-500 text-[11px] font-black uppercase tracking-widest mt-3 group-hover:underline">Read Article →</p>
            </div>
           </div>
             )}
 
             {/* Text below image — mobile only */}
              <div className="md:hidden p-5">
-                <h2 className="text-lg font-black text-white leading-tight mb-2">
+                <h2 className="text-lg font-black text-blue-500 leading-tight mb-2">
                   {featuredArticle.title}
                 </h2>
                  {featuredArticle.excerpt && (

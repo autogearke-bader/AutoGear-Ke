@@ -519,10 +519,10 @@ const TechnicianProfilePage: React.FC = () => {
       </Helmet>
 
       {/* Back to Home Link - Hidden on mobile */}
-      <div className="hidden md:block px-4 md:px-8 py-0">
+      <div className="hidden md:block px-4 md:px-16 py-0">
         <Link 
           to="/"
-          className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors inline-flex items-center gap-1"
+          className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors inline-flex items-center gap-1"
         >
           ← Back to Home
         </Link>
@@ -533,7 +533,7 @@ const TechnicianProfilePage: React.FC = () => {
         <div className="max-w-4xl mx-auto">
           {/* Cover Image - using thumbnail_image as cover */}
           {technician.thumbnail_image && (
-            <div className="w-full h-32 md:h-48 rounded-lg overflow-hidden mb-4">
+            <div className="w-full h-32 md:h-60 rounded-lg overflow-hidden mb-4">
               <img
                 src={cardThumbnail(technician.thumbnail_image)}
                 alt={`${technician.business_name} cover`}
@@ -554,14 +554,14 @@ const TechnicianProfilePage: React.FC = () => {
             {/* Identity */}
             <div className="flex-1">
               <div className="flex items-center justify-between">
-                <h1 className="text-2xl md:text-3xl font-black text-white mb-2">
+                <h1 className="text-2xl md:text-3xl font-black text-blue-500 mb-2">
                   {technician.business_name}
                 </h1>
                 {/* Edit Profile Button - only for owner */}
                 {isCurrentUser && (
                   <button
                     onClick={() => navigate('/technician-dashboard?tab=profile')}
-                    className="ml-4 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                    className="ml-4 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors"
                   >
                     Edit Profile
                   </button>
@@ -576,17 +576,17 @@ const TechnicianProfilePage: React.FC = () => {
                   </span>
                 )}
                 {technician.mobile_service === 'yes' && (
-                  <span className="bg-green-900/50 text-green-400 text-xs px-2 py-1 rounded border border-green-800">
+                  <span className="bg-green-200 text-green-500 text-xs px-2 py-1 rounded border border-green-800">
                     Mobile Service
                   </span>
                 )}
                 {technician.mobile_service === 'no' && (
-                  <span className="bg-blue-900/50 text-blue-400 text-xs px-2 py-1 rounded border border-blue-800">
+                  <span className="bg-blue-200 text-blue-500 text-xs px-2 py-1 rounded border border-blue-800">
                     Studio Based
                   </span>
                 )}
                 {technician.mobile_service === 'both' && (
-                  <span className="bg-purple-900/50 text-purple-400 text-xs px-2 py-1 rounded border border-purple-800">
+                  <span className="bg-purple-200 text-purple-500 text-xs px-2 py-1 rounded border border-purple-800">
                     Mobile & Studio
                   </span>
                 )}
@@ -595,8 +595,8 @@ const TechnicianProfilePage: React.FC = () => {
               {/* Rating - Always show */}
               <div className="flex items-center gap-2 mb-2">
                 <div className="flex items-center gap-1">
-                  <span className="text-yellow-400 text-lg">★</span>
-                  <span className="text-white font-bold">
+                  <span className="text-yellow-500 text-lg">★</span>
+                  <span className="text-blue-500 font-bold">
                     {technician.review_count > 0 
                       ? (technician.avg_rating || 0).toFixed(1)
                       : 'New'
@@ -608,7 +608,7 @@ const TechnicianProfilePage: React.FC = () => {
                 </div>
               </div>
 
-              <p className="text-slate-400 text-sm flex items-center gap-1">
+              <p className="text-blue-500 text-sm flex items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
                   <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
                 </svg>
@@ -624,7 +624,7 @@ const TechnicianProfilePage: React.FC = () => {
       {portfolioPhotos.length > 0 && (
         <section className="px-4 md:px-8 pb-6">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-lg font-bold text-white mb-3">Portfolio</h2>
+            <h2 className="text-lg font-bold text-blue-500 mb-3">Portfolio</h2>
             
             {/* Uniform grid - 2 columns on mobile, 3 columns on desktop */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -651,7 +651,7 @@ const TechnicianProfilePage: React.FC = () => {
       {videos.length > 0 && (
         <section className="px-4 md:px-8 pb-6">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-lg font-bold text-white mb-3">Videos</h2>
+            <h2 className="text-lg font-bold text-blue-500 mb-3">Videos</h2>
             
             {/* Mobile: horizontal scroll, 75% width each */}
             <div className="md:hidden flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory">
@@ -679,14 +679,14 @@ const TechnicianProfilePage: React.FC = () => {
                             }}
                           />
                         ) : (
-                          <div className="absolute inset-0 bg-slate-800 flex items-center justify-center rounded-lg">
-                            <span className="text-slate-500 text-xs">Loading...</span>
+                          <div className="absolute inset-0 bg-white flex items-center justify-center rounded-lg">
+                            <span className="text-blue-500 text-xs">Loading...</span>
                           </div>
                         )}
                         {/* Play button overlay */}
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-colors rounded-lg">
-                          <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                            <svg className="w-5 h-5 text-black ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                        <div className="absolute inset-0 flex items-center justify-center bg-blue-500 group-hover:bg-blue-600 transition-colors rounded-lg">
+                          <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                            <svg className="w-5 h-5 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M8 5v14l11-7z"/>
                             </svg>
                           </div>
@@ -744,8 +744,8 @@ const TechnicianProfilePage: React.FC = () => {
                         )}
                         {/* Play button overlay */}
                         <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-colors rounded-lg">
-                          <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                            <svg className="w-5 h-5 text-black ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                          <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                            <svg className="w-5 h-5 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M8 5v14l11-7z"/>
                             </svg>
                           </div>
@@ -775,8 +775,8 @@ const TechnicianProfilePage: React.FC = () => {
       {technician.bio && (
         <section className="px-4 md:px-8 pb-6">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-lg font-bold text-white mb-2">About</h2>
-            <p className="text-slate-300 text-sm leading-relaxed">{technician.bio}</p>
+            <h2 className="text-lg font-bold text-blue-500 mb-2">About</h2>
+            <p className="text-slate-500 text-sm leading-relaxed">{technician.bio}</p>
           </div>
         </section>
       )}
@@ -785,7 +785,7 @@ const TechnicianProfilePage: React.FC = () => {
       {technician.technician_services && technician.technician_services.length > 0 && (
         <section className="px-4 md:px-8 pb-6">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-lg font-bold text-white mb-3">Services <span className="text-xs font-normal text-slate-400 ml-2">The Pricing of a service depends on the vehicle size and the Model</span></h2>
+            <h2 className="text-lg font-bold text-blue-500 mb-3">Services <span className="text-xs font-normal text-slate-400 ml-2">The Pricing of a service depends on the vehicle size and the Model</span></h2>
             <ul className="space-y-2">
               {technician.technician_services.map((service) => {
                 const variants = technician.service_variants?.filter(v => v.service_id === service.id) || [];
@@ -794,15 +794,15 @@ const TechnicianProfilePage: React.FC = () => {
                   <li key={service.id} className="space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="text-blue-400">•</span>
-                        <span className="text-white font-medium">{service.service_name}</span>
+                        <span className="text-blue-500">•</span>
+                        <span className="text-blue-500 font-medium">{service.service_name}</span>
                         {variants.length === 0 && service.price && (
-                          <span className="text-green-400 font-medium">
+                          <span className="text-green-500 font-medium">
                             Ksh {service.price.toLocaleString()}
                           </span>
                         )}
                         {variants.length === 0 && service.negotiable && (
-                          <span className="bg-yellow-900/50 text-yellow-400 text-xs px-2 py-0.5 rounded border border-yellow-800">
+                          <span className="bg-white text-yellow-500 text-xs px-2 py-0.5 rounded border border-yellow-600">
                             Negotiable
                           </span>
                         )}
@@ -811,7 +811,7 @@ const TechnicianProfilePage: React.FC = () => {
                         <Link
                           to={`#book-${service.id}`}
                           onClick={() => handleBookService(service.service_name)}
-                          className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
+                          className="text-blue-500 hover:text-blue-300 text-sm font-medium transition-colors"
                         >
                           Book →
                         </Link>
@@ -822,29 +822,29 @@ const TechnicianProfilePage: React.FC = () => {
                       <ul className="ml-6 space-y-1">
                         {variants.map((variant) => (
                           <li key={variant.id} className="flex items-center gap-2 min-w-0">
-                            <span className="text-blue-300 shrink-0">◦</span>
+                            <span className="text-blue-500 shrink-0">◦</span>
                             <span
                               className={`text-slate-300 flex-1 min-w-0 md:truncate${
-                                expandedVariants.has(variant.id) ? '' : ' truncate'
+                                variant.id && expandedVariants.has(variant.id) ? '' : ' truncate'
                               } md:cursor-default cursor-pointer`}
-                              onClick={() => toggleVariantName(variant.id)}
+                              onClick={() => variant.id && toggleVariantName(variant.id)}
                             >
                               {variant.variant_name}
                             </span>
                             {variant.price && (
-                              <span className="text-green-400 font-medium shrink-0">
+                              <span className="text-green-500 font-medium shrink-0">
                                 Ksh {variant.price.toLocaleString()}
                               </span>
                             )}
                             {variant.is_negotiable && (
-                              <span className="bg-yellow-900/50 text-yellow-400 text-xs px-2 py-0.5 rounded border border-yellow-800 shrink-0">
+                              <span className="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded border border-yellow-600 shrink-0">
                                 Negotiable
                               </span>
                             )}
                             <Link
                               to={`#book-${service.id}`}
                               onClick={() => handleBookService(`${service.service_name} - ${variant.variant_name}`)}
-                              className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors shrink-0"
+                              className="text-blue-500 hover:text-blue-300 text-sm font-medium transition-colors shrink-0"
                             >
                               Book →
                             </Link>
@@ -855,7 +855,7 @@ const TechnicianProfilePage: React.FC = () => {
 
                     {/* Service note */}
                     {service.notes && (
-                      <p className="ml-6 text-slate-400 text-xs italic leading-relaxed">
+                      <p className="ml-6 text-slate-500 text-xs italic leading-relaxed">
                         {service.notes}
                       </p>
                     )}
@@ -868,7 +868,7 @@ const TechnicianProfilePage: React.FC = () => {
             <div className="mt-4 pt-4 border-t border-slate-800">
               <Link 
                 to={`/${getServiceSlug(technician.technician_services[0]?.service_name || 'car-detailing')}/${getLocationSlug(technician.area || technician.county || 'nairobi')}`}
-                className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
+                className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-300 text-sm font-medium transition-colors"
               >
                 View all {technician.technician_services[0]?.service_name || 'services'} in {technician.area || technician.county}
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -884,7 +884,7 @@ const TechnicianProfilePage: React.FC = () => {
       {(technician.area || technician.google_maps_link || (technician.latitude && technician.longitude)) && (
         <section className="px-4 md:px-8 pb-6">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-lg font-bold text-white mb-3">Location</h2>
+            <h2 className="text-lg font-bold text-blue-500 mb-3">Location</h2>
             {technician.latitude && technician.longitude ? (
               <TechnicianMap 
                 area={technician.area} 
@@ -938,7 +938,7 @@ const TechnicianProfilePage: React.FC = () => {
       {businessHours.length > 0 && (
         <section className="px-4 md:px-8 pb-6">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-lg font-bold text-white mb-3">Business Hours</h2>
+            <h2 className="text-lg font-bold text-blue-500 mb-3">Business Hours</h2>
             <BusinessHoursDisplay hours={businessHours} />
           </div>
         </section>
@@ -947,15 +947,15 @@ const TechnicianProfilePage: React.FC = () => {
       {/* Reviews - Always show the section */}
       <section className="px-4 md:px-8 pb-24">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-lg font-bold text-white mb-3">Reviews</h2>
+            <h2 className="text-lg font-bold text-blue-500 mb-3">Reviews</h2>
             
             {/* Rating Summary */}
             <div className="flex items-center gap-4 mb-4">
-              <div className="text-4xl font-black text-white">
+              <div className="text-4xl font-black text-blue-500">
                 {technician.review_count > 0 ? (technician.avg_rating || 0).toFixed(1) : '-'}
               </div>
               <div>
-                <div className="flex text-yellow-400">
+                <div className="flex text-yellow-500">
                   {technician.review_count > 0 
                     ? '★'.repeat(Math.round(technician.avg_rating || 0))
                     : null
@@ -984,11 +984,11 @@ const TechnicianProfilePage: React.FC = () => {
 
             {/* Review Form */}
             {showReviewForm && (
-              <div className="mb-6 bg-slate-900 border border-slate-800 p-4 rounded-lg">
+              <div className="mb-6 bg-blue-500 border border-blue-500 p-4 rounded-lg">
                 <h3 className="text-white font-bold mb-3">Your Review</h3>
                 
                 {reviewError && (
-                  <div className="mb-3 p-2 bg-red-900/50 border border-red-800 text-red-400 text-sm rounded">
+                  <div className="mb-3 p-2 bg-red-500 border border-red-600 text-red-400 text-sm rounded">
                     {reviewError}
                   </div>
                 )}
@@ -1082,15 +1082,15 @@ const TechnicianProfilePage: React.FC = () => {
                   <div key={review.id} className="bg-slate-900 border border-slate-800 p-4 rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <div>
-                        <p className="text-white font-medium">{review.client_name}</p>
+                        <p className="text-blue-500 font-medium">{review.client_name}</p>
                         <p className="text-slate-400 text-xs">
                           {new Date(review.created_at).toLocaleDateString()}
                         </p>
                       </div>
                       <div className="flex items-center gap-1">
-                        <span className="text-yellow-400">{'★'.repeat(review.rating)}</span>
+                        <span className="text-yellow-500">{'★'.repeat(review.rating)}</span>
                         {review.would_rebook === 'yes' && (
-                          <span className="ml-2 text-green-400 text-xs">↻ Would rebook</span>
+                          <span className="ml-2 text-green-500 text-xs">↻ Would rebook</span>
                         )}
                       </div>
                     </div>
@@ -1106,7 +1106,7 @@ const TechnicianProfilePage: React.FC = () => {
 
             {/* Book Button - Below Reviews */}
             <div className="mt-8 pt-6 border-t border-slate-800">
-              <h3 className="text-lg font-bold text-white mb-3">Book This Technician</h3>
+              <h3 className="text-lg font-bold text-blue-500 mb-3">Book This Technician</h3>
               <button
                 onClick={() => handleBookService(technician.technician_services?.[0]?.service_name || '')}
                 className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors"
@@ -1172,7 +1172,7 @@ const TechnicianProfilePage: React.FC = () => {
 
             {/* Add/Edit Form */}
             {!editingVideo && technician.technician_videos && technician.technician_videos.length >= 3 ? (
-              <p className="text-yellow-400 text-sm">Maximum of 3 video links reached. Please remove a video to add a new one.</p>
+              <p className="text-yellow-500 text-sm">Maximum of 3 video links reached. Please remove a video to add a new one.</p>
             ) : (
               <>
                 <div className="mb-4">

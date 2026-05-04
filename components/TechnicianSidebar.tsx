@@ -34,8 +34,8 @@ const TechnicianSidebar: React.FC<TechnicianSidebarProps> = ({ technician }) => 
 
   const isActive = (path: string) => location.pathname === path || location.search.includes(path);
 
-  const activeClass = "bg-sky-500/20 text-sky-400 border-r-2 border-sky-500";
-  const inactiveClass = "text-slate-300 hover:bg-slate-800/50 hover:text-white";
+  const activeClass = "bg-sky-500/20 text-blue-500 border-r-2 border-sky-500";
+  const inactiveClass = "text-blue-500 hover:bg-slate-800/50 hover:text-white";
 
   const handleSignOut = async () => {
     try {
@@ -59,7 +59,7 @@ const TechnicianSidebar: React.FC<TechnicianSidebarProps> = ({ technician }) => 
       {/* Profile Section */}
       <div className="p-4 border-b border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-full bg-sky-500 flex items-center justify-center text-white font-bold overflow-hidden">
+          <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-[#ffff] font-bold overflow-hidden">
             {technician?.profile_image ? (
               <img 
                 src={profileThumb(technician.profile_image)} 
@@ -72,7 +72,7 @@ const TechnicianSidebar: React.FC<TechnicianSidebarProps> = ({ technician }) => 
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-white truncate">{businessName}</h3>
+            <h3 className="font-bold text-blue-500 truncate">{businessName}</h3>
             <p className="text-sm text-slate-400 truncate">{fullName}</p>
             <div className="flex items-center gap-1 mt-1">
               <span className={`w-2 h-2 rounded-full ${technician?.status === 'live' ? 'bg-green-500' : 'bg-yellow-500'}`}></span>

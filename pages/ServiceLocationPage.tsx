@@ -7,11 +7,10 @@ import { TechnicianCard, TechnicianCardSkeleton } from '../src/components/Techni
 
 // ─── Service Slugs ────────────────────────────────────────────────────────────
 export const SERVICE_SLUGS: Record<string, string> = {
-   'window-tinting': 'Car Window Tinting',
+  'window-tinting': 'Car Window Tinting',
   'car-wrapping': 'Car Wrapping',
   'ppf': 'PPF Installation',
   'ceramic-coating': 'Ceramic Coating',
-  'car-buffing': 'Car Buffing',
   'car-detailing': 'Car Detailing',
   'headlight-restoration': 'Headlight Restoration',
   'car-tuning': 'Car Tuning',
@@ -20,16 +19,18 @@ export const SERVICE_SLUGS: Record<string, string> = {
 // ─── Location Slugs (all lowercase + hyphens for URL safety) ──────────────────
 export const LOCATION_SLUGS: Record<string, string> = {
   'nairobi': 'Nairobi',
-  // Nairobi estates — all fixed to lowercase + hyphens
+  'kileleshwa': 'Kileleshwa',
+  'thika-road': 'Thika Road',
+  'parklands': 'Parklands',
   'lavington': 'Lavington',
-  'kiambu-road': 'Kiambu Road',
   'westlands': 'Westlands',
   'karen': 'Karen',
   'kilimani': 'Kilimani',
-  'ngong-road': 'Ngong Road',
-  'thika-road': 'Thika Road',
+  'garden-estate': 'Garden Estate',
   'langata': 'Langata',
-  'ruaka': 'Ruaka',
+  'ruiru': 'Ruiru',
+  'ngong-road': 'Ngong Road',
+  'kiambu-road': 'Kiambu Road',
 };
 
 // ─── Service Content ───────────────────────────────────────────────────────────
@@ -255,47 +256,9 @@ Find mobile car window tinting near you. Book certified 3M & Llumar technicians 
     ],
   },
 
-  'car-buffing': {
-    metaDescription: `Car buffing & paint polishing in {location}, Kenya. Remove swirl marks, scratches & oxidation. Find professional detailers & book on Mekh.`,
-    intro: `Car buffing and polishing in {location} costs KES 5,000–20,000 depending on vehicle size. Mekh connects you with certified technicians in {location} who use machine buffing to remove swirl marks, oxidation, light scratches, and water spots — bringing your paint back to showroom condition.`,
-    priceRange: 'KES 5,000 – KES 20,000',
-    quickAnswer: {
-      cost: 'KES 5,000 – 20,000',
-      time: '2–3 hours',
-      technicians: 'available',
-      mobile: true,
-    },
-    whatIs: 'Car buffing, also known as paint polishing, uses rotary buffers and compounds to remove swirl marks, oxidation, and light scratches from the vehicle\'s paint, restoring its shine and clarity.',
-      faqs: [
-        {
-          question: 'How much does car buffing cost in {location}?',
-          answer: 'Car buffing and polishing in {location} typically costs KES 5,000–20,000 depending on vehicle size, paint condition, and the level of correction required. Basic swirl mark removal starts lower, while extensive oxidation or deep scratch correction costs more. Premium compounds and professional-grade equipment may increase pricing. The final cost depends on how much work is needed to restore your vehicle\'s shine. Many technicians offer packages that include wax or sealant application after buffing.',
-        },
-        {
-          question: 'Does buffing remove scratches?',
-          answer: 'Buffing can remove light to moderate surface scratches and swirl marks that are only in the clear coat layer. Deep scratches that penetrate the clear coat or reach the base coat paint cannot be fully removed by buffing alone and may require touch-up paint or panel respray. The effectiveness depends on scratch depth and paint condition. Professional technicians can assess your vehicle and recommend the best approach. Some light scratches may become less visible after buffing, even if not completely eliminated.',
-        },
-        {
-          question: 'How often should I buff my car?',
-          answer: 'Most vehicles benefit from professional buffing once a year, or every 12–18 months depending on driving conditions and paint care. Vehicles exposed to harsh sunlight, road salt, or frequent washing may need it more often. Over-buffing can thin the clear coat over time, so it\'s best done by professionals who measure paint thickness and use appropriate techniques. Regular waxing and proper washing between buffing sessions help maintain the results longer.',
-        },
-        {
-          question: 'Is buffing safe for my car?',
-          answer: 'Yes, buffing is safe when done by trained professionals using the correct machine, pad, compound, and technique combination. They know how to avoid heat buildup that could damage paint or plastic parts. Improper buffing by untrained hands can cause holograms (rainbow effects), thin spots in the clear coat, or even burn the paint. Always choose certified technicians with experience in paint correction. Professional buffing actually strengthens and protects the paint when done correctly.',
-        },
-      ],
-    pricingContext: 'Car buffing and polishing in {location} typically costs KES 5,000–20,000 depending on vehicle size and the level of paint correction needed.',
-     benefits: [
-       'Removes swirl marks and oxidation',
-       'Restores showroom shine and clarity',
-       'Eliminates water spots and light scratches',
-       'Great preparation before ceramic coating or PPF',
-       'Increases resale value',
-       'Safe for all paint types when done professionally',
-     ],
-   },
-
-   'headlight-restoration': {
+  
+    
+      'headlight-restoration':{
      metaDescription: `Professional headlight restoration services in {location}, Kenya. Restore cloudy headlights to clear, bright condition. Compare prices, portfolios & book certified technicians on Mekh.`,
      intro: `Headlight restoration in {location} costs KES 2,000–8,000 per headlight depending on condition. Mekh connects you with certified technicians in {location} who restore cloudy, yellowed headlights to clear, bright condition using professional sanding and coating techniques. Improve visibility and safety while enhancing your vehicle's appearance.`,
      priceRange: 'KES 2,000 – KES 8,000',
@@ -394,6 +357,14 @@ Find mobile car window tinting near you. Book certified 3M & Llumar technicians 
   'car-detailing': {
     metaDescription: `Professional car detailing in {location}, Kenya. Interior deep clean, exterior polish & full detailing packages. Find trusted detailers & book on Mekh.`,
     intro: `Experience the ultimate car detailing services in {location}. Mekh connects you with professional detailers offering everything from interior deep cleaning and leather conditioning to exterior paint correction and show-car preparation. We use professional-grade products and techniques to restore your vehicle inside and out.`,
+    priceRange: 'KES 5,000 – KES 25,000+',
+    quickAnswer: {
+      cost: 'KES 5,000 – 25,000+',
+      time: '2–8 hours',
+      technicians: 'available',
+      mobile: true,
+    },
+    whatIs: 'Car detailing is a comprehensive cleaning and restoration process that goes beyond a regular car wash. It involves deep cleaning, polishing, and protecting both the interior and exterior of a vehicle to restore it to showroom condition.',
     faqs: [
       {
         question: 'How much does car detailing cost in {location}?',
@@ -428,6 +399,14 @@ Find mobile car window tinting near you. Book certified 3M & Llumar technicians 
 const getDefaultContent = (service: string, location: string): ServiceContent => ({
   metaDescription: `Find professional ${service.toLowerCase()} services in ${location}, Kenya. Browse certified technicians, compare prices & book on Mekh.`,
   intro: `Looking for professional ${service.toLowerCase()} services in ${location}? Mekh connects you with certified automotive technicians in your area. Browse profiles, compare services, and book with confidence.`,
+  priceRange: 'Contact for quote',
+  quickAnswer: {
+    cost: 'Varies',
+    time: 'Varies',
+    technicians: 'available',
+    mobile: true,
+  },
+  whatIs: `${service} is a professional automotive service. Contact certified technicians in ${location} for detailed information about this service.`,
   faqs: [
     {
       question: `How much does ${service.toLowerCase()} cost in ${location}?`,
@@ -457,7 +436,6 @@ const SERVICE_SEARCH_TERMS: Record<string, string[]> = {
   'Car Wrapping': ['wrapping', 'wrap'],
   'PPF Installation': ['ppf', 'paint protection', 'film'],
   'Ceramic Coating': ['ceramic', 'coating'],
-  'Car Buffing': ['buffing', 'buff', 'polish'],
   'Car Detailing': ['detailing', 'detail', 'wash'],
   'Headlight Restoration': ['headlight restoration', 'headlight', 'tail light'],
   'Car Tuning': ['tuning', 'tune', 'ecu'],
@@ -469,7 +447,9 @@ const SERVICE_SEARCH_TERMS: Record<string, string[]> = {
 
 // Helper to get custom title based on service and location
 const getCustomTitle = (service: string, locationName: string): string => {
-  const key = `${service}-${location}`;
+  const serviceName = SERVICE_SLUGS[service] || service;
+  const locationSlug = Object.entries(LOCATION_SLUGS).find(([, v]) => v === locationName)?.[0] || locationName.toLowerCase().replace(/\s+/g, '-');
+  const key = `${service}-${locationSlug}`;
   const customTitles: Record<string, string> = {
     'car-wrapping-karen': 'Car Wrapping in Karen | Professional Vehicle Wraps | Mekh',
     'car-detailing-karen': 'Professional Car Detailing in Karen | Mekh',
@@ -485,7 +465,6 @@ const getCustomTitle = (service: string, locationName: string): string => {
     'car-wrapping-westlands': 'Professional Car Wrapping Services in Westlands, Nairobi',
     'car-detailing-kiambu-road': 'Professional Mobile Car Detailing Services on Kiambu Road',
     'car-wrapping-kiambu-road': 'Professional Car Wrapping Services on Kiambu Road, Nairobi',
-    'car-detailing-ruaka': 'Professional Car Detailing Services in Ruaka, Nairobi',
     'ceramic-coating-nairobi': 'Professional Ceramic Coating Services in Nairobi',
     'ceramic-coating-westlands': 'Professional Ceramic Coating Services in Westlands, Nairobi',
     'ceramic-coating-kiambu-road': 'Professional Ceramic Coating Services on Kiambu Road',
@@ -495,11 +474,12 @@ const getCustomTitle = (service: string, locationName: string): string => {
 
 // Helper to get custom H1 based on service and location
 const getCustomH1 = (service: string, locationName: string): string => {
-  const key = `${service}-${location}`;
+  const serviceName = SERVICE_SLUGS[service] || service;
+  const locationSlug = Object.entries(LOCATION_SLUGS).find(([, v]) => v === locationName)?.[0] || locationName.toLowerCase().replace(/\s+/g, '-');
+  const key = `${service}-${locationSlug}`;
   const customH1s: Record<string, string> = {
     'car-detailing-karen': 'Professional Car Detailing Services in Karen, Nairobi',
     'car-wrapping-thika-road': 'Professional Car Wrapping Services in Thika Road, Nairobi',
-    'car-wrapping-wambugu-road': 'Professional Car Wrapping Services on Wambugu Road, Nairobi',
     'car-wrapping-nairobi': 'Professional Car Wrapping Services in Nairobi',
     'car-detailing-nairobi': 'Professional Car Detailing Services in Nairobi',
     'car-detailing-thika-road': 'Professional Car Detailing Services on Thika Road',
@@ -514,7 +494,6 @@ const getCustomH1 = (service: string, locationName: string): string => {
     'car-wrapping-lavington': 'Professional Car Wrapping Services in Lavington, Nairobi',
     'ceramic-coating-kiambu-road': 'Professional Ceramic Coating Services on Kiambu Road',
     'car-detailing-kiambu-road': 'Professional Mobile Car Detailing Services on Kiambu Road',
-    'car-detailing-ruaka': 'Professional Car Detailing Services in Ruaka, Nairobi',
     'car-detailing-westlands': 'Professional Car Detailing Services in Westlands, Nairobi',
   };
   return customH1s[key] || (service === 'window-tinting' ? `Car Window Tinting in ${locationName} — Mobile Service Near You` : `${serviceName} in ${locationName}`);
@@ -599,7 +578,7 @@ const ServiceLocationPage: React.FC = () => {
     name: `${serviceName} in ${locationName}`,
     description: serviceContent?.intro || '',
     priceRange: serviceContent?.priceRange,
-    telephone: '+254700000000', // Placeholder, replace with actual
+    telephone: '+254738242743', // Placeholder, replace with actual
     address: {
       '@type': 'PostalAddress',
       addressLocality: locationName,
@@ -646,7 +625,7 @@ const ServiceLocationPage: React.FC = () => {
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mekh.app' },
       { '@type': 'ListItem', position: 2, name: serviceName, item: `https://mekh.app/services/${service}` },
-      { '@type': 'ListItem', position: 3, name: locationName, item: `https://mekh.app/${service}/${location}` },
+      { '@type': 'ListItem', position: 3, name: locationName, item: `https://mekh.app/services/${service}/${location}` },
     ],
   }), [serviceName, locationName, service, location]);
 
@@ -664,14 +643,14 @@ const ServiceLocationPage: React.FC = () => {
         <meta name="description" content={serviceContent?.metaDescription || ''} />
 
         {/* Canonical URL */}
-        <link rel="canonical" href={`https://mekh.app/${service}/${location}`} />
+        <link rel="canonical" href={`https://mekh.app/services/${service}/${location}`} />
 
         {/* Open Graph */}
         <meta property="og:title" content={`${serviceName} in ${locationName} | Mekh`} />
         <meta property="og:description" content={serviceContent?.metaDescription || ''} />
         <meta property="og:image" content={`https://mekh.app/assets/${service}.jpg`} />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content={`https://mekh.app/${service}/${location}`} />
+        <meta property="og:url" content={`https://mekh.app/services/${service}/${location}`} />
 
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
@@ -697,14 +676,13 @@ const ServiceLocationPage: React.FC = () => {
 
       {/* ─── Hero ─────────────────────────────────────────────────────────── */}
       <section className="relative py-12 md:py-16 px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-slate-950 to-slate-950" />
         <div className="relative max-w-4xl mx-auto text-center">
 
           {/* Breadcrumb nav — also renders schema above */}
           <nav aria-label="Breadcrumb" className="mb-4 text-sm">
             <ol className="flex items-center justify-center gap-2 flex-wrap">
               <li>
-                <Link to="/" className="text-slate-400 hover:text-blue-400 transition-colors">
+                <Link to="/" className="text-slate-500 hover:text-blue-500 transition-colors">
                   Home
                 </Link>
               </li>
@@ -712,7 +690,7 @@ const ServiceLocationPage: React.FC = () => {
               <li>
                 <Link
                   to={`/services/${service}`}
-                  className="text-slate-400 hover:text-blue-400 transition-colors"
+                  className="text-slate-500 hover:text-blue-500 transition-colors"
                 >
                   {serviceName}
                 </Link>
@@ -723,35 +701,35 @@ const ServiceLocationPage: React.FC = () => {
           </nav>
 
           {/* H1 — primary keyword: Service in Location */}
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4 tracking-tight">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-blue-500 mb-4 tracking-tight">
             {getCustomH1(service!, locationName)}
           </h1>
 
-          <p className="text-slate-300 text-lg md:text-xl max-w-2xl mx-auto mb-6 leading-relaxed intro-paragraph">
+          <p className="text-slate-500 text-lg md:text-xl max-w-2xl mx-auto mb-6 leading-relaxed intro-paragraph">
             {serviceContent?.intro}
           </p>
 
           {/* What Is [Service]? */}
           {serviceContent?.whatIs && (
             <div className="max-w-2xl mx-auto mb-6">
-              <h3 className="text-white font-bold text-lg mb-2">What is {serviceName}?</h3>
+              <h3 className="text-blue-500 font-bold text-lg mb-2">What is {serviceName}?</h3>
               <p className="text-slate-400 leading-relaxed">{serviceContent.whatIs}</p>
             </div>
           )}
 
           {/* Quick Answer Box */}
           {serviceContent?.quickAnswer && (
-            <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 mb-6 max-w-2xl mx-auto">
+            <div className="bg-blue-500 border border-blue-500 rounded-2xl p-6 mb-6 max-w-2xl mx-auto">
               <h3 className="text-white font-bold text-lg mb-4 text-center">
                 {serviceName} in {locationName} — Quick Facts
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                 <div>
-                  <p className="text-slate-400 text-sm">Cost</p>
+                  <p className="text-white text-sm">Cost</p>
                   <p className="text-white font-semibold">{serviceContent.quickAnswer.cost}</p>
                 </div>
                 <div>
-                  <p className="text-slate-400 text-sm">Time</p>
+                  <p className="text-white text-sm">Time</p>
                   <p className="text-white font-semibold">{serviceContent.quickAnswer.time}</p>
                 </div>
                 <div>
@@ -771,13 +749,13 @@ const ServiceLocationPage: React.FC = () => {
               onClick={() =>
                 document.getElementById('technicians-section')?.scrollIntoView({ behavior: 'smooth' })
               }
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-bold text-sm transition-colors"
+              className="bg-blue-500 hover:bg-blue-500 text-white px-6 py-3 rounded-full font-bold text-sm transition-colors"
             >
               Browse Technicians
             </button>
             <Link
               to="/join"
-              className="bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-full font-bold text-sm transition-colors border border-slate-700"
+              className="text-blue-500 px-6 py-3 rounded-full font-bold text-sm transition-colors border border-slate-700"
             >
               Join as a Technician
             </Link>
@@ -788,7 +766,7 @@ const ServiceLocationPage: React.FC = () => {
       {/* ─── Pricing Context ──────────────────────────────────────────────── */}
       <section className="px-4 pb-8" aria-label="Pricing information">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 flex gap-4 items-start">
+          <div className="bg-blue-500 border border-blue-500 rounded-2xl p-6 flex gap-4 items-start">
             <div className="w-10 h-10 rounded-full bg-green-600/20 flex items-center justify-center flex-shrink-0 mt-0.5">
               <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -799,7 +777,7 @@ const ServiceLocationPage: React.FC = () => {
               <h2 className="text-lg font-bold text-white mb-1">
                 How Much Does {serviceName} Cost in {locationName}?
               </h2>
-              <p className="text-slate-300 text-sm leading-relaxed pricing-context">
+              <p className="text-white text-sm leading-relaxed pricing-context">
                 {serviceContent?.pricingContext}
               </p>
             </div>
@@ -810,29 +788,29 @@ const ServiceLocationPage: React.FC = () => {
         {/* ─── How It Works ────────────────────────────────────────────────── */}
         <section className="px-4 pb-10" aria-label="How it works">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold text-white mb-6 text-center">
+            <h2 className="text-2xl font-bold text-blue-500 mb-6 text-center">
               How It Works
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center">
-                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-white font-bold text-lg">1</span>
                 </div>
-                <h3 className="text-white font-semibold mb-2">Browse Verified Technicians</h3>
+                <h3 className="text-blue-500 font-semibold mb-2">Browse Verified Technicians</h3>
                 <p className="text-slate-400 text-sm">Find certified {serviceName.toLowerCase()} professionals in {locationName} with portfolios and reviews.</p>
               </div>
               <div className="text-center">
-                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-white font-bold text-lg">2</span>
                 </div>
-                <h3 className="text-white font-semibold mb-2">Compare Prices & Reviews</h3>
+                <h3 className="text-blue-500 font-semibold mb-2">Compare Prices & Reviews</h3>
                 <p className="text-slate-400 text-sm">Review portfolios, check pricing, and read customer feedback to choose the best fit.</p>
               </div>
               <div className="text-center">
-                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-white font-bold text-lg">3</span>
                 </div>
-                <h3 className="text-white font-semibold mb-2">Book & Get Confirmation</h3>
+                <h3 className="text-blue-500 font-semibold mb-2">Book & Get Confirmation</h3>
                 <p className="text-slate-400 text-sm">Book directly and receive a WhatsApp confirmation for your {serviceName.toLowerCase()} service.</p>
               </div>
             </div>
@@ -873,7 +851,7 @@ const ServiceLocationPage: React.FC = () => {
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             {/* H2 — location keyword reinforcement */}
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-2xl font-bold text-blue-500">
               {serviceName} Technicians in {locationName}
             </h2>
             {!loading && (
@@ -908,7 +886,7 @@ const ServiceLocationPage: React.FC = () => {
                     position: index + 1,
                     item: {
                       '@type': 'LocalBusiness',
-                      name: tech.business_name || tech.name,
+                      name: tech.business_name || `${tech.first_name} ${tech.last_name}`,
                       url: `https://mekh.app/technician/${tech.slug}`,
                     },
                   })),
@@ -923,7 +901,7 @@ const ServiceLocationPage: React.FC = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">
+              <h3 className="text-xl font-bold text-blue-500 mb-2">
                 No {serviceName} Technicians in {locationName} Yet
               </h3>
               <p className="text-slate-400 mb-6 max-w-sm mx-auto text-sm">
@@ -933,13 +911,13 @@ const ServiceLocationPage: React.FC = () => {
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Link
                   to="/join"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-bold text-sm transition-colors"
+                  className="hover:bg-blue-600 text-blue-500 px-6 py-3 rounded-full font-bold text-sm transition-colors"
                 >
                   List Your Business Free
                 </Link>
                 <button
                   onClick={() => navigate('/')}
-                  className="bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-full font-bold text-sm transition-colors"
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-full font-bold text-sm transition-colors"
                 >
                   Browse All Technicians
                 </button>
@@ -954,7 +932,7 @@ const ServiceLocationPage: React.FC = () => {
         <section className="px-4 pb-16" aria-label="Frequently asked questions">
           <div className="max-w-3xl mx-auto">
             {/* H2 — question keywords */}
-            <h2 className="text-2xl font-bold text-white mb-6 text-center">
+            <h2 className="text-2xl font-bold text-blue-500 mb-6 text-center">
               Frequently Asked Questions about {serviceName} in {locationName}
             </h2>
 
@@ -962,7 +940,7 @@ const ServiceLocationPage: React.FC = () => {
               {serviceContent.faqs.map((faq, idx) => (
                 <div
                   key={idx}
-                  className="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden"
+                  className="border border-blue-600 rounded-xl overflow-hidden"
                 >
                   <button
                     type="button"
@@ -999,7 +977,7 @@ const ServiceLocationPage: React.FC = () => {
               <p className="text-slate-400 text-sm mb-3">
                 More questions about {serviceName.toLowerCase()} in {locationName}?
               </p>
-              <Link to="/contact" className="text-blue-400 hover:underline font-medium text-sm">
+              <Link to="/contact" className="text-blue-500 hover:underline font-medium text-sm">
                 Contact Mekh →
               </Link>
             </div>
@@ -1010,7 +988,7 @@ const ServiceLocationPage: React.FC = () => {
       {/* ─── Other Services ────────────────────────────────────────────── */}
       <section className="px-4 pb-12" aria-label="Other services">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-lg font-bold text-white mb-4">
+          <h2 className="text-lg font-bold text-blue-500 mb-4">
             Other Services in {locationName}
           </h2>
           <div className="flex flex-wrap gap-2">
@@ -1019,8 +997,8 @@ const ServiceLocationPage: React.FC = () => {
               .map(([slug, name]) => (
                 <Link
                   key={slug}
-                  to={`/${slug}/${location}`}
-                  className="bg-slate-900 border border-slate-800 hover:border-slate-600 text-slate-300 hover:text-white px-3 py-1.5 rounded-full text-sm transition-colors"
+                  to={`/services/${slug}/${location}`}
+                  className="bg-blue-500 border border-blue-500 hover:border-blue-500 text-white hover:text-blue-300 px-3 py-1.5 rounded-full text-sm transition-colors"
                 >
                   {name} in {locationName}
                 </Link>
@@ -1032,7 +1010,7 @@ const ServiceLocationPage: React.FC = () => {
       {/* ─── Related Locations ────────────────────────────────────────────── */}
       <section className="px-4 pb-12" aria-label="Other locations">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-lg font-bold text-white mb-4">
+          <h2 className="text-lg font-bold text-blue-500 mb-4">
             {serviceName} in Other Areas
           </h2>
           <div className="flex flex-wrap gap-2">
@@ -1049,7 +1027,7 @@ const ServiceLocationPage: React.FC = () => {
                   <Link
                     key={slug}
                     to={`/services/${service}/${slug}`}
-                    className="bg-slate-900 border border-slate-800 hover:border-slate-600 text-slate-300 hover:text-white px-3 py-1.5 rounded-full text-sm transition-colors"
+                    className="bg-white border-blue-700 hover:border-blue-600 text-slate-300 hover:text-blue-500 px-3 py-1.5 rounded-full text-sm transition-colors"
                   >
                     {serviceName} in {name}
                   </Link>
@@ -1061,8 +1039,8 @@ const ServiceLocationPage: React.FC = () => {
 
       {/* ─── Technician CTA ───────────────────────────────────────────────── */}
       <section className="px-4 pb-16">
-        <div className="max-w-4xl mx-auto bg-gradient-to-r from-blue-900/50 to-slate-900 border border-blue-800/50 rounded-2xl p-8 text-center">
-          <h2 className="text-2xl font-bold text-white mb-3">
+        <div className="max-w-4xl mx-auto border border-blue-700 rounded-2xl p-8 text-center">
+          <h2 className="text-2xl font-bold text-blue-500 mb-3">
             Are You a {serviceName} Specialist in {locationName}?
           </h2>
           <p className="text-slate-300 mb-6 max-w-xl mx-auto">

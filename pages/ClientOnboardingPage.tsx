@@ -96,7 +96,7 @@ const ClientOnboardingPage: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full"></div>
+        <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
       </div>
     );
   }
@@ -106,13 +106,13 @@ const ClientOnboardingPage: React.FC = () => {
       {/* Header */}
       <header className="px-4 pt-6 pb-4">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center">
+          <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white">Welcome!</h1>
+            <h1 className="text-xl font-bold text-blue-500">Welcome!</h1>
             <p className="text-slate-400 text-sm">Complete your profile to get started</p>
           </div>
         </div>
@@ -154,7 +154,7 @@ const ClientOnboardingPage: React.FC = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter your full name"
-              className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+              className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-slate-500 placeholder-slate-500 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
             />
           </div>
 
@@ -168,7 +168,7 @@ const ClientOnboardingPage: React.FC = () => {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="e.g., 0712345678 or +254712345678"
-              className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+              className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-slate-500 placeholder-slate-500 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
             />
             <p className="text-slate-500 text-xs mt-1.5">
               This number is used to confirm service delivery and invite you to rate your experience.
@@ -186,7 +186,7 @@ const ClientOnboardingPage: React.FC = () => {
           <button
             type="submit"
             disabled={saving}
-            className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2"
+            className="w-full bg-blue-500 hover:bg-blue-500 disabled:bg-blue-800 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2"
           >
             {saving ? (
               <>

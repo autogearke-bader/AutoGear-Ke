@@ -17,10 +17,9 @@ const SERVICE_SLUGS = [
   'car-wrapping',
   'ppf',
   'ceramic-coating',
-  'face-lifting',
   'car-detailing',
   'headlight-restoration',
-  'chrome-deletion',
+  'car-tuning',
 ];
 
 const LOCATION_SLUGS = [
@@ -29,18 +28,14 @@ const LOCATION_SLUGS = [
   'thika-road',
   'parklands',
   'lavington',
-  'park-rd',
   'westlands',
   'karen',
   'kilimani',
   'garden-estate',
   'langata',
-  'waiyaki-way',
-  'dagoretti-corner',
-  'wambugu-road',
   'ruiru',
-  'industrial-area',
   'ngong-road',
+  'kiambu-road',
 ];
 
 const STATIC_PAGES = [
@@ -123,7 +118,7 @@ export default {
 
     const serviceLocationUrls = SERVICE_SLUGS.flatMap(service =>
       LOCATION_SLUGS.map(location => ({
-        url:        `/${service}/${location}`,
+        url:        `/services/${service}/${location}`,
         priority:   '0.8',
         changefreq: 'weekly',
         lastmod:    null,

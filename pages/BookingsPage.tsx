@@ -194,7 +194,7 @@ const BookingsPage: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full"></div>
+        <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
       </div>
     );
   }
@@ -206,34 +206,34 @@ const BookingsPage: React.FC = () => {
         <div className="flex items-center gap-3 mb-4">
           <button
             onClick={() => navigate(-1)}
-            className="w-8 h-8 bg-slate-800 rounded-lg flex items-center justify-center"
+            className="w-8 h-8 rounded-lg flex items-center justify-center"
             aria-label="Go back"
           >
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h1 className="text-xl font-bold text-white">My Bookings</h1>
+          <h1 className="text-xl font-bold text-blue-500">My Bookings</h1>
         </div>
 
         {/* Booking Summary */}
         {leads.length > 0 && (
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 mb-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-2 mb-2">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-xs font-medium uppercase tracking-wider">Total Bookings</p>
-                <p className="text-2xl font-black text-white">{leads.length}</p>
+                <p className="text-slate-400 text-xs font-medium uppercase tracking-wider">Totals</p>
+                <p className="text-2xl font-black text-blue-500">{leads.length}</p>
               </div>
               <div className="flex gap-3 text-center">
-                <div className="bg-emerald-500/10 rounded-xl px-3 py-2">
+                <div className="bg-emerald-500/10 rounded-xl px-2 py-2">
                   <p className="text-emerald-400 text-lg font-black">{leads.filter(l => l.status === 'job_done').length}</p>
-                  <p className="text-emerald-400/70 text-[10px] uppercase">Completed</p>
+                  <p className="text-emerald-400/70 text-[10px] uppercase">Attended</p>
                 </div>
-                <div className="bg-blue-500/10 rounded-xl px-3 py-2">
+                <div className="bg-blue-200 rounded-xl px-2 py-2">
                   <p className="text-blue-400 text-lg font-black">{leads.filter(l => l.status === 'in_progress').length}</p>
-                  <p className="text-blue-400/70 text-[10px] uppercase">In Progress</p>
+                  <p className="text-blue-500 text-[10px] uppercase">In Progress</p>
                 </div>
-                <div className="bg-amber-500/10 rounded-xl px-3 py-2">
+                <div className="bg-amber-500/10 rounded-xl px-2 py-2">
                   <p className="text-amber-400 text-lg font-black">{leads.filter(l => l.status === 'pending').length}</p>
                   <p className="text-amber-400/70 text-[10px] uppercase">Pending</p>
                 </div>
@@ -274,13 +274,13 @@ const BookingsPage: React.FC = () => {
         ) : leads.length === 0 ? (
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center">
             <div className="text-4xl mb-3">📋</div>
-            <p className="text-white font-bold mb-2">No bookings yet</p>
+            <p className="text-blue-500 font-bold mb-2">No bookings yet</p>
             <p className="text-slate-400 text-sm mb-4">
               You haven't made any bookings. Browse technicians and book your first service!
             </p>
             <Link
               to="/"
-              className="inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm font-black uppercase tracking-widest px-4 py-2.5 rounded-xl transition-all"
+              className="inline-block bg-blue-500 hover:bg-blue-600 text-white text-sm font-black uppercase tracking-widest px-4 py-2.5 rounded-xl transition-all"
             >
               Browse Technicians
             </Link>
@@ -294,7 +294,7 @@ const BookingsPage: React.FC = () => {
               >
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-white font-bold text-sm truncate">
+                    <h3 className="text-blue-500 font-bold text-sm truncate">
                       {lead.technicians?.business_name || 'Technician'}
                     </h3>
                     <p className="text-slate-400 text-xs truncate">
@@ -310,7 +310,7 @@ const BookingsPage: React.FC = () => {
                 <div className="flex gap-2">
                   <Link
                     to={`/technician/${lead.technicians?.slug}`}
-                    className="flex-1 flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-black uppercase tracking-widest py-2.5 rounded-xl transition-all"
+                    className="flex-1 flex items-center justify-center gap-1.5 bg-blue-500 hover:bg-blue-700 text-white text-[11px] font-black uppercase tracking-widest py-2.5 rounded-xl transition-all"
                   >
                     View Technician
                   </Link>
@@ -330,7 +330,7 @@ const BookingsPage: React.FC = () => {
                   {lead.status === 'job_done' && (
                     <button
                       onClick={() => handleRemoveBooking(lead.id)}
-                      className="flex items-center justify-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-[11px] font-black uppercase tracking-widest px-3 py-2.5 rounded-xl transition-all border border-red-500/20"
+                      className="flex items-center justify-center gap-1.5 bg-red-300 hover:bg-red-400 text-red-500 text-[15px] font-black uppercase tracking-widest px-3 py-2.5 rounded-xl transition-all border border-red-500/20"
                       title="Remove booking"
                     >
                       ✕
@@ -347,7 +347,7 @@ const BookingsPage: React.FC = () => {
       {reviewModal.open && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6">
-            <h3 className="text-lg font-bold text-white mb-4">
+            <h3 className="text-lg font-bold text-blue-500 mb-4">
               Review {reviewModal.technicianName}
             </h3>
 
@@ -372,7 +372,7 @@ const BookingsPage: React.FC = () => {
                 value={reviewModal.comment}
                 onChange={(e) => setReviewModal({ ...reviewModal, comment: e.target.value })}
                 rows={4}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm"
+                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 text-sm"
                 placeholder="Share your experience..."
               />
             </div>
@@ -406,14 +406,14 @@ const BookingsPage: React.FC = () => {
             <div className="flex gap-3">
               <button
                 onClick={() => setReviewModal({ ...reviewModal, open: false })}
-                className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm rounded-xl transition-colors"
+                className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-blue-500 font-bold text-sm rounded-xl transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSubmitReview}
                 disabled={saving}
-                className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 text-white font-bold text-sm rounded-xl transition-colors"
+                className="flex-1 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-600/50 text-white font-bold text-sm rounded-xl transition-colors"
               >
                 {saving ? 'Submitting...' : 'Submit Review'}
               </button>

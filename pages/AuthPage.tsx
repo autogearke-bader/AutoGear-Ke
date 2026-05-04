@@ -47,7 +47,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
 
   const handleTabChange = (tab: 'signin' | 'signup') => {
     setActiveTab(tab);
-    setView(tab);
+    setView(tab); // ✅ resets view so check-email is cleared when switching tabs
     resetForms();
   };
 
@@ -73,11 +73,20 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
     setLoading(true);
     setError('');
 
-    // For clients, allow signup without name/phone - they'll complete profile later
     try {
-      await signUpClient(signupEmail, signupPassword, '', '');
-      // Show check email view for email confirmation
+      const data = await signUpClient(signupEmail, signupPassword, '', '');
+
+      // ✅ If session exists immediately → email confirmation is OFF
+      // Navigate directly to home, no email screen needed
+      if (data.session) {
+        onAuthSuccess?.();
+        navigate(returnTo || '/');
+        return;
+      }
+
+      // ✅ No session → email confirmation is ON → show check email screen
       setView('check-email');
+      setActiveTab('check-email' as any); // prevents signup form showing simultaneously
     } catch (err: any) {
       setError(err.message || 'Failed to create account. Email may already be in use.');
     } finally {
@@ -153,7 +162,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
         {/* Logo and Title */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-block">
-            <h1 className="text-2xl font-black text-white uppercase tracking-tight mb-2">
+            <h1 className="text-2xl font-black text-blue-500 uppercase tracking-tight mb-2">
               Mekh
             </h1>
           </Link>
@@ -167,7 +176,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
 
         {/* Redirect Message */}
         {redirectMessage && (
-          <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl text-blue-400 text-sm text-center">
+          <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl text-blue-500 text-sm text-center">
             {redirectMessage}
           </div>
         )}
@@ -179,8 +188,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
           </div>
         )}
 
-        {/* Sign In Form */}
-        {activeTab === 'signin' && (
+        {/* Sign In Form — only when on signin tab AND not on check-email */}
+        {activeTab === 'signin' && view !== 'check-email' && (
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
             <form onSubmit={handleSignIn} className="space-y-4">
               <div>
@@ -190,25 +199,25 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 text-base"
+                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 placeholder-slate-500 focus:outline-none focus:border-blue-500 text-base"
                   placeholder="your@email.com"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">Password</label>
+                <label className="block text-sm font-medium text-slate-500 mb-1">Password</label>
                 <div className="relative">
                   <input
                     type={showSignInPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 text-base pr-12"
+                    className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-slate-500 placeholder-slate-500 focus:outline-none focus:border-blue-500 text-base pr-12"
                     placeholder="••••••••"
                   />
                   <button
                     type="button"
                     onClick={() => setShowSignInPassword(!showSignInPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-300 transition-colors"
                   >
                     {showSignInPassword ? (
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -226,7 +235,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors disabled:opacity-50 text-base"
+                className="w-full py-3 bg-blue-500 hover:bg-blue-500 text-white font-bold rounded-lg transition-colors disabled:opacity-50 text-base"
               >
                 {loading ? 'Signing in...' : 'Sign In'}
               </button>
@@ -237,7 +246,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
               Don't have an account?{' '}
               <button
                 onClick={() => handleTabChange('signup')}
-                className="text-blue-400 hover:text-blue-300 font-medium"
+                className="text-blue-500 hover:text-blue-500 font-medium"
               >
                 create account
               </button>
@@ -258,7 +267,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
               type="button"
               onClick={handleGoogleSignIn}
               disabled={loading}
-              className="w-full py-3 bg-white hover:bg-gray-100 text-slate-800 font-bold rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2 text-base"
+              className="w-full py-3 bg-white hover:bg-gray-100 text-blue-500 font-bold rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2 text-base"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -271,8 +280,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
           </div>
         )}
 
-        {/* Sign Up Form */}
-        {activeTab === 'signup' && (
+        {/* Sign Up Form — only when on signup tab AND not showing check-email */}
+        {activeTab === 'signup' && view !== 'check-email' && (
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
             <form onSubmit={handleSignUp} className="space-y-4">
               <div>
@@ -282,7 +291,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
                   value={signupEmail}
                   onChange={(e) => setSignupEmail(e.target.value)}
                   required
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 text-base"
+                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 placeholder-slate-500 focus:outline-none focus:border-blue-500 text-base"
                   placeholder="your@email.com"
                 />
               </div>
@@ -295,13 +304,13 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
                     onChange={(e) => setSignupPassword(e.target.value)}
                     required
                     minLength={8}
-                    className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 text-base pr-12"
+                    className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 placeholder-slate-500 focus:outline-none focus:border-blue-500 text-base pr-12"
                     placeholder="Min 8 characters"
                   />
                   <button
                     type="button"
                     onClick={() => setShowSignUpPassword(!showSignUpPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-600 transition-colors"
                   >
                     {showSignUpPassword ? (
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -322,7 +331,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors disabled:opacity-50 text-base"
+                className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg transition-colors disabled:opacity-50 text-base"
               >
                 {loading ? 'Creating account...' : 'Create Account'}
               </button>
@@ -333,7 +342,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
               Already have an account?{' '}
               <button
                 onClick={() => handleTabChange('signin')}
-                className="text-blue-400 hover:text-blue-300 font-medium"
+                className="text-blue-500 hover:text-blue-600 font-medium"
               >
                 sign in
               </button>
@@ -354,7 +363,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
               type="button"
               onClick={handleGoogleSignIn}
               disabled={loading}
-              className="w-full py-3 bg-white hover:bg-gray-100 text-slate-800 font-bold rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2 text-base"
+              className="w-full py-3 bg-white hover:bg-gray-100 text-blue-500 font-bold rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2 text-base"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -367,9 +376,9 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
           </div>
         )}
 
-        {/* Check Email View */}
+        {/* Check Email View — takes over the entire card */}
         {view === 'check-email' && (
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+          <div className="bg-slate-900 border border-blue-800 rounded-2xl p-6">
             <div className="text-center py-8">
               <div className="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -377,20 +386,20 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h2 className="text-xl font-bold text-white mb-2">Check your email</h2>
+              <h2 className="text-xl font-bold text-blue-500 mb-2">Check your email</h2>
               <p className="text-slate-400 text-sm max-w-sm mx-auto">
-                We've sent a confirmation link to <strong className="text-white">{signupEmail}</strong>. 
+                We've sent a confirmation link to <strong className="text-blue-500">{signupEmail}</strong>. 
                 Click the link to activate your Mekh account.
               </p>
               <p className="text-slate-500 text-xs mt-4">
                 Didn't receive it? Check your spam folder or{' '}
-                <button className="text-blue-400 hover:underline" onClick={handleResend}>
+                <button className="text-blue-500 hover:underline" onClick={handleResend}>
                   resend the email
                 </button>
               </p>
               <button
                 onClick={() => handleTabChange('signin')}
-                className="mt-6 text-blue-400 hover:text-blue-300 text-sm font-medium"
+                className="mt-6 text-blue-500 hover:text-blue-600 text-sm font-medium"
               >
                 Back to Sign In
               </button>
@@ -431,7 +440,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
         <div className="mt-8 text-center">
           <Link 
             to="/" 
-            className="text-slate-500 hover:text-slate-400 text-sm"
+            className="text-blue-500 hover:text-blue-400 text-sm"
           >
             ← Back to Home
           </Link>

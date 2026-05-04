@@ -57,20 +57,18 @@ export const signUpClient = async (
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { role: 'client', name, phone } },
+    options: {
+      data: {
+        role: 'client',
+        name,   // ← trigger reads these from user_metadata
+        phone
+      }
+    },
   });
   if (error) throw error;
 
-  // Create client profile row
-  if (data.user) {
-    const { error: profileError } = await supabase.from('clients').insert([{
-      user_id: data.user.id,
-      name,
-      phone,
-      email,
-    }]);
-    if (profileError) throw profileError;
-  }
+  // ✅ REMOVED: manual clients insert — trigger handles it automatically
+  // This eliminates the 401 race condition entirely
 
   return data;
 };

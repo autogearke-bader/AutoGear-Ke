@@ -7,29 +7,41 @@ const AuthCallback = () => {
 
   useEffect(() => {
     const handleCallback = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
+      try {
+        // ✅ exchangeCodeForSession handles BOTH:
+        // - Email confirmation links (?code=xxx)
+        // - OAuth callbacks (Google, etc.)
+        const { data, error } = await supabase.auth.exchangeCodeForSession(
+          window.location.href
+        );
 
-      if (error) {
-        console.error('Auth callback error:', error);
-        navigate('/auth?error=confirmation_failed');
-        return;
-      }
-
-      if (session) {
-        const role = session.user.user_metadata?.role;
-
-        if (role === 'technician') {
-          navigate('/join'); // Continue technician onboarding
-        } else {
-          navigate('/'); // Send clients to homepage
+        if (error) {
+          console.error('Auth callback error:', error);
+          // Send back to auth with a readable error
+          navigate(`/auth?error=${encodeURIComponent(error.message)}`);
+          return;
         }
-      } else {
-        navigate('/auth');
+
+        if (data.session) {
+          const role = data.session.user.user_metadata?.role;
+
+          if (role === 'technician') {
+            navigate('/join');
+          } else {
+            // ✅ Small delay so Layout's onAuthStateChange can fire first
+            setTimeout(() => navigate('/'), 100);
+          }
+        } else {
+          navigate('/auth');
+        }
+      } catch (err: any) {
+        console.error('Unexpected callback error:', err);
+        navigate('/auth?error=unexpected_error');
       }
     };
 
     handleCallback();
-  }, []);
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center">

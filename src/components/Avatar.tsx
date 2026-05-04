@@ -30,7 +30,7 @@ export const Avatar = ({ imageUrl, name, size = 'md', className = '' }: AvatarPr
   }
 
   return (
-    <div className={`${sizeClass} rounded-full bg-blue-600 flex items-center justify-center text-white font-bold ${className}`}>
+    <div className={`${sizeClass} rounded-full bg-blue-600 flex items-center justify-center text-[#ffff] font-bold ${className}`}>
       {initial}
     </div>
   );

@@ -23,6 +23,7 @@ const GuestMenuPage = lazy(() => import('./pages/GuestMenuPage.tsx'));
 const TechnicianMenuPage = lazy(() => import('./pages/TechnicianMenuPage.tsx'));
 const ServiceLocationPage = lazy(() => import('./pages/ServiceLocationPage.tsx'));
 const AuthCallback = lazy(() => import('./pages/AuthCallback.tsx'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage.tsx'));
 
 import Layout from './components/Layout.tsx';
 import ErrorBoundary from './components/ErrorBoundary.tsx';
@@ -125,7 +126,6 @@ const AppContent: React.FC = () => {
           try {
             const isComplete = await isTechnicianProfileComplete();
             if (!isComplete) {
-              setCheckingProfile(false);
               navigate('/join');
               return;
             } else {
@@ -134,7 +134,6 @@ const AppContent: React.FC = () => {
             }
           } catch (techError) {
             // Profile might not exist yet — redirect to JoinPage
-            setCheckingProfile(false);
             navigate('/join');
             return;
           }
@@ -144,17 +143,14 @@ const AppContent: React.FC = () => {
           try {
             const onboardingComplete = await isClientOnboardingComplete();
             if (!onboardingComplete) {
-              setCheckingProfile(false);
               navigate('/onboarding');
               return;
             }
           } catch (onboardingError) {
             // If we can't determine, redirect to onboarding
-            setCheckingProfile(false);
             navigate('/onboarding');
             return;
           }
-          setCheckingProfile(false);
         }
       } catch (error) {
         // Auth error — could be CSP blocking or network issues
@@ -164,46 +160,16 @@ const AppContent: React.FC = () => {
       }
     };
 
-    // Listen for auth state changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        // Delay slightly to allow for profile creation
-        setTimeout(checkProfileCompletion, 1000);
-
-        // Check if there's a pending user type to redirect to JoinPage
-        const pendingUserType = localStorage.getItem('pendingUserType') as 'client' | 'technician' | null;
-        if (pendingUserType === 'technician') {
-          localStorage.removeItem('pendingUserType');
-          navigate('/join');
-        }
-      }
-    });
-
-    // Listen for manual profile completion trigger events
-    const handleProfileCompletionTrigger = (event: Event) => {
-      const customEvent = event as CustomEvent<{ userType: 'client' | 'technician' }>;
-      const { userType } = customEvent.detail;
-      if (userType === 'technician') {
-        navigate('/join');
-      }
-    };
-    window.addEventListener('triggerProfileCompletion', handleProfileCompletionTrigger);
-
-    // Initial check
+    // ✅ REMOVED: onAuthStateChange from here — Layout.tsx handles it
+    // ✅ REMOVED: triggerProfileCompletion event listener — causes duplicate navigation
+    // Only run once on mount — Layout.tsx handles ongoing auth state
     checkProfileCompletion();
-
-    return () => {
-      subscription.unsubscribe();
-      window.removeEventListener('triggerProfileCompletion', handleProfileCompletionTrigger);
-    };
-  }, [navigate]);
+  }, []); // ← empty deps, no navigate dependency needed
 
   // Show a loading skeleton until auth check completes (prevents blank screen on slow connections)
   if (checkingProfile) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sky-500" />
       </div>
     );
@@ -213,13 +179,14 @@ const AppContent: React.FC = () => {
     <Layout>
       <Suspense
         fallback={
-          <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+          <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sky-500" />
           </div>
         }
       >
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/technicians" element={<Navigate to="/" replace />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/join" element={<JoinPage />} />
@@ -240,16 +207,18 @@ const AppContent: React.FC = () => {
           <Route path="/technicianprofile" element={<TechnicianProfilePage />} />
           <Route path="/blogs" element={<BlogPage />} />
           <Route path="/blogs/:slug" element={<ArticleDetailPage />} />
-          <Route path="/:service/:location" element={<ServiceLocationPage />} />
+          <Route path="/services/:service/:location" element={<ServiceLocationPage />} />
+          <Route path="/404" element={<NotFoundPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
 
-      {/* PWA Install Banner */}
+      {/* PWA Install Banner - Only show on mobile devices */}
       {showInstallBanner && (
-        <div className="fixed bottom-20 left-4 right-4 bg-slate-900 border border-blue-600 rounded-2xl p-4 flex items-center gap-3 z-50 shadow-xl">
+        <div className="fixed bottom-20 left-4 right-4 bg-slate-900 border border-blue-600 rounded-2xl p-4 flex items-center gap-3 z-50 shadow-xl md:hidden">
           <img src="/assets/180.png" className="w-10 h-10 rounded-xl" alt="Mekh" />
           <div className="flex-1">
-            <p className="text-white font-bold text-sm">Install Mekh</p>
+            <p className="text-blue-500 font-bold text-sm">Install Mekh</p>
             <p className="text-slate-400 text-xs">Add to your home screen for quick access</p>
           </div>
           <button

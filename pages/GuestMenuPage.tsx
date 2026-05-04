@@ -18,75 +18,75 @@ const GuestMenuPage: React.FC = () => {
     <div className="min-h-screen bg-slate-950 text-slate-50 pb-24">
       {/* Mekh Section */}
       <div className="p-4">
-        <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">Mekh</h3>
-        <div className="bg-slate-900 rounded-lg border border-slate-800 overflow-hidden">
+        <h3 className="text-xs font-black uppercase tracking-widest text-blue-500 mb-3">Mekh</h3>
+        <div className="bg-slate-900 rounded-lg border border-blue-500 overflow-hidden">
           <Link 
             to="/about" 
-            className="flex items-center gap-3 p-4 border-b border-slate-800 hover:bg-slate-800/50 transition-colors"
+            className="flex items-center gap-3 p-4 border-b border-blue-500 hover:bg-blue-300 transition-colors"
           >
-            <svg className="w-5 h-5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span className="text-slate-200">About Us</span>
+            <span className="text-blue-500">About Us</span>
           </Link>
           <Link 
             to="/contact" 
-            className="flex items-center gap-3 p-4 border-b border-slate-800 hover:bg-slate-800/50 transition-colors"
+            className="flex items-center gap-3 p-4 border-b border-blue-500 hover:bg-blue-300 transition-colors"
           >
-            <svg className="w-5 h-5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
-            <span className="text-slate-200">Contact Us</span>
+            <span className="text-blue-500">Contact Us</span>
           </Link>
           <button 
             onClick={handleJoinAsTechnician}
-            className="flex items-center gap-3 p-4 border-b border-slate-800 hover:bg-slate-800/50 transition-colors w-full text-left"
+            className="flex items-center gap-3 p-4 bg-blue-500 border-b border-blue-500 hover:bg-blue-500 transition-colors w-full text-left"
           >
-            <svg className="w-5 h-5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
             </svg>
-            <span className="text-slate-200">Join as Technician</span>
+            <span className="text-[#ffff]">Join as Technician</span>
           </button>
         </div>
       </div>
 
       {/* Legal Section */}
       <div className="p-4">
-        <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">Legal</h3>
-        <div className="bg-slate-900 rounded-lg border border-slate-800 overflow-hidden">
+        <h3 className="text-xs font-black uppercase tracking-widest text-blue-500 mb-3">Legal</h3>
+        <div className="bg-white rounded-lg border border-blue-500 overflow-hidden">
           <Link 
             to="/terms" 
-            className="flex items-center gap-3 p-4 border-b border-slate-800 hover:bg-slate-800/50 transition-colors"
+            className="flex items-center gap-3 p-4 border-b border-blue-500 hover:bg-blue-300 transition-colors"
           >
-            <svg className="w-5 h-5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <span className="text-slate-200">Terms & Conditions</span>
+            <span className="text-blue-500">Terms & Conditions</span>
           </Link>
           <Link 
             to="/privacy" 
-            className="flex items-center gap-3 p-4 hover:bg-slate-800/50 transition-colors"
+            className="flex items-center gap-3 p-4 hover:bg-blue-300 transition-colors"
           >
-            <svg className="w-5 h-5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
-            <span className="text-slate-200">Privacy Policy</span>
+            <span className="text-blue-500">Privacy Policy</span>
           </Link>
         </div>
       </div>
 
       {/* Sign In / Sign Up Section */}
       <div className="p-4">
-        <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">Account</h3>
-        <div className="bg-slate-900 rounded-lg border border-slate-800 overflow-hidden">
+        <h3 className="text-xs font-black uppercase tracking-widest text-blue-500 mb-3">Account</h3>
+        <div className="bg-slate-900 rounded-lg border border-blue-500 overflow-hidden">
           <Link 
             to="/auth" 
-            className="flex items-center gap-3 p-4 border-b border-slate-800 hover:bg-slate-800/50 transition-colors"
+            className="flex items-center gap-3 p-4 border-b border-blue-500 hover:bg-blue-300 transition-colors"
           >
-            <svg className="w-5 h-5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
             </svg>
-            <span className="text-slate-200">Sign In / Sign Up</span>
+            <span className="text-blue-500">Sign In / Sign Up</span>
           </Link>
         </div>
       </div>
@@ -105,7 +105,7 @@ const GuestMenuPage: React.FC = () => {
           </svg>
           <span className="text-xs font-medium">Insights</span>
         </Link>
-        <Link to="/guest-menu" className="flex flex-col items-center text-sky-500 transition-colors">
+        <Link to="/guest-menu" className="flex flex-col items-center text-blue-500 transition-colors">
           <svg className="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24">
             <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
           </svg>

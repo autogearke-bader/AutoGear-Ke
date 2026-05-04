@@ -199,7 +199,7 @@ const JoinPage: React.FC = () => {
 
   // Services state
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
-  const [servicePrices, setServicePrices] = useState<Record<string, { price: string; negotiable: boolean; notes?: string }>>([]);
+  const [servicePrices, setServicePrices] = useState<Record<string, { price: string; negotiable: boolean; notes?: string }>>({});
   const [selectedCategories, setSelectedCategories] = useState<Record<string, ServiceCategory>>({});
 
   // Service variants state
@@ -1274,17 +1274,17 @@ const JoinPage: React.FC = () => {
                 <div className={`
                   w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-colors
                   ${isCompleted ? 'bg-green-600 text-white' : ''}
-                  ${isCurrent ? 'bg-blue-600 text-white ring-2 ring-blue-400' : ''}
+                  ${isCurrent ? 'bg-blue-500 text-white ring-2 ring-blue-400' : ''}
                   {!isCompleted && !isCurrent ? 'bg-slate-700 text-slate-400' : ''}
                 `}>
                   {isCompleted ? '✓' : index + 1}
                 </div>
-                <span className={`text-xs mt-1 hidden sm:block ${isCurrent ? 'text-white font-medium' : 'text-slate-400'}`}>
+                <span className={`text-xs mt-1 hidden sm:block ${isCurrent ? 'text-white font-medium' : 'text-blue-500'}`}>
                   {step.title}
                 </span>
               </div>
               {index < STEPS.length - 1 && (
-                <div className={`flex-1 h-1 mx-2 ${completedSteps.has(step.id) ? 'bg-green-600' : 'bg-slate-700'}`} />
+                <div className={`flex-1 h-1 mx-2 ${completedSteps.has(step.id) ? 'bg-green-600' : 'bg-blue-500'}`} />
               )}
             </div>
           );
@@ -1299,7 +1299,7 @@ const JoinPage: React.FC = () => {
       case 'profile':
         return (
           <div className="space-y-4">
-            <h2 className="text-xl font-bold text-white mb-4">Personal & Business Information</h2>
+            <h2 className="text-xl font-bold text-blue-500 mb-4">Personal & Business Information</h2>
             <p className="text-slate-400 text-sm mb-6">Tell us about yourself and your business</p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1312,7 +1312,7 @@ const JoinPage: React.FC = () => {
                   value={profileForm.first_name}
                   onChange={(e) => setProfileForm({ ...profileForm, first_name: e.target.value })}
                   required
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
                 />
               </div>
               <div>
@@ -1324,7 +1324,7 @@ const JoinPage: React.FC = () => {
                   value={profileForm.last_name}
                   onChange={(e) => setProfileForm({ ...profileForm, last_name: e.target.value })}
                   required
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
                 />
               </div>
             </div>
@@ -1337,7 +1337,7 @@ const JoinPage: React.FC = () => {
                 onChange={(e) => setProfileForm({ ...profileForm, business_name: e.target.value })}
                 required
                 placeholder="e.g., John's Auto Detailing"
-                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
               />
             </div>
 
@@ -1348,7 +1348,7 @@ const JoinPage: React.FC = () => {
                 value={profileForm.phone}
                 onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
                 placeholder="e.g., 0712345678"
-                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
               />
             </div>
 
@@ -1359,7 +1359,7 @@ const JoinPage: React.FC = () => {
                 title="Years of Experience"
                 value={profileForm.experience_years}
                 onChange={(e) => setProfileForm({ ...profileForm, experience_years: e.target.value })}
-                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
               >
                 <option value="">Select Experience</option>
                 {EXPERIENCE_OPTIONS.map(exp => (
@@ -1379,7 +1379,7 @@ const JoinPage: React.FC = () => {
                 }}
                 required
                 placeholder="e.g., Westlands, Nairobi"
-                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
               />
             </div>
 
@@ -1390,7 +1390,7 @@ const JoinPage: React.FC = () => {
                  onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })}
                  rows={3}
                  placeholder="Example: Hi, I'm Brian Mutua, a window tinting specialist based in Westlands. I've been doing this for 6 years working mostly on Japanese imports. I use quality films and don't rush the job. Book me for a clean finish and honest pricing."
-                 className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                 className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
                />
                <p className="text-xs text-slate-500 mt-1">Tell clients your name, what you do, how long you've been doing it, and why they should pick you. Be specific and write like you're talking to someone.</p>
              </div>
@@ -1400,7 +1400,7 @@ const JoinPage: React.FC = () => {
       case 'location':
         return (
           <div className="space-y-4">
-            <h2 className="text-xl font-bold text-white mb-4">Location & Experience</h2>
+            <h2 className="text-xl font-bold text-blue-500 mb-4">Location & Experience</h2>
             <p className="text-slate-400 text-sm mb-6">Where do you operate and how experienced are you?</p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full overflow-hidden">
@@ -1412,7 +1412,7 @@ const JoinPage: React.FC = () => {
                   onChange={(e) => setProfileForm({ ...profileForm, area: e.target.value })}
                   required
                   placeholder="e.g., Westlands, Kilimani"
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
                 />
                 {resolvedLocationName && (
                   <p className="text-green-400 text-xs mt-1 flex items-center gap-1">
@@ -1431,13 +1431,13 @@ const JoinPage: React.FC = () => {
                     value={profileForm.google_maps_link}
                     onChange={(e) => setProfileForm({ ...profileForm, google_maps_link: e.target.value })}
                     placeholder="https://maps.google.com/..."
-                    className="flex-1 min-w-0 px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                    className="flex-1 min-w-0 px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
                   />
                   <button
                     type="button"
                     onClick={handleGetCurrentLocation}
                     disabled={locationLoading || geocodingLoading}
-                    className="flex-shrink-0 w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center justify-center disabled:opacity-50"
+                    className="flex-shrink-0 w-12 h-12 bg-blue-500 hover:bg-blue-600 text-[#ffff] rounded-lg flex items-center justify-center disabled:opacity-50"
                     title="Use current location"
                   >
                     {locationLoading || geocodingLoading ? (
@@ -1467,7 +1467,7 @@ const JoinPage: React.FC = () => {
                   title="Years of Experience"
                   value={profileForm.experience_years}
                   onChange={(e) => setProfileForm({ ...profileForm, experience_years: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
                 >
                   <option value="">Select Experience</option>
                   {EXPERIENCE_OPTIONS.map(exp => (
@@ -1482,7 +1482,7 @@ const JoinPage: React.FC = () => {
                   title="Mobile Service"
                   value={profileForm.mobile_service}
                   onChange={(e) => setProfileForm({ ...profileForm, mobile_service: e.target.value as 'yes' | 'no' | 'both' })}
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
                 >
                   <option value="no">No - I work at my location</option>
                   <option value="yes">Yes - I travel to clients</option>
@@ -1496,7 +1496,7 @@ const JoinPage: React.FC = () => {
       case 'business_hours':
         return (
           <div className="space-y-4">
-            <h2 className="text-xl font-bold text-white mb-4">Business Hours</h2>
+            <h2 className="text-xl font-bold text-blue-500 mb-4">Business Hours</h2>
             <p className="text-slate-400 text-sm mb-6">Set your operating hours for each day of the week</p>
             
             <BusinessHoursEditor
@@ -1509,12 +1509,12 @@ const JoinPage: React.FC = () => {
       case 'services':
         return (
           <div className="space-y-4">
-            <h2 className="text-xl font-bold text-white mb-4">Services Offered</h2>
+            <h2 className="text-xl font-bold text-blue-500 mb-4">Services Offered</h2>
             <p className="text-slate-400 text-sm mb-4">Select 1–4 services you offer. Technicians who specialize in 2–3 services attract more relevant bookings.</p>
             
             {selectedServices.length > 0 && selectedServices.length < 2 && (
               <div className="mb-4 p-3 bg-blue-900/30 border border-blue-800 rounded-lg">
-                <p className="text-blue-300 text-sm">💡 Technicians with 2+ services get more bookings</p>
+                <p className="text-blue-500 text-sm">💡 Technicians with 2+ services get more bookings</p>
               </div>
            )}
             
@@ -1998,7 +1998,7 @@ const JoinPage: React.FC = () => {
 
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-black text-white uppercase tracking-tight mb-2">
+          <h1 className="text-2xl font-black text-blue-500 uppercase tracking-tight mb-2">
             Become a Technician
           </h1>
           <p className="text-slate-400">
@@ -2033,7 +2033,7 @@ const JoinPage: React.FC = () => {
               type="button"
               onClick={handleBack}
               disabled={currentStepIndex === 0 || saving}
-              className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-3 hover:bg-blue-600 text-blue-500 font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Back
             </button>
@@ -2042,7 +2042,7 @@ const JoinPage: React.FC = () => {
               type="button"
               onClick={handleContinue}
               disabled={saving || !isStepValid()}
-              className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {saving ? (
                 <>

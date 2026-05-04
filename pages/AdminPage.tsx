@@ -183,8 +183,8 @@ const AdminPage: React.FC = () => {
 
   // ── Articles ───────────────────────────────────────────────
   const [localArticles,      setLocalArticles]      = useState<Article[]>([]);
-  const [editingArticleId,   setEditingArticleId]   = useState<number|null>(null);
-  const [selectedArticleIds, setSelectedArticleIds] = useState<number[]>([]);
+  const [editingArticleId,   setEditingArticleId]   = useState<string|null>(null);
+  const [selectedArticleIds, setSelectedArticleIds] = useState<string[]>([]);
   const [articleSearch,      setArticleSearch]      = useState('');
 
   // Article form
@@ -1046,7 +1046,7 @@ const AdminPage: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
-            <h1 className="text-2xl font-black text-white uppercase tracking-widest">Command Center</h1>
+            <h1 className="text-2xl font-black text-blue-500 uppercase tracking-widest">Command Center</h1>
             <p className="text-slate-600 text-[10px] font-black uppercase tracking-widest mt-1">Mekh Admin</p>
           </div>
 
@@ -1075,16 +1075,16 @@ const AdminPage: React.FC = () => {
 
           <form onSubmit={handleLogin} className="space-y-4">
             <input type="email" value={emailInput} onChange={e => setEmailInput(e.target.value)} placeholder="Admin email" required disabled={isLockedOut}
-              className="w-full bg-slate-900 border border-slate-800 rounded-2xl px-5 py-4 text-white outline-none focus:border-blue-500 transition-all disabled:opacity-40" />
+              className="w-full bg-slate-900 border border-blue-500 rounded-2xl px-5 py-4 text-slate-500 outline-none focus:border-blue-500 transition-all disabled:opacity-40" />
             <input type="password" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} placeholder="Password" required disabled={isLockedOut}
-              className="w-full bg-slate-900 border border-slate-800 rounded-2xl px-5 py-4 text-white outline-none focus:border-blue-500 transition-all disabled:opacity-40" />
+              className="w-full bg-slate-900 border border-blue-500 rounded-2xl px-5 py-4 text-slate-500 outline-none focus:border-blue-500 transition-all disabled:opacity-40" />
             <button type="submit" disabled={isLockedOut}
               className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-800 disabled:text-slate-600 text-white font-black py-4 rounded-2xl uppercase tracking-widest text-[11px] transition-all active:scale-95">
               {isLockedOut ? `Locked (${Math.ceil(lockoutTimer / 1000)}s)` : 'Unlock Terminal'}
             </button>
           </form>
           <div className="mt-8 text-center">
-            <Link to="/" className="text-slate-600 hover:text-slate-400 text-[10px] font-black uppercase tracking-widest transition-colors">← Return to Site</Link>
+            <Link to="/" className="text-blue-600 hover:text-blue-300 text-[10px] font-black uppercase tracking-widest transition-colors">← Return to Site</Link>
           </div>
         </div>
       </div>
@@ -1103,7 +1103,7 @@ const AdminPage: React.FC = () => {
       <div className="border-b border-slate-800 px-6 py-5 sticky top-0 bg-slate-950 z-10">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-black text-white uppercase tracking-tighter">Command Center</h1>
+            <h1 className="text-xl font-black text-blue-500 uppercase tracking-tighter">Command Center</h1>
             <p className="text-slate-600 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 mt-0.5">
               <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse inline-block" />
               Mekh Marketplace
@@ -1111,10 +1111,10 @@ const AdminPage: React.FC = () => {
           </div>
           <div className="flex items-center gap-3">
             <button onClick={exportBackup}
-              className="bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-blue-500/20 transition-all">
+              className="bg-blue-600/10 hover:bg-blue-600/20 text-blue-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-blue-500/20 transition-all">
               Backup
             </button>
-            <button onClick={handleLogout} className="text-red-500 font-black text-[10px] uppercase tracking-widest hover:underline">
+            <button onClick={handleLogout} className="text-red-500 border border-blue-500 px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest hover:underline">
               Log Out
             </button>
           </div>
@@ -1139,7 +1139,7 @@ const AdminPage: React.FC = () => {
           <div className="flex border-b border-slate-800 flex-wrap">
             {(['technicians','leads','reviews','article','stats'] as const).map(tab => (
               <button key={tab} onClick={() => { setActiveTab(tab); if (tab === 'stats') { fetchUserStats(); fetchActiveUsers(); }}}
-                className={`flex-1 py-5 font-black text-[11px] uppercase tracking-widest transition-all relative whitespace-nowrap px-2 ${activeTab === tab ? 'text-blue-400 bg-slate-950/40 border-b-2 border-blue-600' : 'text-slate-600 hover:text-slate-400'}`}>
+                className={`flex-1 py-5 font-black text-[11px] uppercase tracking-widest transition-all relative whitespace-nowrap px-2 ${activeTab === tab ? 'text-[#ffff] bg-blue-500 border-b-2 border-blue-500' : 'text-blue-500 hover:text-blue-300'}`}>
                 {tab === 'article' ? 'Blog' : tab === 'stats' ? 'Stats' : tab.charAt(0).toUpperCase() + tab.slice(1)}
                 {tab === 'technicians' && pendingCount > 0 && (
                   <span className="ml-1.5 bg-amber-500 text-black text-[9px] font-black px-1.5 py-0.5 rounded-full align-middle">{pendingCount}</span>
@@ -1156,7 +1156,7 @@ const AdminPage: React.FC = () => {
               {/* Stats row */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 {([
-                  ['all',       'Total',     technicians.length,                                  'text-white'],
+                  ['all',       'Total',     technicians.length,                                  'text-blue-600'],
                   ['pending',   'Pending',   pendingCount,                                        'text-amber-400'],
                   ['live',      'Live',      technicians.filter(t=>t.status==='live').length,      'text-emerald-400'],
                   ['suspended', 'Suspended', technicians.filter(t=>t.status==='suspended').length, 'text-red-400'],
@@ -1174,7 +1174,7 @@ const AdminPage: React.FC = () => {
                 <button 
                   onClick={() => { console.log('Manually refreshing data...'); refreshData(); }}
                   disabled={techLoading}
-                  className="bg-blue-600/10 hover:bg-blue-600/20 disabled:opacity-50 text-blue-400 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-blue-500/20 transition-all">
+                  className="bg-blue-600/10 hover:bg-blue-600/20 disabled:opacity-50 text-blue-500 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-blue-500/20 transition-all">
                   {techLoading ? '⟳ Refreshing...' : '⟳ Refresh'}
                 </button>
                 <p className="text-slate-500 text-[10px]">Having trouble seeing pending technicians? Click refresh or check browser console (F12) for errors.</p>
@@ -1182,7 +1182,7 @@ const AdminPage: React.FC = () => {
 
               {/* Search */}
               <input value={techSearch} onChange={e => setTechSearch(e.target.value)} placeholder="Search by business name or phone…"
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-blue-500 mb-6 transition-all" />
+                className="w-full bg-slate-950 border border-blue-500 rounded-xl px-4 py-3 text-slate-500 text-sm outline-none focus:border-blue-500 mb-6 transition-all" />
 
               {techLoading ? (
                 <div className="text-center py-16 text-slate-600 font-black uppercase tracking-widest text-[11px]">Loading…</div>
@@ -1200,13 +1200,13 @@ const AdminPage: React.FC = () => {
                     </thead>
                     <tbody className="divide-y divide-slate-900">
                       {filteredTechnicians.map(t => (
-                        <tr key={t.id} className="hover:bg-slate-900/40 transition-colors">
+                        <tr key={t.id} className="hover:bg-blue-200 transition-colors">
                           {/* Avatar + name */}
                           <td className="py-4 pr-4">
                             <div className="flex items-center gap-3">
                               {t.profile_image
                                 ? <img src={cx(t.profile_image,'w_40,h_40,c_fill,g_face,q_auto,f_auto')} alt={t.business_name} className="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-slate-800" />
-                                : <div className="w-10 h-10 rounded-full bg-blue-600/20 flex items-center justify-center flex-shrink-0 text-blue-400 font-black text-sm border border-blue-600/20">{t.business_name.charAt(0).toUpperCase()}</div>
+                                : <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center flex-shrink-0 text-blue-500 font-black text-sm border border-blue-600/20">{t.business_name.charAt(0).toUpperCase()}</div>
                               }
                               <div className="min-w-0">
                                 <p className="text-white font-bold text-sm truncate max-w-[160px]">{t.business_name}</p>
@@ -1235,12 +1235,12 @@ const AdminPage: React.FC = () => {
                             <div className="flex items-center gap-1.5 flex-wrap">
                               {t.status === 'pending' && <>
                                 <button onClick={() => approveTechnician(t.id)} className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap">✓ Approve</button>
-                                <button onClick={() => viewPendingTechContent(t)} className="bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap">👁 View</button>
+                                <button onClick={() => viewPendingTechContent(t)} className="bg-blue-500 hover:bg-blue-600/20 text-[#ffff] px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap">👁 View</button>
                                 <button onClick={() => openRejectModal(t.id)} className="bg-red-500/10 hover:bg-red-500/20 text-red-400 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap">✗ Reject</button>
                               </>}
                               {t.status === 'live' && <>
-                                <button onClick={() => viewLiveTechDetails(t)} className="bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap">👁 View</button>
-                                <button onClick={() => suspendTechnician(t.id)} className="bg-slate-800 hover:bg-red-500/10 text-slate-500 hover:text-red-400 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all">Suspend</button>
+                                <button onClick={() => viewLiveTechDetails(t)} className="bg-blue-500 hover:bg-blue-600/20 text-[#ffff] px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap">👁 View</button>
+                                <button onClick={() => suspendTechnician(t.id)} className="bg-red-500 hover:bg-red-500/10 text-[#ffff] hover:text-red-400 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all">Suspend</button>
                               </>}
                               {t.status === 'suspended' && <>
                                 <button onClick={() => reactivateTechnician(t.id)} className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all">Reactivate</button>
@@ -1266,11 +1266,11 @@ const AdminPage: React.FC = () => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 {[
                   ['Total Leads',   leads.length,                                     'text-white'],
-                  ['This Month',    leadsThisMonth,                                   'text-blue-400'],
+                  ['This Month',    leadsThisMonth,                                   'text-blue-600'],
                   ['Job Done',      leads.filter(l=>l.status==='job_done').length,     'text-emerald-400'],
                   ['Pending',       leads.filter(l=>l.status==='pending').length,      'text-amber-400'],
                 ].map(([label, count, color]) => (
-                  <div key={label as string} className="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-center">
+                  <div key={label as string} className="bg-slate-950 border border-blue-600 rounded-2xl p-4 text-center">
                     <p className={`text-2xl font-black ${color}`}>{count}</p>
                     <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">{label}</p>
                   </div>
@@ -1280,12 +1280,12 @@ const AdminPage: React.FC = () => {
               {/* Filters */}
               <div className="flex flex-wrap gap-3 mb-6">
                 <select value={leadsFilterTech} onChange={e => setLeadsFilterTech(e.target.value)} aria-label="Filter by technician"
-                  className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-blue-500">
+                  className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-500 text-sm outline-none focus:border-blue-500">
                   <option value="">All Technicians</option>
                   {uniqueTechNames.map(n => <option key={n as string} value={n as string}>{n}</option>)}
                 </select>
-                <input type="date" value={leadsDateFrom} onChange={e => setLeadsDateFrom(e.target.value)} aria-label="Date from" className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-blue-500" />
-                <input type="date" value={leadsDateTo}   onChange={e => setLeadsDateTo(e.target.value)} aria-label="Date to" className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-blue-500" />
+                <input type="date" value={leadsDateFrom} onChange={e => setLeadsDateFrom(e.target.value)} aria-label="Date from" className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-500 text-sm outline-none focus:border-blue-500" />
+                <input type="date" value={leadsDateTo}   onChange={e => setLeadsDateTo(e.target.value)} aria-label="Date to" className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-500 text-sm outline-none focus:border-blue-500" />
                 <button onClick={exportLeadsCSV} className="bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-blue-500/20 transition-all">Export CSV</button>
                 {selectedLeadIds.length > 0 ? (
                   <button onClick={() => deleteLeads(selectedLeadIds)} disabled={isDeleting}
@@ -1303,7 +1303,7 @@ const AdminPage: React.FC = () => {
                       console.error('Error clearing leads filters:', err);
                       setStatus({ message: 'Failed to clear filters.', type: 'error' });
                     }
-                  }} className="bg-slate-800 hover:bg-slate-700 text-slate-400 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Clear</button>
+                  }} className="bg-blue-600 hover:bg-slate-700 text-[#ffff] px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Clear</button>
                 )}
               </div>
 
@@ -1326,7 +1326,7 @@ const AdminPage: React.FC = () => {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left min-w-[900px]">
                     <thead>
-                      <tr className="border-b border-slate-800">
+                      <tr className="border-b border-blue-600">
                         {['Select','Date','Client','Phone','Service','Location','Technician','Source','Status'].map(h => (
                           <th key={h} className="pb-3 pr-4 text-[9px] font-black uppercase tracking-widest text-slate-600 whitespace-nowrap">{h}</th>
                         ))}
@@ -1334,14 +1334,14 @@ const AdminPage: React.FC = () => {
                     </thead>
                     <tbody className="divide-y divide-slate-900">
                       {filteredLeads.map(l => (
-                        <tr key={l.id} className="hover:bg-slate-900/40 transition-colors">
+                        <tr key={l.id} className="hover:bg-blue-200 transition-colors">
                           <td className="py-3 pr-4">
                             <input type="checkbox" checked={selectedLeadIds.includes(l.id)} aria-label={`Select lead ${l.id}`}
                               onChange={() => setSelectedLeadIds(p => p.includes(l.id) ? p.filter(id => id !== l.id) : [...p, l.id])}
                               className="w-4 h-4 rounded bg-slate-950 border-slate-700 text-blue-600" />
                           </td>
                           <td className="py-3 pr-4 text-slate-500 text-[10px] whitespace-nowrap">{formatDate(l.created_at)}</td>
-                          <td className="py-3 pr-4 text-slate-200 text-sm font-semibold">{l.client_name}</td>
+                          <td className="py-3 pr-4 text-blue-500 text-sm font-semibold">{l.client_name}</td>
                           <td className="py-3 pr-4">
                             <a href={`https://wa.me/254${l.client_phone.replace(/^0/,'')}`} target="_blank" rel="noreferrer" className="text-emerald-400 hover:underline text-sm whitespace-nowrap">{l.client_phone}</a>
                           </td>
@@ -1369,7 +1369,7 @@ const AdminPage: React.FC = () => {
                           </td>
                           <td className="py-3">
                             <select value={l.status} onChange={e => updateLeadStatus(l.id, e.target.value)} aria-label={`Update status for lead ${l.id}`}
-                              className={`bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-[10px] font-black uppercase outline-none transition-all ${
+                              className={`bg-slate-950 border border-blue-600 rounded-lg px-2 py-1.5 text-slate-500 text-[10px] font-black uppercase outline-none transition-all ${
                                 l.status === 'job_done'    ? 'text-emerald-400' :
                                 l.status === 'contacted'   ? 'text-blue-400'    :
                                 l.status === 'no_response' ? 'text-red-400'     : 'text-slate-400'}`}>
@@ -1404,7 +1404,7 @@ const AdminPage: React.FC = () => {
                         ? filter === 'pending' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
                         : filter === 'approved' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                         : filter === 'declined' ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-                        : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                        : 'bg-blue-500/20 text-blue-400 border border-blue-600'
                         : 'bg-slate-800 text-slate-500 hover:bg-slate-700'
                     }`}
                   >
@@ -1424,7 +1424,7 @@ const AdminPage: React.FC = () => {
                   ['Hidden', reviews.filter(r => r.status === 'approved' && !r.is_visible).length, 'text-orange-400'],
                   ['Declined', reviews.filter(r => r.status === 'declined').length, 'text-red-400'
                 ]].map(([label, count, color]) => (
-                  <div key={label as string} className="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-center">
+                  <div key={label as string} className="bg-slate-950 border border-blue-600 rounded-2xl p-4 text-center">
                     <p className={`text-2xl font-black ${color}`}>{count as number}</p>
                     <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">{label as string}</p>
                   </div>
@@ -1433,15 +1433,15 @@ const AdminPage: React.FC = () => {
 
               {/* Rating breakdown */}
               {reviews.length > 0 && (
-                <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 mb-6">
-                  <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-4">Rating Breakdown</p>
+                <div className="bg-slate-950 border border-blue-600 rounded-2xl p-5 mb-6">
+                  <p className="text-blue-500 text-[10px] font-black uppercase tracking-widest mb-4">Rating Breakdown</p>
                   {[5,4,3,2,1].map(star => {
                     const count = reviews.filter(r => r.rating === star).length;
                     const pct   = reviews.length ? (count / reviews.length) * 100 : 0;
                     return (
                       <div key={star} className="flex items-center gap-3 mb-2">
                         <span className="text-amber-400 text-[11px] font-bold w-6 text-right">{star}★</span>
-                        <div className="flex-1 bg-slate-800 rounded-full h-2">
+                        <div className="flex-1 bg-slate-800 border border-blue-600 rounded-full h-2">
                           <div className="bg-amber-400 h-2 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
                         </div>
                         <span className="text-slate-500 text-[10px] font-bold w-6">{count}</span>
@@ -1456,15 +1456,15 @@ const AdminPage: React.FC = () => {
               ) : (
                 <>
                   {reviews.length > 0 && (
-                    <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 mb-6">
-                      <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-4">Rating Breakdown</p>
+                    <div className="bg-slate-950 border border-blue-600 rounded-2xl p-5 mb-6">
+                      <p className="text-blue-500 text-[10px] font-black uppercase tracking-widest mb-4">Rating Breakdown</p>
                       {[5,4,3,2,1].map(star => {
                         const count = reviews.filter(r => r.rating === star).length;
                         const pct   = reviews.length ? (count / reviews.length) * 100 : 0;
                         return (
                           <div key={star} className="flex items-center gap-3 mb-2">
                             <span className="text-amber-400 text-[11px] font-bold w-6 text-right">{star}★</span>
-                            <div className="flex-1 bg-slate-800 rounded-full h-2">
+                            <div className="flex-1 bg-slate-800 border border-blue-700 rounded-full h-2">
                               <div className="bg-amber-400 h-2 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
                             </div>
                             <span className="text-slate-500 text-[10px] font-bold w-6">{count}</span>
@@ -1546,7 +1546,7 @@ const AdminPage: React.FC = () => {
                                 <button
                                   onClick={() => handleRevokeReview(r.id)}
                                   disabled={reviewActionInProgress === r.id}
-                                  className="bg-slate-800 hover:bg-red-500/20 text-slate-400 hover:text-red-400 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all disabled:opacity-50"
+                                  className="bg-red-500 hover:bg-red-300 text-[#ffff] hover:text-red-400 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all disabled:opacity-50"
                                 >
                                   Revoke
                                 </button>
@@ -1555,7 +1555,7 @@ const AdminPage: React.FC = () => {
                                 <button
                                   onClick={() => handleApproveReview(r.id)}
                                   disabled={reviewActionInProgress === r.id}
-                                  className="bg-slate-800 hover:bg-emerald-500/20 text-slate-400 hover:text-emerald-400 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all disabled:opacity-50"
+                                  className="bg-green-600 hover:bg-emerald-300 text-[#ffff] hover:text-emerald-400 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all disabled:opacity-50"
                                 >
                                   Restore
                                 </button>
@@ -1590,12 +1590,12 @@ const AdminPage: React.FC = () => {
                 {/* ── Article form ──────────────────────── */}
                 <div className="lg:col-span-7">
                   <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-white font-black text-[11px] uppercase tracking-widest flex items-center gap-2">
+                    <h2 className="text-blue-500 font-black text-[11px] uppercase tracking-widest flex items-center gap-2">
                       <span className={`w-2.5 h-2.5 rounded-full ${editingArticleId ? 'bg-amber-500' : 'bg-blue-500'}`} />
                       {editingArticleId ? 'Editing Article' : 'New Article'}
                     </h2>
                     {editingArticleId && (
-                      <button onClick={resetArticleForm} className="text-blue-400 text-[10px] font-black uppercase tracking-widest hover:underline">Cancel Edit</button>
+                      <button onClick={resetArticleForm} className="text-red-500 text-[10px] font-black uppercase tracking-widest hover:underline">Cancel Edit</button>
                     )}
                   </div>
 
@@ -1604,7 +1604,7 @@ const AdminPage: React.FC = () => {
                     <div>
                       <label className="block text-[10px] text-slate-500 font-black uppercase tracking-widest mb-2">Title *</label>
                       <input value={articleTitle} onChange={e => setArticleTitle(e.target.value)} required placeholder="Article title…"
-                        className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white outline-none focus:border-blue-500 transition-all" />
+                        className="w-full bg-slate-950 border border-blue-800 rounded-2xl px-5 py-4 text-slate-500 outline-none focus:border-blue-500 transition-all" />
                     </div>
 
                     {/* Images — Cloudinary with Required Alt Text */}
@@ -1624,12 +1624,12 @@ const AdminPage: React.FC = () => {
                               <img src={cx(img.url, 'w_200,h_150,c_fill,q_auto,f_auto')} alt={img.alt}
                                 className="w-full h-24 object-cover rounded-xl border border-slate-800" loading="lazy" />
                               <button type="button" onClick={() => setArticleImages(p => p.filter((_,i) => i !== idx))}
-                                className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full text-[9px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity font-black">✕</button>
+                                className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-blue-500 rounded-full text-[9px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity font-black">✕</button>
                               <input 
                                 value={img.alt} 
                                 onChange={e => setArticleImages(p => p.map((im,i) => i===idx ? {...im, alt: e.target.value} : im))}
                                 placeholder="Ceramic coating being applied to a Toyota Prado in Nairobi" 
-                                className={`w-full bg-slate-900 rounded-lg px-2 py-1 text-[10px] text-white outline-none mt-1 font-medium border ${
+                                className={`w-full bg-slate-900 rounded-lg px-2 py-1 text-[10px] text-blue-500 outline-none mt-1 font-medium border ${
                                   !img.alt.trim() ? 'border-red-500/50 bg-red-500/5' : 'border-slate-800'
                                 }`} />
                               {!img.alt.trim() && <p className="text-[9px] text-red-400 mt-1 font-bold">Required for SEO</p>}
@@ -1638,7 +1638,7 @@ const AdminPage: React.FC = () => {
                         </div>
                       )}
                       <button type="button" onClick={() => articleImgRef.current?.click()} disabled={articleImgUploading}
-                        className="w-full border-2 border-dashed border-slate-800 hover:border-blue-600 rounded-2xl p-4 text-slate-600 hover:text-blue-400 transition-all text-[11px] font-black uppercase tracking-widest">
+                        className="w-full border-2 border-dashed border-slate-800 hover:border-blue-600 rounded-2xl p-4 text-blue-500 hover:text-blue-400 transition-all text-[11px] font-black uppercase tracking-widest">
                         {articleImgUploading ? '⏳ Uploading…' : '+ Upload Image'}
                       </button>
                     </div>
@@ -1647,7 +1647,7 @@ const AdminPage: React.FC = () => {
                     <div>
                       <label className="block text-[10px] text-slate-500 font-black uppercase tracking-widest mb-2">Excerpt</label>
                       <textarea value={articleExcerpt} onChange={e => setArticleExcerpt(e.target.value)} rows={3} placeholder="Short description for article cards…"
-                        className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white outline-none focus:border-blue-500 resize-none" />
+                        className="w-full bg-slate-950 border border-blue-700 rounded-2xl px-5 py-4 text-slate-500 outline-none focus:border-blue-500 resize-none" />
                     </div>
 
                     {/* Rich text */}
@@ -1660,11 +1660,11 @@ const AdminPage: React.FC = () => {
 
                     {/* SEO */}
                     <div className="pt-6 border-t border-slate-800 space-y-4">
-                      <h3 className="text-white font-black text-[10px] uppercase tracking-widest">SEO & Metadata</h3>
+                      <h3 className="text-blue-500 font-black text-[10px] uppercase tracking-widest">SEO & Metadata</h3>
                       <div>
                         <label className="block text-[10px] text-slate-500 font-black uppercase tracking-widest mb-2">Meta Description</label>
                         <textarea value={articleMetaDesc} onChange={e => setArticleMetaDesc(e.target.value)} rows={2} placeholder="150–160 characters for search engines…"
-                          className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-3 text-white outline-none focus:border-blue-500 resize-none" />
+                          className="w-full bg-slate-950 border border-blue-800 rounded-2xl px-5 py-3 text-slate-500 outline-none focus:border-blue-500 resize-none" />
                         <p className={`text-[10px] mt-1 ${articleMetaDesc.length > 160 ? 'text-red-400' : 'text-slate-600'}`}>{articleMetaDesc.length}/160</p>
                       </div>
 
@@ -1672,7 +1672,7 @@ const AdminPage: React.FC = () => {
                       <div>
                         <label className="block text-[10px] text-slate-500 font-black uppercase tracking-widest mb-2">Author Bio</label>
                         <textarea value={articleAuthorBio} onChange={e => setArticleAuthorBio(e.target.value)} rows={3} placeholder="e.g., Written by John Doe, expert in window tinting with 5 years experience..."
-                          className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-3 text-white outline-none focus:border-blue-500 resize-none" />
+                          className="w-full bg-slate-950 border border-blue-800 rounded-2xl px-5 py-3 text-slate-500 outline-none focus:border-blue-500 resize-none" />
                       </div>
 
                       {/* FAQs */}
@@ -1680,7 +1680,7 @@ const AdminPage: React.FC = () => {
                         <label className="block text-[10px] text-slate-500 font-black uppercase tracking-widest mb-2">FAQs</label>
                         <p className="text-[10px] text-slate-600 mb-3">Add frequently asked questions to improve SEO and user engagement.</p>
                         {articleFaqs.map((faq, idx) => (
-                          <div key={idx} className="mb-4 border border-slate-800 rounded-lg p-3">
+                          <div key={idx} className="mb-4 border border-blue-800 rounded-lg p-3">
                             <input
                               type="text"
                               value={faq.question}
@@ -1690,7 +1690,7 @@ const AdminPage: React.FC = () => {
                                 setArticleFaqs(newFaqs);
                               }}
                               placeholder="Question"
-                              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white outline-none focus:border-blue-500 mb-2"
+                              className="w-full bg-slate-950 border border-blue-800 rounded-lg px-3 py-2 text-slate-500 outline-none focus:border-blue-500 mb-2"
                             />
                             <textarea
                               value={faq.answer}
@@ -1701,7 +1701,7 @@ const AdminPage: React.FC = () => {
                               }}
                               placeholder="Answer"
                               rows={2}
-                              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white outline-none focus:border-blue-500 resize-none"
+                              className="w-full bg-slate-950 border border-blue-800 rounded-lg px-3 py-2 text-slate-500 outline-none focus:border-blue-500 resize-none"
                             />
                             <button
                               type="button"
@@ -1743,7 +1743,7 @@ const AdminPage: React.FC = () => {
                                 }
                               }}
                               placeholder="Link title (e.g., Find Window Tinting Services in Nairobi)"
-                              className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white outline-none focus:border-blue-500 text-sm"
+                              className="flex-1 bg-slate-950 border border-blue-800 rounded-lg px-3 py-2 text-slate-500 outline-none focus:border-blue-500 text-sm"
                             />
                             <input
                               type="text"
@@ -1759,7 +1759,7 @@ const AdminPage: React.FC = () => {
                                 }
                               }}
                               placeholder="URL (e.g., /services/tinting?location=nairobi)"
-                              className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white outline-none focus:border-blue-500 text-sm"
+                              className="flex-1 bg-slate-950 border border-blue-800 rounded-lg px-3 py-2 text-slate-500 outline-none focus:border-blue-500 text-sm"
                             />
                             <button
                               type="button"
@@ -1809,7 +1809,7 @@ const AdminPage: React.FC = () => {
                 {/* ── Article list ──────────────────────── */}
                 <div className="lg:col-span-5">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-white font-black text-[10px] uppercase tracking-widest">{localArticles.length} Articles</h3>
+                    <h3 className="text-blue-500 font-black text-[10px] uppercase tracking-widest">{localArticles.length} Articles</h3>
                     {selectedArticleIds.length > 0 && (
                       <button onClick={handleBulkArticleDelete} className="bg-red-500/10 hover:bg-red-500/20 text-red-400 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all">
                         🗑 Delete {selectedArticleIds.length}
@@ -1818,13 +1818,13 @@ const AdminPage: React.FC = () => {
                   </div>
 
                   <input value={articleSearch} onChange={e => setArticleSearch(e.target.value)} placeholder="Search articles…"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-blue-500 mb-3 transition-all" />
+                    className="w-full bg-slate-950 border border-blue-800 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-blue-500 mb-3 transition-all" />
 
                   <label className="flex items-center gap-2 mb-4 cursor-pointer">
                     <input type="checkbox"
                       checked={selectedArticleIds.length === localArticles.length && localArticles.length > 0}
                       onChange={() => setSelectedArticleIds(selectedArticleIds.length === localArticles.length ? [] : localArticles.map(a => a.id))}
-                      className="w-4 h-4 rounded bg-slate-950 border-slate-700 text-blue-600" />
+                      className="w-4 h-4 rounded bg-slate-950 border-blue-700 text-slate-500" />
                     <span className="text-slate-600 text-[10px] font-black uppercase tracking-widest">Select All</span>
                   </label>
 
@@ -1832,7 +1832,7 @@ const AdminPage: React.FC = () => {
                     {filteredArticles.length === 0 ? (
                       <div className="text-center py-10 text-slate-600 text-[11px] font-black uppercase tracking-widest">No articles yet</div>
                     ) : filteredArticles.map(article => (
-                      <div key={article.id} className="bg-slate-950 border border-slate-800 rounded-2xl p-4 hover:border-slate-700 transition-colors">
+                      <div key={article.id} className="bg-slate-950 border border-blue-800 rounded-2xl p-4 hover:border-slate-700 transition-colors">
                         <div className="flex items-start gap-3">
                           <input type="checkbox" checked={selectedArticleIds.includes(article.id)} aria-label={`Select article ${article.id}`}
                             onChange={() => setSelectedArticleIds(p => p.includes(article.id) ? p.filter(id => id !== article.id) : [...p, article.id])}
@@ -1842,7 +1842,7 @@ const AdminPage: React.FC = () => {
                               className="w-14 h-14 rounded-xl object-cover flex-shrink-0 border border-slate-800" loading="lazy" />
                           )}
                           <div className="flex-1 min-w-0">
-                            <p className="text-white font-bold text-sm truncate">{article.title}</p>
+                            <p className="text-blue-500 font-bold text-sm truncate">{article.title}</p>
                             {article.excerpt && <p className="text-slate-500 text-[10px] mt-0.5 line-clamp-1">{article.excerpt}</p>}
                             <div className="flex items-center gap-2 mt-2 flex-wrap">
                               <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${article.is_published ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-800 text-slate-500'}`}>
@@ -1854,7 +1854,7 @@ const AdminPage: React.FC = () => {
                         </div>
                         <div className="flex gap-2 mt-3 pt-3 border-t border-slate-900">
                           <button onClick={() => handleEditArticle(article)}
-                            className="flex-1 bg-slate-800 hover:bg-blue-600/10 hover:text-blue-400 text-slate-400 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
+                            className="flex-1 bg-blue-500 hover:bg-blue-200 hover:text-blue-400 text-[#ffff] py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
                             Edit
                           </button>
                           <button onClick={() => deleteArticle(article.id, article.title)}
@@ -1877,7 +1877,7 @@ const AdminPage: React.FC = () => {
           {activeTab === 'stats' && (
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-white font-black text-[11px] uppercase tracking-widest flex items-center gap-2">
+                <h2 className="text-blue-500 font-black text-[11px] uppercase tracking-widest flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
                   User Registration Statistics
                 </h2>
@@ -1892,25 +1892,25 @@ const AdminPage: React.FC = () => {
               ) : userStats ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
                   {/* Active Users - Real-time */}
-                  <div className="bg-gradient-to-br from-purple-900/30 to-blue-900/30 border border-purple-500/30 rounded-2xl p-6 text-center relative overflow-hidden">
+                  <div className="bg-gradient-to-br from-purple-100 to-blue-900/30 border border-purple-500/30 rounded-2xl p-6 text-center relative overflow-hidden">
                     <div className="absolute top-2 right-2 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                    <p className="text-4xl font-black text-purple-400">{activeUsersLoading ? '...' : activeUsers}</p>
-                    <p className="text-purple-300 text-[10px] font-black uppercase tracking-widest mt-2">Active Now</p>
-                    <p className="text-slate-500 text-[8px] mt-1">Last 5 minutes</p>
+                    <p className="text-4xl font-black text-purple-500">{activeUsersLoading ? '...' : activeUsers}</p>
+                    <p className="text-purple-500 text-[10px] font-black uppercase tracking-widest mt-2">Active Now</p>
+                    <p className="text-slate-800 text-[12px] mt-1">Last 5 minutes</p>
                   </div>
-                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 text-center">
+                  <div className="bg-slate-950 border border-blue-800 rounded-2xl p-6 text-center">
                     <p className="text-4xl font-black text-white">{userStats.totalUsers}</p>
                     <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-2">Total Registered</p>
                   </div>
-                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 text-center">
-                    <p className="text-4xl font-black text-blue-400">{userStats.totalClients}</p>
+                  <div className="bg-slate-950 border border-blue-800 rounded-2xl p-6 text-center">
+                    <p className="text-4xl font-black text-blue-500">{userStats.totalClients}</p>
                     <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-2">Total Clients</p>
                   </div>
-                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 text-center">
+                  <div className="bg-slate-950 border border-blue-800 rounded-2xl p-6 text-center">
                     <p className="text-4xl font-black text-emerald-400">{userStats.totalTechnicians}</p>
                     <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-2">Technicians</p>
                   </div>
-                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 text-center">
+                  <div className="bg-slate-950 border border-blue-800 rounded-2xl p-6 text-center">
                     <p className="text-4xl font-black text-amber-400">{userStats.newUsersThisMonth}</p>
                     <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-2">New This Month</p>
                   </div>
@@ -1921,28 +1921,28 @@ const AdminPage: React.FC = () => {
 
               {/* Breakdown section */}
               {userStats && (
-                <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6">
-                  <h3 className="text-white font-black text-[10px] uppercase tracking-widest mb-4">Registration Breakdown</h3>
+                <div className="bg-slate-950 border border-blue-800 rounded-2xl p-6">
+                  <h3 className="text-blue-500 font-black text-[10px] uppercase tracking-widest mb-4">Registration Breakdown</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-slate-900/50 rounded-xl p-4">
+                    <div className="bg-blue-300 rounded-xl p-4">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-slate-400 text-[10px] font-black uppercase">New Clients This Month</span>
-                        <span className="text-blue-400 font-black text-lg">{userStats.newClientsThisMonth}</span>
+                        <span className="text-[#ffff] font-black text-lg">{userStats.newClientsThisMonth}</span>
                       </div>
                       <div className="w-full bg-slate-800 rounded-full h-2">
                         <div className="bg-blue-400 h-2 rounded-full" style={{ width: userStats.totalClients > 0 ? `${(userStats.newClientsThisMonth / userStats.totalClients) * 100}%` : '0%' }} />
                       </div>
                     </div>
-                    <div className="bg-slate-900/50 rounded-xl p-4">
+                    <div className="bg-blue-300 rounded-xl p-4">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-slate-400 text-[10px] font-black uppercase">New Technicians This Month</span>
-                        <span className="text-emerald-400 font-black text-lg">{userStats.newTechniciansThisMonth}</span>
+                        <span className="text-emerald-600 font-black text-lg">{userStats.newTechniciansThisMonth}</span>
                       </div>
                       <div className="w-full bg-slate-800 rounded-full h-2">
                         <div className="bg-emerald-400 h-2 rounded-full" style={{ width: userStats.totalTechnicians > 0 ? `${(userStats.newTechniciansThisMonth / userStats.totalTechnicians) * 100}%` : '0%' }} />
                       </div>
                     </div>
-                    <div className="bg-slate-900/50 rounded-xl p-4">
+                    <div className="bg-blue-200 rounded-xl p-4">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-slate-400 text-[10px] font-black uppercase">New Users Last Month</span>
                         <span className="text-amber-400 font-black text-lg">{userStats.newUsersLastMonth}</span>

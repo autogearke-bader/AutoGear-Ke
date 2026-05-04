@@ -45,8 +45,8 @@ const ClientBottomNav: React.FC<{ isClient: boolean }> = ({ isClient }) => {
       ? location.pathname === '/'
       : location.pathname.startsWith(path);
 
-  const active   = 'text-sky-500';
-  const inactive = 'text-slate-400 hover:text-white';
+  const active   = 'text-blue-500';
+  const inactive = 'text-gray-500 hover:text-white';
 
   // Handle home button click with refresh
   const handleHomeClick = (e: React.MouseEvent) => {
@@ -69,8 +69,8 @@ const ClientBottomNav: React.FC<{ isClient: boolean }> = ({ isClient }) => {
       className={`
         fixed bottom-0 left-0 right-0 z-50
         sm:hidden
-        bg-slate-900/95 backdrop-blur-md
-        border-t border-slate-800
+        backdrop-blur-md
+        border-t border-slate-500
         rounded-t-2xl
         flex justify-around items-end
         transition-transform duration-100

@@ -72,13 +72,13 @@ export default defineConfig(({ mode }) => {
               ],
 
               skipWaiting: false,
-              clientsClaim: true,
+              clientsClaim: false, // ← FIXED: was true — this was hijacking open tabs
               maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
               runtimeCaching: [
                 // Cache JS and CSS at runtime (served instantly after first visit)
                 {
                   urlPattern: /\/assets\/.+\.(js|css)$/i,
-                  handler: 'CacheFirst',
+                  handler: 'StaleWhileRevalidate', // ← FIXED: was CacheFirst — now revalidates in bg
                   options: {
                     cacheName: 'static-assets',
                     expiration: {

@@ -86,7 +86,7 @@ const TechnicianDashboardPage: React.FC = () => {
   const [serviceVariants, setServiceVariants] = useState<ServiceVariant[]>([]);
   const [availableServices, setAvailableServices] = useState<string[]>([]);
   const [editingServices, setEditingServices] = useState(false);
-  const [servicesForm, setServicesForm] = useState<{ id?: string; service_name: string; category: ServiceCategory; price: string; negotiable: boolean; notes?: string; variants: { id?: string; service_id?: string; variant_name: string; price: string; is_negotiable: boolean }[] }[]>([]);
+  const [servicesForm, setServicesForm] = useState<{ id?: string; service_name: string; category: ServiceCategory | ''; price: string; negotiable: boolean; notes?: string; variants: { id?: string; service_id?: string; variant_name: string; price: string; is_negotiable: boolean }[] }[]>([]);
   const [dirtyServiceIndices, setDirtyServiceIndices] = useState<Set<number>>(new Set());
   const [photos, setPhotos] = useState<TechnicianPhoto[]>([]);
   const [selectedPayments, setSelectedPayments] = useState<string[]>([]);
@@ -542,7 +542,7 @@ const TechnicianDashboardPage: React.FC = () => {
       }
 
       // Prepare services for upsert
-      const servicesToUpsert: { id?: string; technician_id: string; service_name: string; price?: number | null; negotiable: boolean }[] = [];
+      const servicesToUpsert: { id?: string; technician_id: string; service_name: string; category: ServiceCategory | ''; price?: number | null; negotiable: boolean; notes?: string | null }[] = [];
       servicesForm.forEach((s) => {
         if (s.variants.length > 0) {
           // Service with variants - no overall price
@@ -687,9 +687,18 @@ const TechnicianDashboardPage: React.FC = () => {
       return;
     }
     const newIndex = servicesForm.length;
-    const newService = {
+    const newService: {
+      id?: string;
+      service_name: string;
+      category: ServiceCategory | '';
+      price: string;
+      negotiable: boolean;
+      notes?: string;
+      variants: { id?: string; service_id?: string; variant_name: string; price: string; is_negotiable: boolean }[];
+    } = {
       id: uuidv4(),
       service_name: '',
+      category: '',
       price: '',
       negotiable: false,
       notes: '',
@@ -777,7 +786,7 @@ const TechnicianDashboardPage: React.FC = () => {
     const initialCustomInputs: Record<number, string> = {};
 
     // Initialize services with variants
-    const servicesWithVariants: { id?: string; service_name: string; category: ServiceCategory; price: string; negotiable: boolean; variants: { id?: string; service_id?: string; variant_name: string; price: string; is_negotiable: boolean }[] }[] = [];
+    const servicesWithVariants: { id?: string; service_name: string; category: ServiceCategory; price: string; negotiable: boolean; notes?: string; variants: { id?: string; service_id?: string; variant_name: string; price: string; is_negotiable: boolean }[] }[] = [];
 
     services.forEach((s) => {
       const isCustom = !availableServices.includes(s.service_name);
@@ -998,7 +1007,7 @@ const TechnicianDashboardPage: React.FC = () => {
         {activeTab === 'profile' && (
           <div className="space-y-6">
             <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-              <h2 className="text-lg font-bold mb-4">Edit Profile</h2>
+              <h2 className="text-lg text-blue-500 font-bold mb-4">Edit Profile</h2>
               
               {/* Profile Image */}
               <div className="mb-6">
@@ -1046,8 +1055,8 @@ const TechnicianDashboardPage: React.FC = () => {
               </div>
 
               {/* Read-only Fields */}
-              <div className="mb-6 p-4 bg-slate-800/50 rounded-lg">
-                <h3 className="text-sm font-medium text-slate-400 mb-3">Account Information (Cannot Edit)</h3>
+              <div className="mb-6 p-4 bg-slate-900 rounded-lg">
+                <h3 className="text-sm font-medium text-blue-500 mb-3">Account Information (Cannot Edit)</h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="email" className="block text-xs text-slate-500 mb-1">Email</label>
@@ -1057,7 +1066,7 @@ const TechnicianDashboardPage: React.FC = () => {
                       value={user?.email || ''}
                       disabled
                       aria-label="Email address"
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-400 cursor-not-allowed"
+                      className="w-full px-3 py-2 bg-slate-900 border border-blue-500 rounded-lg text-slate-500 cursor-not-allowed"
                     />
                   </div>
                   <div>
@@ -1085,7 +1094,7 @@ const TechnicianDashboardPage: React.FC = () => {
                     type="text"
                     value={profileForm.first_name}
                     onChange={(e) => setProfileForm({ ...profileForm, first_name: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
                   />
                 </div>
                 <div>
@@ -1097,7 +1106,7 @@ const TechnicianDashboardPage: React.FC = () => {
                     type="text"
                     value={profileForm.last_name}
                     onChange={(e) => setProfileForm({ ...profileForm, last_name: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
                   />
                 </div>
                 <div className="md:col-span-2">
@@ -1109,7 +1118,7 @@ const TechnicianDashboardPage: React.FC = () => {
                     type="text"
                     value={profileForm.business_name}
                     onChange={(e) => setProfileForm({ ...profileForm, business_name: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
                   />
                 </div>
                 <div>
@@ -1120,7 +1129,7 @@ const TechnicianDashboardPage: React.FC = () => {
                     id="experience"
                     value={profileForm.experience_years}
                     onChange={(e) => setProfileForm({ ...profileForm, experience_years: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
                   >
                     <option value="">Select experience</option>
                     {EXPERIENCE_OPTIONS.map(opt => (
@@ -1136,7 +1145,7 @@ const TechnicianDashboardPage: React.FC = () => {
                     id="mobileService"
                     value={profileForm.mobile_service}
                     onChange={(e) => setProfileForm({ ...profileForm, mobile_service: e.target.value as any })}
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
                   >
                     <option value="no">Studio Only</option>
                     <option value="yes">Mobile Only</option>
@@ -1152,7 +1161,7 @@ const TechnicianDashboardPage: React.FC = () => {
                     type="text"
                     value={profileForm.area}
                     onChange={(e) => setProfileForm({ ...profileForm, area: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
                   />
                 </div>
                  <div className="md:col-span-2">
@@ -1164,7 +1173,7 @@ const TechnicianDashboardPage: React.FC = () => {
                      value={profileForm.bio}
                      onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })}
                      rows={4}
-                     className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                     className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
                      placeholder="Example: Hi, I'm Brian Mutua, a window tinting specialist based in Westlands. I've been doing this for 6 years working mostly on Japanese imports. I use quality films and don't rush the job. Book me for a clean finish and honest pricing."
                    />
                    <p className="text-xs text-slate-500 mt-1">Tell clients your name, what you do, how long you've been doing it, and why they should pick you. Be specific and write like you're talking to someone.</p>
@@ -1174,14 +1183,14 @@ const TechnicianDashboardPage: React.FC = () => {
 
             {/* Video Links */}
             <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-              <h2 className="text-lg font-bold mb-4">Video Links</h2>
-              <p className="text-slate-400 text-sm mb-4">Add up to 3 video links (TikTok, YouTube, or Instagram). Videos will be displayed as thumbnails on your profile.</p>
+              <h2 className="text-lg text-blue-500 font-bold mb-4">Video Links</h2>
+              <p className="text-slate-400 text-sm mb-4">Add up to 3 video links (TikTok). Videos will be displayed as thumbnails on your profile.</p>
               
               {/* Current Videos */}
               {videos.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                   {videos.map((video) => (
-                    <div key={video.id} className="relative group bg-slate-800 rounded-lg overflow-hidden">
+                    <div key={video.id} className="relative group bg-slate-900 rounded-lg overflow-hidden">
                       {/* Video thumbnail with 9:16 portrait aspect ratio */}
                       <div className="relative w-full pb-[177.78%] bg-slate-700">
                         {videoThumbnails[video.id] ? (
@@ -1203,8 +1212,8 @@ const TechnicianDashboardPage: React.FC = () => {
                           className="absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/60 transition-colors"
                           aria-label={`Play ${video.platform} video`}
                         >
-                          <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
-                            <svg className="w-6 h-6 text-slate-900 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                          <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center">
+                            <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M8 5v14l11-7z"/>
                             </svg>
                           </div>
@@ -1239,8 +1248,8 @@ const TechnicianDashboardPage: React.FC = () => {
                       setNewVideoUrl(e.target.value);
                       setVideoUrlError('');
                     }}
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                    placeholder="Paste TikTok, YouTube, or Instagram video URL..."
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
+                    placeholder="Paste TikTok video URL..."
                   />
                   {videoUrlError && (
                     <p className="text-red-400 text-sm">{videoUrlError}</p>
@@ -1263,8 +1272,7 @@ const TechnicianDashboardPage: React.FC = () => {
 
             {/* Business Hours */}
             <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-              <h2 className="text-lg font-bold mb-4">Business Hours</h2>
-              <p className="text-slate-400 text-sm mb-4">Set your operating hours for each day of the week</p>
+              <h2 className="text-lg text-blue-500 font-bold mb-4">Business Hours</h2>
               <BusinessHoursEditor
                 hours={businessHours}
                 onChange={setBusinessHours}
@@ -1273,14 +1281,14 @@ const TechnicianDashboardPage: React.FC = () => {
 
             {/* Pricing Notes */}
             <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-              <h2 className="text-lg font-bold mb-4">Pricing Notes</h2>
+              <h2 className="text-lg text-blue-500 font-bold mb-4">Pricing Notes</h2>
               <label htmlFor="pricingNotes" className="sr-only">Pricing notes</label>
               <textarea
                 id="pricingNotes"
                 value={profileForm.pricing_notes}
                 onChange={(e) => setProfileForm({ ...profileForm, pricing_notes: e.target.value })}
                 rows={3}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
                 placeholder="Any additional pricing information..."
               />
             </div>
@@ -1368,7 +1376,7 @@ const TechnicianDashboardPage: React.FC = () => {
             {/* Services & Pricing */}
             <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold">Services & Pricing</h2>
+                <h2 className="text-lg text-blue-500 font-bold">Services & Pricing</h2>
                 {!editingServices && (
                   <button
                     type="button"
@@ -1387,13 +1395,13 @@ const TechnicianDashboardPage: React.FC = () => {
                       <div className="flex items-start gap-4">
                         <div className="flex-1 grid md:grid-cols-4 gap-3">
                           <div className="md:col-span-2">
-                            <label htmlFor={`serviceName-${index}`} className="block text-xs text-slate-500 mb-1">Service Name</label>
+                            <label htmlFor={`serviceName-${index}`} className="block text-xs text-blue-500 mb-1">Service Name</label>
                             <div className="space-y-2">
                               <select
                                 id={`serviceName-${index}`}
                                 value={customServiceInputs[index] !== undefined ? 'Other' : service.service_name}
                                 onChange={(e) => handleServiceChange(index, 'service_name', e.target.value)}
-                                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                                className="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-slate-500"
                               >
                                 <option value="">Select service</option>
                                 {availableServices.map(s => (
@@ -1414,20 +1422,20 @@ const TechnicianDashboardPage: React.FC = () => {
                                     setServicesForm(updated);
                                   }}
                                   placeholder="Enter custom service name"
-                                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400"
+                                  className="w-full px-3 py-2 bg-slate-900 border border-blue-500 rounded-lg text-slate-500 placeholder-slate-400"
                                 />
                               )}
                             </div>
                           </div>
                            {service.variants.length === 0 && (
                              <div>
-                               <label htmlFor={`price-${index}`} className="block text-xs text-slate-500 mb-1">Price (KSh)</label>
+                               <label htmlFor={`price-${index}`} className="block text-xs text-blue-500 mb-1">Price (KSh)</label>
                                <input
                                  id={`price-${index}`}
                                  type="number"
                                  value={service.price}
                                  onChange={(e) => handleServiceChange(index, 'price', e.target.value)}
-                                 className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                                 className="w-full px-3 py-2 bg-slate-900 border border-blue-500 rounded-lg text-slate-500"
                                  placeholder="0"
                                />
                              </div>
@@ -1442,7 +1450,7 @@ const TechnicianDashboardPage: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => handleRemoveService(index)}
-                            className="p-2 text-red-400 hover:text-red-300"
+                            className="p-2 text-red-500 hover:text-red-300"
                             aria-label="Remove service"
                           >
                             ✕
@@ -1455,7 +1463,7 @@ const TechnicianDashboardPage: React.FC = () => {
                               type="checkbox"
                               checked={service.negotiable}
                               onChange={(e) => handleServiceChange(index, 'negotiable', e.target.checked)}
-                              className="rounded"
+                              className="bg-slate-900 rounded"
                               id={`negotiable-${index}`}
                             />
                             <label htmlFor={`negotiable-${index}`} className="text-sm text-slate-400">
@@ -1466,13 +1474,13 @@ const TechnicianDashboardPage: React.FC = () => {
 
                         {/* Category Selection - Required */}
                         <div className="mt-3">
-                          <label className="block text-xs text-slate-500 mb-1">
+                          <label className="block text-xs text-blue-500 mb-1">
                             Category <span className="text-red-400">*</span>
                           </label>
                           <select
                             value={service.category || ''}
                             onChange={(e) => handleServiceChange(index, 'category', e.target.value)}
-                            className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                            className="w-full px-3 py-2 bg-slate-900 border border-blue-500 rounded-lg text-slate-500"
                             required
                           >
                             <option value="">Select category</option>
@@ -1488,7 +1496,7 @@ const TechnicianDashboardPage: React.FC = () => {
 
                         {/* Service Notes */}
                         <div className="mt-3">
-                          <label htmlFor={`notes-${index}`} className="block text-xs text-slate-500 mb-1">Service Notes (Optional)</label>
+                          <label htmlFor={`notes-${index}`} className="block text-xs text-blue-500 mb-1">Service Notes (Optional)</label>
                           <textarea
                             id={`notes-${index}`}
                             value={service.notes || ''}
@@ -1496,19 +1504,19 @@ const TechnicianDashboardPage: React.FC = () => {
                             placeholder="Optional: e.g. Price varies by vehicle size. Sedans start at Ksh 13,000."
                             rows={2}
                             maxLength={150}
-                            className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none"
+                            className="w-full px-3 py-2 bg-slate-900 border border-blue-600 rounded-lg text-slate-500 text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none"
                           />
                           <p className="text-slate-500 text-xs mt-1">{(service.notes || '').length}/150 characters</p>
                         </div>
 
                         {/* Variants Section */}
-                       <div className="mt-4 pt-4 border-t border-slate-700">
+                       <div className="mt-4 pt-4 border-t border-slate-900">
                          <div className="flex items-center justify-between mb-3">
-                           <h4 className="text-white font-medium text-sm">Add Variants (Optional)</h4>
+                           <h4 className="text-blue-500 font-medium text-sm">Add Variants (Optional)</h4>
                            <button
                              type="button"
                              onClick={() => handleAddVariant(index)}
-                             className="text-blue-400 hover:text-blue-300 text-sm"
+                             className="text-blue-500 hover:text-blue-300 text-sm"
                            >
                              + Add Variant
                            </button>
@@ -1516,19 +1524,19 @@ const TechnicianDashboardPage: React.FC = () => {
                          {service.variants.length > 0 && (
                            <div className="space-y-2">
                              {service.variants.map((variant, variantIndex) => (
-                               <div key={variantIndex} className="flex flex-col gap-2 p-2 bg-slate-700 rounded-lg">
+                               <div key={variantIndex} className="flex flex-col gap-2 p-2 bg-slate-900 rounded-lg">
                                  <div className="flex items-center gap-2">
                                    <input
                                      type="text"
                                      value={variant.variant_name}
                                      onChange={(e) => handleVariantChange(index, variantIndex, 'variant_name', e.target.value)}
                                      placeholder="Variant name (e.g. Ceramic, 3M, etc.)"
-                                     className="flex-1 px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg text-white text-sm placeholder-slate-400"
+                                     className="flex-1 px-3 py-2 bg-slate-900 border border-blue-500 rounded-lg text-slate-500 text-sm placeholder-slate-400"
                                    />
                                    <button
                                      type="button"
                                      onClick={() => handleRemoveVariant(index, variantIndex)}
-                                     className="p-2 text-red-400 hover:text-red-300 flex-shrink-0"
+                                     className="p-2 text-red-500 hover:text-red-400 flex-shrink-0"
                                      aria-label="Remove variant"
                                    >
                                      ✕
@@ -1539,7 +1547,7 @@ const TechnicianDashboardPage: React.FC = () => {
                                    value={variant.price}
                                    onChange={(e) => handleVariantChange(index, variantIndex, 'price', e.target.value)}
                                    placeholder="Price (KSh)"
-                                   className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg text-white text-sm"
+                                   className="w-full px-3 py-2 bg-slate-900 border border-blue-500 rounded-lg text-slate-500 text-sm"
                                  />
                                  <label className="flex items-center gap-2 text-sm text-slate-400">
                                    <input
@@ -1565,7 +1573,7 @@ const TechnicianDashboardPage: React.FC = () => {
                     type="button"
                     onClick={handleAddService}
                     disabled={servicesForm.length >= 4}
-                    className="w-full py-3 border-2 border-dashed border-slate-700 text-slate-400 hover:border-slate-600 hover:text-white disabled:border-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed rounded-lg transition-colors"
+                    className="w-full py-3 border-2 border-dashed border-slate-700 text-blue-500 hover:border-slate-600 hover:text-white disabled:border-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed rounded-lg transition-colors"
                   >
                     + Add Service {servicesForm.length >= 4 && '(Max 4)'}
                   </button>
@@ -1574,7 +1582,7 @@ const TechnicianDashboardPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setEditingServices(false)}
-                      className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white font-medium rounded-lg transition-colors"
+                      className="flex-1 py-3 bg-slate-900 hover:bg-blue-300 text-blue-500 font-medium rounded-lg transition-colors"
                     >
                       Cancel
                     </button>
@@ -1596,7 +1604,7 @@ const TechnicianDashboardPage: React.FC = () => {
                     services.map((service) => (
                       <div key={service.id} className="flex items-center justify-between p-4 bg-slate-800 rounded-lg">
                         <div>
-                          <p className="text-white font-medium">{service.service_name}</p>
+                          <p className="text-blue-500 font-medium">{service.service_name}</p>
                           <p className="text-slate-400 text-sm">
                             {service.price ? `KSh ${service.price?.toLocaleString() || '0'}` : 'Contact for price'}
                             {service.negotiable && ' (Negotiable)'}
@@ -1612,7 +1620,7 @@ const TechnicianDashboardPage: React.FC = () => {
             {/* Portfolio Photos */}
             <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold">Portfolio Photos</h2>
+                <h2 className="text-lg text-blue-500 font-bold">Portfolio Photos</h2>
                 <label className="cursor-pointer px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors">
                   Add Photos
                   <input type="file" accept="image/*" multiple onChange={handlePhotoUpload} className="hidden" />
@@ -1661,7 +1669,7 @@ const TechnicianDashboardPage: React.FC = () => {
         {activeTab === 'bookings' && (
           <div className="space-y-6">
             <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-              <h2 className="text-lg font-bold mb-4">
+              <h2 className="text-lg font-bold text-blue-500 mb-4">
                 Bookings / Leads ({leads.length})
               </h2>
 
@@ -1672,7 +1680,7 @@ const TechnicianDashboardPage: React.FC = () => {
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     leadsView === 'active'
                       ? 'bg-blue-600 text-white'
-                      : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                      : 'bg-slate-800 text-blue-500 hover:bg-blue-600'
                   }`}
                 >
                   Active ({leads.filter(l => !l.is_archived).length})
@@ -1682,7 +1690,7 @@ const TechnicianDashboardPage: React.FC = () => {
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     leadsView === 'archived'
                       ? 'bg-blue-600 text-white'
-                      : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                      : 'bg-slate-800 text-blue-500 hover:bg-slate-700'
                   }`}
                 >
                   Archived ({leads.filter(l => l.is_archived).length})
@@ -1699,7 +1707,7 @@ const TechnicianDashboardPage: React.FC = () => {
                     <div key={lead.id} className="p-4 bg-slate-800 rounded-lg">
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <p className="text-white font-medium">{lead.client_name}</p>
+                          <p className="text-blue-500 font-medium">{lead.client_name}</p>
                           <p className="text-slate-400 text-sm">{lead.client_phone}</p>
                         </div>
                         <select
@@ -1708,7 +1716,7 @@ const TechnicianDashboardPage: React.FC = () => {
                           value={lead.status}
                           onChange={(e) => handleLeadStatusChange(lead.id, e.target.value as Lead['status'])}
                           disabled={lead.status === 'job_done' || leadsView === 'archived'}
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          className={`px-3 bg-slate-900 text-slate-500 py-1rounded-full text-xs font-medium ${
                             lead.status === 'pending' ? 'bg-yellow-900/50 text-yellow-400' :
                             lead.status === 'job_done' ? 'bg-green-900/50 text-green-400' :
                             'bg-red-900/50 text-red-400'
@@ -1721,7 +1729,7 @@ const TechnicianDashboardPage: React.FC = () => {
                       </div>
                       <div className="text-sm">
                         <p className="text-slate-300">
-                          <span className="text-slate-500">Service:</span> {lead.service_requested}
+                          <span className="text-blue-500">Service:</span> {lead.service_requested}
                         </p>
                         {lead.vehicle_model && (
                           <p className="text-slate-300">
@@ -1731,7 +1739,7 @@ const TechnicianDashboardPage: React.FC = () => {
                         <p className="text-slate-300">
                           <span className="text-slate-500">Location:</span> {lead.client_location}
                         </p>
-                        <p className="text-slate-500 text-xs mt-2">
+                        <p className="text-blue-500 text-xs mt-2">
                           {new Date(lead.created_at).toLocaleString()}
                         </p>
                       </div>
@@ -1744,7 +1752,7 @@ const TechnicianDashboardPage: React.FC = () => {
             {/* Stats */}
             <div className="grid md:grid-cols-3 gap-4">
               <div className="bg-slate-900 border border-slate-800 rounded-lg p-6 text-center">
-                <p className="text-3xl font-black text-blue-400">{leads.length}</p>
+                <p className="text-3xl font-black text-blue-500">{leads.length}</p>
                 <p className="text-slate-400 text-sm">Total Bookings</p>
               </div>
               <div className="bg-slate-900 border border-slate-800 rounded-lg p-6 text-center">
@@ -1781,7 +1789,7 @@ const TechnicianDashboardPage: React.FC = () => {
 
             {notifications.length === 0 ? (
               <div className="bg-slate-900 border border-slate-800 rounded-lg p-6 text-center">
-                <p className="text-slate-400">No notifications yet.</p>
+                <p className="text-blue-500">No notifications yet.</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -1838,7 +1846,7 @@ const TechnicianDashboardPage: React.FC = () => {
           <div className="space-y-6">
             {/* Public Profile Link */}
             <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-              <h2 className="text-lg font-bold mb-4">Public Profile</h2>
+              <h2 className="text-lg font-bold text-blue-500 mb-4">Public Profile</h2>
               <p className="text-slate-400 text-sm mb-4">
                 Share this link with customers to view your public profile
               </p>
@@ -1865,7 +1873,7 @@ const TechnicianDashboardPage: React.FC = () => {
                   href={`/technician/${technician?.slug}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-sm rounded-lg transition-colors"
+                  className="px-4 py-2 bg-slate-900 hover:bg-blue-300 text-blue-500 border border-slate-300 text-sm rounded-lg transition-colors"
                 >
                   View
                 </a>
@@ -1874,9 +1882,9 @@ const TechnicianDashboardPage: React.FC = () => {
 
             {/* Reviews - Read Only */}
             <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-              <h2 className="text-lg font-bold mb-4">Reviews & Ratings</h2>
+              <h2 className="text-lg text-blue-500 font-bold mb-4">Reviews & Ratings</h2>
               <div className="flex items-center gap-4 mb-4">
-                <div className="text-3xl font-black text-white">{technician?.avg_rating || 0}</div>
+                <div className="text-3xl font-black text-blue-500">{technician?.avg_rating || 0}</div>
                 <div>
                   <div className="flex text-yellow-400">
                     {'★'.repeat(Math.round(technician?.avg_rating || 0))}
@@ -1891,7 +1899,7 @@ const TechnicianDashboardPage: React.FC = () => {
 
             {/* Account Info */}
             <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-              <h2 className="text-lg font-bold mb-4">Account Information</h2>
+              <h2 className="text-lg text-blue-500 font-bold mb-4">Account Information</h2>
               <div className="space-y-3">
                 <div className="flex justify-between py-2 border-b border-slate-800">
                   <span className="text-slate-400">Email</span>

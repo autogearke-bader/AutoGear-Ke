@@ -91,7 +91,7 @@ export const BusinessHoursEditor: React.FC<BusinessHoursEditorProps> = ({
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-medium text-slate-800 mb-3">Business Hours</h3>
+        {/*<h3 className="text-lg font-medium text-slate-500 mb-3">Business Hours</h3>*/}
         <p className="text-sm text-slate-500 mb-4">
           Set your weekly operating schedule. Customers will see when you're open.
         </p>
@@ -99,7 +99,7 @@ export const BusinessHoursEditor: React.FC<BusinessHoursEditorProps> = ({
 
       {/* Weekdays */}
       <div className="space-y-3">
-        <h4 className="text-sm font-medium text-slate-600">Weekdays</h4>
+        <h4 className="text-sm font-medium text-blue-500">Weekdays</h4>
         {weekdays.map(day => {
           const dayInfo = DAYS_OF_WEEK.find(d => d.value === day.day_of_week);
           return (
@@ -111,9 +111,9 @@ export const BusinessHoursEditor: React.FC<BusinessHoursEditorProps> = ({
                     checked={day.is_open}
                     onChange={() => handleToggleDay(day.day_of_week)}
                     disabled={disabled}
-                    className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+                    className="w-4 h-4 text-blue-500 rounded border-slate-300 focus:ring-blue-500"
                   />
-                  <span className="ml-2 text-sm font-medium text-slate-700">
+                  <span className="ml-2 text-sm font-medium text-slate-500">
                     {dayInfo?.shortLabel}
                   </span>
                 </label>
@@ -127,21 +127,21 @@ export const BusinessHoursEditor: React.FC<BusinessHoursEditorProps> = ({
                     disabled={disabled}
                     aria-label={`${dayInfo?.shortLabel} opening time`}
                     title="Opening time"
-                    className="text-sm border-slate-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className="text-sm bg-slate-900 text-slate-500 border-t border-slate-500 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">Open</option>
                     {TIME_OPTIONS.map(t => (
                       <option key={t.value} value={t.value}>{t.label}</option>
                     ))}
                   </select>
-                  <span className="text-slate-400">to</span>
+                  <span className="text-blue-500">to</span>
                   <select
                     value={day.close_time || ''}
                     onChange={(e) => handleTimeChange(day.day_of_week, 'close_time', e.target.value)}
                     disabled={disabled}
                     aria-label={`${dayInfo?.shortLabel} closing time`}
                     title="Closing time"
-                    className="text-sm border-slate-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className="text-sm bg-slate-900 text-slate-500 border-t border-slate-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">Close</option>
                     {TIME_OPTIONS.map(t => (
@@ -152,7 +152,7 @@ export const BusinessHoursEditor: React.FC<BusinessHoursEditorProps> = ({
               )}
               
               {!day.is_open && (
-                <span className="text-sm text-slate-400 italic">Closed</span>
+                <span className="text-sm  text-slate-400 italic">Closed</span>
               )}
             </div>
           );
@@ -161,7 +161,7 @@ export const BusinessHoursEditor: React.FC<BusinessHoursEditorProps> = ({
 
       {/* Weekends */}
       <div className="space-y-3">
-        <h4 className="text-sm font-medium text-slate-600">Weekend</h4>
+        <h4 className="text-sm font-medium text-blue-500">Weekend</h4>
         {weekends.map(day => {
           const dayInfo = DAYS_OF_WEEK.find(d => d.value === day.day_of_week);
           const isSunday = day.day_of_week === 0;
@@ -222,7 +222,7 @@ export const BusinessHoursEditor: React.FC<BusinessHoursEditorProps> = ({
                         disabled={disabled}
                         aria-label={`${dayInfo?.shortLabel} opening time`}
                         title="Opening time"
-                        className="text-sm border-slate-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        className="text-sm bg-slate-900 text-slate-500 border-t border-slate-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       >
                         <option value="">Open</option>
                         {TIME_OPTIONS.map(t => (
@@ -236,7 +236,7 @@ export const BusinessHoursEditor: React.FC<BusinessHoursEditorProps> = ({
                         disabled={disabled}
                         aria-label={`${dayInfo?.shortLabel} closing time`}
                         title="Closing time"
-                        className="text-sm border-slate-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        className="text-sm bg-slate-900 text-slate-500 border-t  border-slate-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       >
                         <option value="">Close</option>
                         {TIME_OPTIONS.map(t => (

@@ -1,0 +1,28 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "Mekh",
+    "Nairobi",
+    "Lavington",
+    "Kiambu",
+    "Westlands",
+    "Karen",
+    "Kilimani",
+    "Ngong",
+    "Thika",
+    "Langata",
+    "Ruaka",
+    "Llumar",
+    "Gtechniq",
+    "XPEL",
+    "SunTek",
+    "Avery",
+    "customised"
+  ],
+  "ignorePaths": [
+    "node_modules",
+    "dist",
+    ".git"
+  ]
+}

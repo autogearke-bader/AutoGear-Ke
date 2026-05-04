@@ -52,6 +52,24 @@ export const isClientOnboardingComplete = async (): Promise<boolean> => {
 
 /** Fetch all live technicians (with services, photos, payments). */
 export const getPublicTechnicians = async (filters?: { area?: string; service?: string }) => {
+  // Service to category mapping
+  const SERVICE_TO_CATEGORY: Record<string, string> = {
+    'wrapping': 'body_exterior',
+    'wrap': 'body_exterior',
+    'ppf': 'body_exterior',
+    'ceramic': 'body_exterior',
+    'coating': 'body_exterior',
+    'buffing': 'body_exterior',
+    'buff': 'body_exterior',
+    'detailing': 'body_exterior',
+    'detail': 'body_exterior',
+    'headlight': 'body_exterior',
+    'restoration': 'body_exterior',
+    'tuning': 'car_electricals_security',
+    'tune': 'car_electricals_security',
+    'ecu': 'car_electricals_security',
+  };
+
   // First, try to get technicians from the specific area
   let query = supabase
     .from('technicians')
@@ -79,10 +97,11 @@ export const getPublicTechnicians = async (filters?: { area?: string; service?: 
 
   let technicians = data ?? [];
 
-  // Client-side filtering for service matching
+  // Client-side filtering for exact service matching
+  let exactMatches: any[] = [];
   if (filters?.service) {
     const searchTerm = filters.service.toLowerCase();
-    technicians = technicians.filter(technician => {
+    exactMatches = technicians.filter(technician => {
       return technician.technician_services?.some((service: any) => {
         // Check service name
         const serviceMatch = service.service_name?.toLowerCase().includes(searchTerm);
@@ -95,13 +114,48 @@ export const getPublicTechnicians = async (filters?: { area?: string; service?: 
         return serviceMatch || variantMatch;
       });
     });
+  } else {
+    exactMatches = technicians;
   }
 
-  // If we have less than 4 technicians and area was specified, get more from other areas
+  // Only limit to 4 technicians when filters are applied
+  if (exactMatches.length >= 4 && (filters?.area || filters?.service)) {
+    return exactMatches.slice(0, 4);
+  }
+
+  // If we have fewer than 4 exact matches, try category-based fallback
+  if (filters?.service && exactMatches.length < 4) {
+    const remainingSlots = 4 - exactMatches.length;
+    const searchTerm = filters.service.toLowerCase();
+    
+    // Determine the category for this service
+    const serviceCategory = SERVICE_TO_CATEGORY[searchTerm] || 'body_exterior';
+
+    // Filter technicians by category (excluding those already in exactMatches)
+    const exactMatchIds = new Set(exactMatches.map(t => t.id));
+    const categoryMatches = technicians.filter(technician => {
+      // Skip if already in exact matches
+      if (exactMatchIds.has(technician.id)) return false;
+
+      // Check if technician offers services in the same category
+      return technician.technician_services?.some((service: any) => 
+        service.category === serviceCategory
+      );
+    });
+
+    // Combine exact matches with category matches
+    technicians = [...exactMatches, ...categoryMatches.slice(0, remainingSlots)];
+  } else {
+    technicians = exactMatches;
+  }
+
+  // If still less than 4 and area was specified, get more from other areas
   if (technicians.length < 4 && filters?.area && filters?.service) {
     const remainingSlots = 4 - technicians.length;
+    const searchTerm = filters.service.toLowerCase();
+    const serviceCategory = SERVICE_TO_CATEGORY[searchTerm] || 'body_exterior';
 
-    // Query technicians from other areas offering the same service
+    // Query technicians from other areas
     let fallbackQuery = supabase
       .from('technicians')
       .select(`
@@ -125,9 +179,8 @@ export const getPublicTechnicians = async (filters?: { area?: string; service?: 
 
     let fallbackTechnicians = fallbackData ?? [];
 
-    // Filter fallback technicians by service
-    const searchTerm = filters.service.toLowerCase();
-    fallbackTechnicians = fallbackTechnicians.filter(technician => {
+    // First try exact service matches from other areas
+    const fallbackExactMatches = fallbackTechnicians.filter(technician => {
       return technician.technician_services?.some((service: any) => {
         const serviceMatch = service.service_name?.toLowerCase().includes(searchTerm);
         const variantMatch = service.service_variants?.some((variant: any) =>
@@ -137,8 +190,21 @@ export const getPublicTechnicians = async (filters?: { area?: string; service?: 
       });
     });
 
+    // If not enough exact matches, add category matches
+    let fallbackResults = fallbackExactMatches;
+    if (fallbackResults.length < remainingSlots) {
+      const fallbackExactIds = new Set(fallbackExactMatches.map(t => t.id));
+      const fallbackCategoryMatches = fallbackTechnicians.filter(technician => {
+        if (fallbackExactIds.has(technician.id)) return false;
+        return technician.technician_services?.some((service: any) => 
+          service.category === serviceCategory
+        );
+      });
+      fallbackResults = [...fallbackExactMatches, ...fallbackCategoryMatches];
+    }
+
     // Add fallback technicians up to the remaining slots
-    technicians = [...technicians, ...fallbackTechnicians.slice(0, remainingSlots)];
+    technicians = [...technicians, ...fallbackResults.slice(0, remainingSlots)];
   }
 
   // Only limit to 4 technicians when filters are applied

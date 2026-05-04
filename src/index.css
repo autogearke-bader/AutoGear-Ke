@@ -2,30 +2,61 @@
 @plugin "@tailwindcss/typography";
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* CSS Root Enforcement - Dark Mode Always */
+/* CSS Root Enforcement - Light Mode Always */
 :root {
-  color-scheme: dark only;
+  color-scheme: light only;
+  background-color: white;
 }
 
 html, body {
-  background-color: #020617 !important;
-  color: #f8fafc !important;
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
   -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
 }
 
-/* Force dark backgrounds on all mobile inputs */
+/* Force light backgrounds on all mobile inputs */
 input, textarea, select {
-  background-color: #0f172a !important;
-  color: #f8fafc !important;
-  border-color: #1e293b !important;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
 }
 
 @theme {
   --font-sans: 'Inter', sans-serif;
 
-  /* Brand Colors - Hardcoded for consistent premium dark theme */
-  --color-brand-bg: #020617;
-  --color-brand-surface: #0f172a;
+  /* Primary Brand Colors - Royal Blue */
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #1A56DB;  /* Main brand color - Royal Blue */
+  --color-primary-700: #1e40af;
+  --color-primary-800: #1e3a8a;
+  --color-primary-900: #1e293b;
+  
+  /* Rating Color */
+  --color-rating-yellow: #F59E0B;
+
+  /* Brand Colors - Hardcoded for consistent premium light theme */
+  --color-brand-bg: #f8fafc;
+  --color-brand-surface: #f8fafc;
+  --color-accent: #1877f2;
+  
+  /* Override default slate colors to use light variants */
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+  --color-slate-950: #020617;
 
   --utility-scrollbar-hide-scrollbars: none;
   --utility-scrollbar-hide-scrollbar-width: none;
@@ -45,6 +76,72 @@ body {
   font-family: 'Inter', sans-serif;
 }
 
+/* Global Light Theme Overrides - Force light backgrounds everywhere */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f8fafc;
+}
+
+/* Override any dark backgrounds with light theme */
+.bg-slate-900,
+.bg-slate-950,
+.bg-gray-900,
+.bg-gray-950 {
+  background-color: #f8fafc !important;
+}
+
+.bg-slate-800,
+.bg-gray-800 {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Override dark text with light theme text - Improved visibility */
+/* Exception: Keep text-white on primary backgrounds and buttons */
+.bg-primary-600 .text-white,
+.bg-primary-700 .text-white,
+.bg-primary-800 .text-white,
+button .text-white,
+.btn .text-white,
+button.text-white,
+.btn.text-white {
+  color: #ffffff !important;
+}
+
+/* Only override text-white in non-button contexts */
+p.text-white,
+span.text-white,
+div.text-white:not(button):not(.btn) {
+  color: #0f172a !important;
+}
+
+.text-slate-50,
+.text-slate-100 {
+  color: #0f172a !important;
+}
+
+.text-slate-300,
+.text-slate-400,
+.text-slate-500,
+.text-slate-600 {
+  color: #0f172a !important;
+}
+
+/* Override dark borders with light borders */
+.border-slate-800,
+.border-slate-700,
+.border-gray-800 {
+  border-color: #e2e8f0 !important;
+}
+
+/* Button and Icon Styling - Accent Blue */
+
+
+/* Remove the global SVG color override - let components control their own icon colors */
+/* svg, .icon {
+  color: #1877f2 !important;
+} */
+
 /* Scrollbar hide utilities */
 ::-webkit-scrollbar {
   display: none;
@@ -62,11 +159,6 @@ body {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
-}
-
-/* Logo glow effect */
-.logo-glow {
-  filter: drop-shadow(0 0 10px rgba(37, 99, 235, 0.5));
 }
 
 /* TikTok Brand Glitch Effect */
@@ -133,59 +225,59 @@ body {
 
 .fade-mask-left {
   left: 0;
-  background: linear-gradient(to right, #020617 0%, transparent 100%);
+  background: linear-gradient(to right, #f8fafc 0%, transparent 100%);
 }
 
 .fade-mask-right {
   right: 0;
-  background: linear-gradient(to left, #020617 0%, transparent 100%);
+  background: linear-gradient(to left, #f8fafc 0%, transparent 100%);
 }
 
-/* Quill Editor Dark Theme */
+/* Quill Editor Light Theme */
 .ql-toolbar.ql-snow {
-  border-color: #1e293b !important;
-  background: #0f172a;
+  border-color: #cbd5e1 !important;
+  background: #f8fafc;
 }
 
 .ql-container.ql-snow {
-  border-color: #1e293b !important;
-  background: #0f172a;
+  border-color: #cbd5e1 !important;
+  background: #f8fafc;
 }
 
 .ql-snow .ql-stroke {
-  stroke: #94a3b8;
+  stroke: #64748b;
 }
 
 .ql-snow .ql-fill {
-  fill: #94a3b8;
+  fill: #64748b;
 }
 
 .ql-snow .ql-picker {
-  color: #94a3b8;
+  color: #64748b;
 }
 
 .ql-snow.ql-toolbar button:hover .ql-stroke,
 .ql-snow .ql-toolbar button:hover .ql-stroke {
-  stroke: #3b82f6;
+  stroke: #0877f2;
 }
 
 .ql-snow.ql-toolbar button:hover .ql-fill,
 .ql-snow .ql-toolbar button:hover .ql-fill {
-  fill: #3b82f6;
+  fill: #0877f2;
 }
 
 .ql-snow.ql-toolbar button:hover .ql-picker,
 .ql-snow .ql-toolbar button:hover .ql-picker {
-  color: #3b82f6;
+  color: #0877f2;
 }
 
 .ql-snow.ql-toolbar button.ql-active .ql-stroke,
 .ql-snow .ql-toolbar button.ql-active .ql-stroke {
-  stroke: #3b82f6;
+  stroke: #0877f2;
 }
 
 .ql-editor {
-  color: #f1f5f9;
+  color: #0f172a;
   min-height: 200px;
 }
 
@@ -195,44 +287,15 @@ body {
 .ql-editor p,
 .ql-editor span,
 .ql-editor li {
-  color: #f1f5f9 !important;
+  color: #0f172a !important;
 }
 
 .ql-editor.ql-blank::before {
-  color: #64748b;
+  color: #94a3b8;
   font-style: normal;
 }
 
-/* Product Description Styling */
-.product-description {
-  color: #f1f5f9 !important;
-  line-height: 1.8;
-}
 
-.product-description h1,
-.product-description h2,
-.product-description h3 {
-  color: #ffffff !important;
-  font-weight: 800;
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
-}
-
-.product-description p {
-  color: #cbd5e1 !important;
-  margin-bottom: 1rem;
-}
-
-.product-description ul,
-.product-description ol {
-  padding-left: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.product-description li {
-  color: #cbd5e1 !important;
-  margin-bottom: 0.5rem;
-}
 
 /* Horizontal Scroll Container Styles */
 .horizontal-scroll-container {
@@ -251,12 +314,12 @@ body {
 }
 
 .scrollbar-thin::-webkit-scrollbar-track {
-  background: #1e293b;
+  background: #e2e8f0;
   border-radius: 3px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: #475569;
+  background: #94a3b8;
   border-radius: 3px;
 }
 

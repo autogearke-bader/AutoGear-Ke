@@ -45,7 +45,7 @@ export const TechnicianCard: React.FC<TechnicianCardProps> = ({ technician, onBo
   return (
     <Link 
       to={`/technician/${technician.slug}`}
-      className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden hover:border-slate-700 transition-colors group block"
+      className="bg-[#f8fafc] border border-slate-200 rounded-lg overflow-hidden hover:border-primary-600 transition-colors group block"
       onClick={handleCardClick}
     >
       {/* Cover Image */}
@@ -66,24 +66,24 @@ export const TechnicianCard: React.FC<TechnicianCardProps> = ({ technician, onBo
         )}
     
         {/* Rating Badge */}
-        <div className="absolute top-1 right-1 bg-black/70 backdrop-blur-sm px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
-          <span className="text-yellow-400 text-[10px]">★</span>
-          <span className="text-white text-[10px] font-medium">
+        <div className="absolute top-1 right-1 bg-blue-500 backdrop-blur-sm px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+          <span className="text-[#F59E0B] text-[15px]">★</span>
+          <span className="text-[#ffff] text-[10px] font-medium">
             {technician.review_count > 0 ? (technician.avg_rating || 0).toFixed(1) : 'New'}
           </span>
-          <span className="text-slate-400 text-[8px]">({technician.review_count || 0})</span>
+          <span className="text-[#ffff] text-[8px]">({technician.review_count || 0})</span>
         </div>
       </div>
 
       {/* Content */}
       <div className="p-2 md:p-3">
         {/* Business Name */}
-        <h3 className="font-bold text-white text-xs md:text-sm mb-0.5 truncate group-hover:text-blue-400 transition-colors">
+        <h3 className="font-bold text-[#0f172a] text-xs md:text-sm mb-0.5 truncate group-hover:text-primary-600 transition-colors">
           {technician.business_name}
         </h3>
 
         {/* Location - Using SVG icon */}
-        <p className="text-slate-400 text-[10px] md:text-xs mb-1 flex items-center gap-1">
+        <p className="text-blue-500 text-[10px] md:text-xs mb-1 flex items-center gap-1">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-2.5 h-2.5">
             <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
           </svg>
@@ -95,7 +95,7 @@ export const TechnicianCard: React.FC<TechnicianCardProps> = ({ technician, onBo
           {technician.technician_services?.slice(0, 2).map((service, idx) => (
             <span 
               key={idx}
-              className="text-[9px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded truncate max-w-[80px]"
+              className="text-[9px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded truncate max-w-[80px]"
             >
               {service.service_name}
             </span>
@@ -110,17 +110,17 @@ export const TechnicianCard: React.FC<TechnicianCardProps> = ({ technician, onBo
         {/* Service Type Badge */}
         <div className="flex items-center gap-1">
           {technician.mobile_service === 'yes' && (
-            <span className="inline-flex items-center gap-0.5 text-[9px] bg-green-900/50 text-green-400 px-1.5 py-0.5 rounded border border-green-800">
+            <span className="inline-flex items-center gap-0.5 text-[9px] bg-primary-50 text-primary-700 px-1.5 py-0.5 rounded border border-primary-200">
               Mobile
             </span>
           )}
           {technician.mobile_service === 'no' && (
-            <span className="inline-flex items-center gap-0.5 text-[9px] bg-blue-900/50 text-blue-400 px-1.5 py-0.5 rounded border border-blue-800">
+            <span className="inline-flex items-center gap-0.5 text-[9px] bg-primary-50 text-primary-700 px-1.5 py-0.5 rounded border border-primary-200">
               Studio
             </span>
           )}
           {technician.mobile_service === 'both' && (
-            <span className="inline-flex items-center gap-0.5 text-[9px] bg-purple-900/50 text-purple-400 px-1.5 py-0.5 rounded border border-purple-800">
+            <span className="inline-flex items-center gap-0.5 text-[9px] bg-primary-50 text-primary-700 px-1.5 py-0.5 rounded border border-primary-200">
               Both
             </span>
           )}
@@ -134,16 +134,16 @@ export const TechnicianCard: React.FC<TechnicianCardProps> = ({ technician, onBo
 // Skeleton loading state
 export const TechnicianCardSkeleton: React.FC = () => {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden animate-pulse">
-      <div className="h-24 md:h-28 lg:h-32 bg-slate-800" />
+    <div className="bg-[#f8fafc] border border-slate-200 rounded-lg overflow-hidden animate-pulse">
+      <div className="h-24 md:h-28 lg:h-32 bg-slate-200" />
       <div className="p-2 md:p-3">
-        <div className="h-3 bg-slate-800 rounded w-3/4 mb-1.5" />
-        <div className="h-2 bg-slate-800 rounded w-1/2 mb-2" />
+        <div className="h-3 bg-slate-200 rounded w-3/4 mb-1.5" />
+        <div className="h-2 bg-slate-200 rounded w-1/2 mb-2" />
         <div className="flex gap-1 mb-2">
-          <div className="h-4 bg-slate-800 rounded w-14" />
-          <div className="h-4 bg-slate-800 rounded w-14" />
+          <div className="h-4 bg-slate-200 rounded w-14" />
+          <div className="h-4 bg-slate-200 rounded w-14" />
         </div>
-        <div className="h-5 bg-slate-800 rounded w-16" />
+        <div className="h-5 bg-slate-200 rounded w-16" />
       </div>
     </div>
   );

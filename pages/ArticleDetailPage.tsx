@@ -139,7 +139,7 @@ const ArticleDetailPage: React.FC = () => {
           </div>
 
           {/* Title */}
-          <h1 className="text-xl md:text-2xl lg:text-4xl font-black text-white mb-6 leading-tight break-words w-full">
+          <h1 className="text-xl md:text-2xl lg:text-4xl font-black text-blue-500 mb-6 leading-tight break-words w-full">
             {article.title}
           </h1>
 
@@ -166,12 +166,12 @@ const ArticleDetailPage: React.FC = () => {
         <div className="max-w-3xl mx-auto w-full">
           <article
             className="prose prose-lg prose-invert max-w-none
-              prose-headings:font-bold prose-headings:text-white prose-headings:break-words
-              prose-p:text-slate-300 prose-p:leading-relaxed prose-p:break-words
+              prose-headings:font-bold prose-headings:text-black prose-headings:break-words
+              prose-p:text-slate-700 prose-p:leading-relaxed prose-p:break-words
               prose-a:text-blue-400 prose-a:no-underline hover:prose-a:text-blue-300 prose-a:break-words
-              prose-strong:text-white prose-strong:font-bold
-              prose-ul:text-slate-300 prose-ol:text-slate-300
-              prose-img:rounded-2xl prose-img:shadow-xl prose-img:max-w-full
+              prose-strong:text-black prose-strong:font-bold
+              prose-ul:text-slate-500 prose-ol:text-slate-500
+              prose-img:rounded-2xl prose-img:shadow-xl prose-img:max-w-100%
               prose-blockquote:border-l-blue-500 prose-blockquote:bg-slate-900 prose-blockquote:rounded-xl prose-blockquote:p-6 prose-blockquote:break-words"
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }}
           />
@@ -182,13 +182,13 @@ const ArticleDetailPage: React.FC = () => {
       {article.internal_links && article.internal_links.length >= 2 && (
         <section className="px-4 md:px-8 pb-10 bg-slate-950">
           <div className="max-w-3xl mx-auto w-full">
-            <h2 className="text-xl font-bold text-white mb-6">Related Links</h2>
+            <h2 className="text-xl font-bold text-blue-500 mb-6">Related Links</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {article.internal_links.map((link, idx) => (
                 <Link
                   key={idx}
                   to={link.url}
-                  className="bg-slate-900 border border-slate-700 rounded-2xl p-4 hover:bg-slate-800 transition-colors"
+                  className="bg-slate-900 border border-blue-500 rounded-2xl p-4 hover:bg-blue-500 transition-colors"
                 >
                   <p className="text-white font-semibold">{link.title}</p>
                 </Link>
@@ -202,10 +202,10 @@ const ArticleDetailPage: React.FC = () => {
       {article.faqs && article.faqs.length > 0 && (
         <section className="px-4 md:px-8 pb-10 bg-slate-950">
           <div className="max-w-3xl mx-auto w-full">
-            <h2 className="text-xl font-bold text-white mb-6">Frequently Asked Questions</h2>
+            <h2 className="text-xl font-bold text-blue-500 mb-6">Frequently Asked Questions</h2>
             {article.faqs.map((faq, idx) => (
               <details key={idx} className="mb-4">
-                <summary className="text-white font-semibold cursor-pointer">{faq.question}</summary>
+                <summary className="text-black font-semibold cursor-pointer">{faq.question}</summary>
                 <p className="text-slate-300 mt-2">{faq.answer}</p>
               </details>
             ))}
@@ -217,7 +217,7 @@ const ArticleDetailPage: React.FC = () => {
       {article.images && article.images.length > 1 && (
         <section className="px-4 md:px-8 pb-10 bg-slate-950">
           <div className="max-w-3xl mx-auto w-full">
-            <p className="text-[10px] text-slate-600 font-black uppercase tracking-widest mb-4">Gallery</p>
+            <p className="text-[15px] text-blue-500 font-black uppercase tracking-widest mb-4">Gallery</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {article.images.slice(1).map((img, idx) => (
                 <img
@@ -236,7 +236,7 @@ const ArticleDetailPage: React.FC = () => {
       {/* ── CTA ───────────────────────────────────────── */}
       <section className="px-4 md:px-8 pb-12 bg-slate-950">
         <div className="max-w-4xl mx-auto w-full">
-          <div className="bg-gradient-to-br from-blue-900/30 to-slate-900 rounded-2xl md:rounded-3xl p-5 md:p-10 lg:p-12 border border-blue-800/30 text-center">
+          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl md:rounded-3xl p-5 md:p-10 lg:p-12 border border-blue-800/30 text-center">
             <h2 className="text-lg md:text-2xl lg:text-3xl font-black text-white mb-3 md:mb-4">
               Need a Technician?
             </h2>
@@ -252,7 +252,7 @@ const ArticleDetailPage: React.FC = () => {
               </Link>
               <Link
                 to="/blogs"
-                className="bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 md:px-8 md:py-3 rounded-full font-bold text-xs md:text-sm uppercase tracking-wider transition-all border border-slate-700 whitespace-nowrap"
+                className="bg-slate-800 hover:bg-slate-700 text-blue-500 px-6 py-3 md:px-8 md:py-3 rounded-full font-bold text-xs md:text-sm uppercase tracking-wider transition-all border border-slate-700 whitespace-nowrap"
               >
                 More Articles
               </Link>

@@ -231,7 +231,7 @@ const QuillEditor: React.FC<QuillEditorProps> = ({ value, onChange, className })
         ref={editorRef} 
         className="ql-container ql-snow"
         onClick={handleEditorClick}
-        style={{ minHeight: '200px', background: '#0f172a', borderRadius: '0 0 1rem 1rem' }}
+        style={{ minHeight: '200px', background: '#ffff', borderRadius: '0 0 1rem 1rem' }}
       />
       
       <style>{`

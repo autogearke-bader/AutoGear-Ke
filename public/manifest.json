@@ -6,13 +6,25 @@
   "display": "standalone",
   "orientation": "portrait",
   "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
-  "background_color": "#080909",
-  "theme_color": "#e8a020",
+  "background_color": "#1A56DB",
+  "theme_color": "#1A56DB",
   "prefer_related_applications": false,
   "scope": "/",
   "lang": "en",
   "categories": ["business", "lifestyle", "shopping"],
   "icons": [
+    {
+      "src": "/assets/mekh.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/mekh.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
     {
       "src": "/assets/180.png",
       "sizes": "180x180",

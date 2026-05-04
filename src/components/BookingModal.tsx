@@ -58,7 +58,7 @@ export const BookingModal = ({
         setClientName(client.name);
         setClientPhone(client.phone);
         setClientId(client.id);
-        setClientEmail(session.user.email); // Use session user email
+        setClientEmail(session.user.email || ''); // Use session user email with fallback
       }
     };
 
@@ -138,13 +138,18 @@ export const BookingModal = ({
       vehicle_model: vehicleModel || null,
     };
 
-    // Insert lead silently in background
-    supabase.from('leads').insert([leadData]).then(({ error }) => {
-      if (error) {
-        console.error('Failed to insert lead:', error);
-      } else {
+    // Insert lead silently in background (fire and forget)
+    (async () => {
+      try {
+        const { error: insertError } = await supabase.from('leads').insert([leadData]);
+        
+        if (insertError) {
+          console.error('Failed to insert lead:', insertError);
+          return;
+        }
+        
         // Notify technician via email and insert notification
-        supabase.functions.invoke('send-lead-notification', {
+        const { data, error: notificationError } = await supabase.functions.invoke('send-lead-notification', {
           body: {
             technician_id: technician.id,
             client_id: clientId,
@@ -154,19 +159,17 @@ export const BookingModal = ({
             client_location: locationText || undefined,
             vehicle_model: vehicleModel || undefined,
           }
-        }).then(({ data, error }) => {
-          if (error) {
-            console.error('Failed to send lead notification:', error);
-          } else {
-            console.log('Lead notification sent successfully:', data);
-          }
-        }).catch((err) => {
-          console.error('Error invoking send-lead-notification function:', err);
         });
+        
+        if (notificationError) {
+          console.error('Failed to send lead notification:', notificationError);
+        } else {
+          console.log('Lead notification sent successfully:', data);
+        }
+      } catch (err: any) {
+        console.error('Error in lead submission process:', err);
       }
-    }).catch((err) => {
-      console.error('Error inserting lead:', err);
-    });
+    })();
 
     // Build WhatsApp URL
     const vehicleInfo = vehicleModel ? ` I have a ${vehicleModel}.` : '';
@@ -203,7 +206,7 @@ export const BookingModal = ({
         <div className="p-6 border-b border-slate-800">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-black text-white uppercase tracking-wide">
+              <h2 className="text-xl font-black text-blue-500 uppercase tracking-wide">
                 Book Technician
               </h2>
               <p className="text-sm text-slate-400 mt-1">
@@ -226,29 +229,29 @@ export const BookingModal = ({
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {/* Name */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">Your Name *</label>
+            <label className="block text-sm font-medium text-blue-500 mb-1">Your Name *</label>
             <input
               type="text"
               value={clientName}
               onChange={(e) => setClientName(e.target.value)}
               required
-              className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+              className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 placeholder-slate-500 focus:outline-none focus:border-blue-500"
               placeholder="John Doe"
             />
-            {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
+            {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
           </div>
 
 
 
           {/* Service */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">Service You Need *</label>
+            <label className="block text-sm font-medium text-blue-500 mb-1">Service You Need *</label>
             <select
               title="Select a service"
               value={selectedService}
               onChange={(e) => setSelectedService(e.target.value)}
               required
-              className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+              className="w-full px-4 py-3 bg-slate-900 border-slate-500 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
             >
               <option value="">Select a service</option>
               {services.map((service) => (
@@ -257,13 +260,13 @@ export const BookingModal = ({
                 </option>
               ))}
             </select>
-            {errors.service && <p className="text-red-400 text-xs mt-1">{errors.service}</p>}
+            {errors.service && <p className="text-red-500 text-xs mt-1">{errors.service}</p>}
           </div>
 
           {/* Service Variants - if available */}
           {serviceVariants.length > 0 && (
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-blue-500 mb-2">
                 Select Options
                 <span className="text-slate-500 font-normal ml-1">(optional)</span>
               </label>
@@ -284,7 +287,7 @@ export const BookingModal = ({
                     />
                     <span className="flex-1 min-w-0 truncate">{variant.variant_name}</span>
                     {variant.price && (<span className="text-green-400 font-medium shrink-0">Ksh {variant.price.toLocaleString()}</span>)}
-                    {variant.is_negotiable && (<span className="bg-yellow-900/50 text-yellow-400 text-xs px-2 py-0.5 rounded border border-yellow-800 shrink-0">Negotiable</span>)}
+                    {variant.is_negotiable && (<span className="bg-yellow-100 text-yellow-500 text-xs px-2 py-0.5 rounded border border-yellow-700 shrink-0">Negotiable</span>)}
                   </label>
                 ))}
               </div>
@@ -293,7 +296,7 @@ export const BookingModal = ({
 
           {/* Service Details - Always visible */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">
+            <label className="block text-sm font-medium text-blue-500 mb-1">
               Additional Details
               <span className="text-slate-500 font-normal ml-1">(optional)</span>
             </label>
@@ -301,7 +304,7 @@ export const BookingModal = ({
               value={serviceDetails}
               onChange={(e) => setServiceDetails(e.target.value)}
               rows={3}
-              className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none"
+              className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none"
               placeholder="e.g. I need tinting for all windows, prefer dark shade, need it done this week..."
             />
             <p className="text-xs text-slate-500 mt-2">
@@ -311,12 +314,12 @@ export const BookingModal = ({
 
           {/* Vehicle Model */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">Vehicle Model</label>
+            <label className="block text-sm font-medium text-blue-500 mb-1">Vehicle Model</label>
             <input
               type="text"
               value={vehicleModel}
               onChange={(e) => setVehicleModel(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+              className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 placeholder-slate-500 focus:outline-none focus:border-blue-500"
               placeholder="e.g. Toyota Noah, BMW X5, Mercedes C300"
             />
             <p className="text-xs text-slate-500 mt-2">
@@ -326,12 +329,12 @@ export const BookingModal = ({
 
           {/* Location */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">Your Location</label>
+            <label className="block text-sm font-medium text-blue-500 mb-1">Your Location</label>
             <input
               type="text"
               value={locationText}
               onChange={(e) => setLocationText(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+              className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 placeholder-slate-500 focus:outline-none focus:border-blue-500"
               placeholder="e.g. Kilimani, Nairobi"
             />
           </div>

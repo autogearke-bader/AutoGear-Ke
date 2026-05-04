@@ -56,10 +56,10 @@ export const LocationBanner = ({ onLocationDetected }: LocationBannerProps) => {
         <div className="flex items-start gap-3">
           <span className="text-2xl flex-shrink-0">📍</span>
           <div className="flex-1">
-            <p className="font-semibold text-sm text-text mb-1">
+            <p className="font-semibold text-sm text-blue-500 text-text mb-1">
               Enable location for better results
             </p>
-            <p className="text-xs text-muted mb-3 leading-relaxed">
+            <p className="text-xs text-muted text-slate-500 mb-3 leading-relaxed">
               We use your location to show technicians nearest to you first.
               Your location is never stored or shared publicly.
             </p>

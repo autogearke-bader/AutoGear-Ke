@@ -54,8 +54,8 @@ const TechnicianBottomNav: React.FC = () => {
 
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path);
 
-  const activeClass = "text-sky-500 transition-colors";
-  const inactiveClass = "text-slate-300 hover:text-white transition-colors";
+  const activeClass = "text-blue-500 transition-colors";
+  const inactiveClass = "text-gray-500 hover:text-white transition-colors";
 
   // Handle home button click with refresh
   const handleHomeClick = (e: React.MouseEvent) => {
