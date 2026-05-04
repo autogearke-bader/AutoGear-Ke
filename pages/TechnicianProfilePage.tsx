@@ -679,14 +679,14 @@ const TechnicianProfilePage: React.FC = () => {
                             }}
                           />
                         ) : (
-                          <div className="absolute inset-0 bg-white flex items-center justify-center rounded-lg">
-                            <span className="text-blue-500 text-xs">Loading...</span>
+                          <div className="absolute inset-0 bg-slate-800 flex items-center justify-center rounded-lg">
+                            <span className="text-slate-500 text-xs">Loading...</span>
                           </div>
                         )}
                         {/* Play button overlay */}
-                        <div className="absolute inset-0 flex items-center justify-center bg-blue-500 group-hover:bg-blue-600 transition-colors rounded-lg">
-                          <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                            <svg className="w-5 h-5 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-colors rounded-lg">
+                          <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                            <svg className="w-5 h-5 text-black ml-0.5" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M8 5v14l11-7z"/>
                             </svg>
                           </div>
