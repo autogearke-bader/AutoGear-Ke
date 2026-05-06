@@ -21,6 +21,7 @@ const AboutPage = lazy(() => import('./pages/AboutPage.tsx'));
 const MenuPage = lazy(() => import('./pages/MenuPage.tsx'));
 const GuestMenuPage = lazy(() => import('./pages/GuestMenuPage.tsx'));
 const TechnicianMenuPage = lazy(() => import('./pages/TechnicianMenuPage.tsx'));
+const ServicePage = lazy(() => import('./pages/ServicePage.tsx'));
 const ServiceLocationPage = lazy(() => import('./pages/ServiceLocationPage.tsx'));
 const AuthCallback = lazy(() => import('./pages/AuthCallback.tsx'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage.tsx'));
@@ -218,6 +219,7 @@ const AppContent: React.FC = () => {
           <Route path="/blogs" element={<BlogPage />} />
           <Route path="/blogs/:slug" element={<ArticleDetailPage />} />
           <Route path="/services/:service/:location" element={<ServiceLocationPage />} />
+          <Route path="/services/:service" element={<ServicePage />} />
           <Route path="/404" element={<NotFoundPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
