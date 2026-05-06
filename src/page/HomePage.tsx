@@ -33,10 +33,6 @@ interface Section {
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const [technicians, setTechnicians] = useState<Technician[]>([]);
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingArticles, setLoadingArticles] = useState(true);
   
   // Service filter state
   const [activeFilter, setActiveFilter] = useState<ServiceCategory | 'all'>('all');
@@ -76,6 +72,23 @@ const HomePage: React.FC = () => {
   const techniciansDebounceTimeout = useRef<NodeJS.Timeout | null>(null);
   const searchDebounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
+  // Fetch technicians
+  useEffect(() => {
+    getPublicTechnicians().then(setTechnicians).then(() => setLoadingTechnicians(false));
+  }, []);
+
+  // Fetch articles
+  useEffect(() => {
+    getPublicArticles().then(setArticles).then(() => setLoadingArticles(false));
+  }, []);
+
+  // Fetch data
+  const [technicians, setTechnicians] = useState([]);
+  const [loadingTechnicians, setLoadingTechnicians] = useState(true);
+
+  const [articles, setArticles] = useState([]);
+  const [loadingArticles, setLoadingArticles] = useState(true);
+
   // Derived values from client data
   const isClient = !!(
     session?.user?.user_metadata?.role === 'client' ||
@@ -95,69 +108,7 @@ const HomePage: React.FC = () => {
     l => l.status === 'job_done'
   );
 
-// Fetch technicians on mount and on page visibility/focus
-useEffect(() => {
-  const fetchTechnicians = async () => {
-    // Prevent concurrent requests
-    if (techniciansRequestInProgress.current) {
-      return;
-    }
 
-    techniciansRequestInProgress.current = true;
-
-    try {
-      const [techniciansData, articlesData] = await Promise.all([
-        getPublicTechnicians(),
-        getPublicArticles(),
-      ]);
-      setTechnicians(techniciansData);
-      setArticles(articlesData);
-    } catch (error) {
-      console.error('Failed to fetch data:', error);
-    } finally {
-      setLoading(false);
-      setLoadingArticles(false);
-      techniciansRequestInProgress.current = false;
-    }
-  };
-
-  fetchTechnicians();
-
-  // Refetch when tab becomes visible again (e.g. switching back from another tab)
-  const handleVisibilityChange = () => {
-    if (document.visibilityState === 'visible') {
-      // Debounce the request to prevent rapid-fire calls
-      if (techniciansDebounceTimeout.current) {
-        clearTimeout(techniciansDebounceTimeout.current);
-      }
-      techniciansDebounceTimeout.current = setTimeout(() => {
-        fetchTechnicians();
-      }, 500); // 500ms debounce
-    }
-  };
-
-  // Refetch when window regains focus (e.g. navigating back)
-  const handleFocus = () => {
-    // Debounce the request to prevent rapid-fire calls
-    if (techniciansDebounceTimeout.current) {
-      clearTimeout(techniciansDebounceTimeout.current);
-    }
-    techniciansDebounceTimeout.current = setTimeout(() => {
-      fetchTechnicians();
-    }, 500); // 500ms debounce
-  };
-
-  document.addEventListener('visibilitychange', handleVisibilityChange);
-  window.addEventListener('focus', handleFocus);
-
-  return () => {
-    document.removeEventListener('visibilitychange', handleVisibilityChange);
-    window.removeEventListener('focus', handleFocus);
-    if (techniciansDebounceTimeout.current) {
-      clearTimeout(techniciansDebounceTimeout.current);
-    }
-  };
-}, []);
 
 
 
@@ -584,7 +535,7 @@ useEffect(() => {
 
   // Check if search has results
   const hasSearchResults = searchQuery.trim().length > 0 && searchResults.length > 0;
-  const hasNoSearchResults = searchQuery.trim().length > 0 && searchResults.length === 0 && !loading;
+  const hasNoSearchResults = searchQuery.trim().length > 0 && searchResults.length === 0 && !loadingTechnicians;
 
   // Build sections
   const sections = useMemo<Section[]>(() => {
@@ -1031,7 +982,7 @@ useEffect(() => {
       */}
 
       {/* Search Results - Show when searching */}
-      {searchQuery.trim().length > 0 && !loading ? (
+      {searchQuery.trim().length > 0 && !loadingTechnicians ? (
         <section className="px-4 pb-4">
           <div className="flex items-center justify-between mb-3">
             <div>
@@ -1209,7 +1160,7 @@ useEffect(() => {
                   paddingBottom: '4px'
                 }}
               >
-                {loading ? (
+                {loadingTechnicians ? (
                   Array.from({ length: 4 }).map((_, i) => (
                     <div 
                       key={i} 

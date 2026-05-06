@@ -22,6 +22,12 @@ input, textarea, select {
   border-color: #cbd5e1 !important;
 }
 
+/* Skeleton shimmer animation */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 @theme {
   --font-sans: 'Inter', sans-serif;
 

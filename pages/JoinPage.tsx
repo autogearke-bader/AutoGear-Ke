@@ -242,7 +242,7 @@ const JoinPage: React.FC = () => {
           .from('technicians')
           .select('id, status')
           .eq('user_id', session.user.id)
-          .single();
+          .maybeSingle();
 
         if (existingTech) {
           console.log('[WIZARD] Existing technician found:', existingTech.id, existingTech.status);
@@ -294,6 +294,12 @@ const JoinPage: React.FC = () => {
           if (savedState.businessHours?.length > 0) {
             setBusinessHours(savedState.businessHours);
           }
+        }
+
+        // If no technician exists in DB but user is resuming to a later step, force start from profile
+        if (!technicianId && currentStep !== 'profile') {
+          setCurrentStep('profile');
+          setCompletedSteps(new Set());
         }
       } catch (err) {
         console.error('Error checking auth:', err);
@@ -660,14 +666,11 @@ const JoinPage: React.FC = () => {
       let uniqueSlug = baseSlug;
       let counter = 1;
       while (true) {
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from('technicians')
           .select('id')
           .eq('slug', uniqueSlug)
-          .single();
-        if (error && error.code === 'PGRST116') { // No rows found
-          break;
-        }
+          .maybeSingle();
         if (data) {
           uniqueSlug = `${baseSlug}-${counter}`;
           counter++;
@@ -1279,7 +1282,7 @@ const JoinPage: React.FC = () => {
                 `}>
                   {isCompleted ? '✓' : index + 1}
                 </div>
-                <span className={`text-xs mt-1 hidden sm:block ${isCurrent ? 'text-white font-medium' : 'text-blue-500'}`}>
+                <span className={`text-xs mt-1 hidden sm:block ${isCurrent ? 'text-[#ffff] font-medium' : 'text-blue-500'}`}>
                   {step.title}
                 </span>
               </div>
@@ -1312,7 +1315,7 @@ const JoinPage: React.FC = () => {
                   value={profileForm.first_name}
                   onChange={(e) => setProfileForm({ ...profileForm, first_name: e.target.value })}
                   required
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-3 bg-slate-800 border border-blue-600 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
                 />
               </div>
               <div>
@@ -1337,7 +1340,7 @@ const JoinPage: React.FC = () => {
                 onChange={(e) => setProfileForm({ ...profileForm, business_name: e.target.value })}
                 required
                 placeholder="e.g., John's Auto Detailing"
-                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
+                className="w-full px-4 py-3 bg-slate-800 border border-blue-600 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
               />
             </div>
 
@@ -1348,7 +1351,7 @@ const JoinPage: React.FC = () => {
                 value={profileForm.phone}
                 onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
                 placeholder="e.g., 0712345678"
-                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
+                className="w-full px-4 py-3 bg-slate-800 border border-blue-600 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
               />
             </div>
 
@@ -1359,7 +1362,7 @@ const JoinPage: React.FC = () => {
                 title="Years of Experience"
                 value={profileForm.experience_years}
                 onChange={(e) => setProfileForm({ ...profileForm, experience_years: e.target.value })}
-                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
+                className="w-full px-4 py-3 bg-slate-800 border border-blue-600 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
               >
                 <option value="">Select Experience</option>
                 {EXPERIENCE_OPTIONS.map(exp => (
@@ -1379,7 +1382,7 @@ const JoinPage: React.FC = () => {
                 }}
                 required
                 placeholder="e.g., Westlands, Nairobi"
-                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
+                className="w-full px-4 py-3 bg-slate-800 border border-blue-600 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
               />
             </div>
 
@@ -1412,7 +1415,7 @@ const JoinPage: React.FC = () => {
                   onChange={(e) => setProfileForm({ ...profileForm, area: e.target.value })}
                   required
                   placeholder="e.g., Westlands, Kilimani"
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-3 bg-slate-900 border border-blue-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
                 />
                 {resolvedLocationName && (
                   <p className="text-green-400 text-xs mt-1 flex items-center gap-1">
@@ -1431,7 +1434,7 @@ const JoinPage: React.FC = () => {
                     value={profileForm.google_maps_link}
                     onChange={(e) => setProfileForm({ ...profileForm, google_maps_link: e.target.value })}
                     placeholder="https://maps.google.com/..."
-                    className="flex-1 min-w-0 px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
+                    className="flex-1 min-w-0 px-4 py-3 bg-slate-900 border border-blue-600 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
                   />
                   <button
                     type="button"
@@ -1451,7 +1454,7 @@ const JoinPage: React.FC = () => {
                   </button>
                 </div>
                 {(geocodingLoading || locationLoading) && (
-                  <p className="text-blue-400 text-xs mt-1">Looking up location name...</p>
+                  <p className="text-blue-500 text-xs mt-1">Looking up location name...</p>
                 )}
                 {locationError && (
                   <p className="text-red-400 text-xs mt-1">{locationError}</p>
@@ -1461,13 +1464,13 @@ const JoinPage: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="experience_years" className="block text-sm text-slate-300 mb-1">Years of Experience *</label>
+                <label htmlFor="experience_years" className="block text-sm text-slate-400 mb-1">Years of Experience *</label>
                 <select
                   id="experience_years"
                   title="Years of Experience"
                   value={profileForm.experience_years}
                   onChange={(e) => setProfileForm({ ...profileForm, experience_years: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-3 bg-slate-900 border border-blue-600 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
                 >
                   <option value="">Select Experience</option>
                   {EXPERIENCE_OPTIONS.map(exp => (
@@ -1476,13 +1479,13 @@ const JoinPage: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label htmlFor="mobile_service" className="block text-sm text-slate-300 mb-1">Mobile Service</label>
+                <label htmlFor="mobile_service" className="block text-sm text-slate-400 mb-1">Mobile Service</label>
                 <select
                   id="mobile_service"
                   title="Mobile Service"
                   value={profileForm.mobile_service}
                   onChange={(e) => setProfileForm({ ...profileForm, mobile_service: e.target.value as 'yes' | 'no' | 'both' })}
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
                 >
                   <option value="no">No - I work at my location</option>
                   <option value="yes">Yes - I travel to clients</option>
@@ -1527,7 +1530,7 @@ const JoinPage: React.FC = () => {
                   className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     selectedServices.includes(service)
                       ? 'bg-blue-600 text-white'
-                      : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                      : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
                   }`}
                 >
                   {service}
@@ -1537,14 +1540,14 @@ const JoinPage: React.FC = () => {
 
             {selectedServices.length > 0 && (
               <div className="mt-6 pt-4 border-t border-slate-700">
-                <h3 className="text-white font-medium mb-3">Set prices for your services (optional)</h3>
+                <h3 className="text-blue-500 font-medium mb-3">Set prices for your services (optional)</h3>
                 {selectedServices.map(serviceName => (
                   <div key={serviceName}>
                     {/* Window Tinting - Show tint type options instead of main service price */}
                     {serviceName === 'Window Tinting' ? (
                       <>
-                        <div className="mb-4 p-4 bg-slate-800 rounded-lg border border-slate-700">
-                          <h4 className="text-white font-medium mb-3 text-sm">Window Tint Types & Pricing</h4>
+                        <div className="mb-4 p-4 bg-slate-900 rounded-lg border border-blue-600">
+                          <h4 className="text-blue-500 font-medium mb-3 text-sm">Window Tint Types & Pricing</h4>
                           <div className="space-y-2">
 
                          {WINDOW_TINT_TYPES.map(tintType => (
@@ -1558,7 +1561,7 @@ const JoinPage: React.FC = () => {
                                  [tintType.name]: { ...windowTintPrices[tintType.name], price: e.target.value }
                               })}
                                placeholder={`Price (KSh, e.g. ${tintType.minPrice})`}
-                               className="w-full sm:flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm"
+                               className="w-full sm:flex-1 px-3 py-2 bg-slate-900 border border-blue-600 rounded-lg text-slate-500 text-sm"
                              />
                          <label className="flex items-center gap-2 text-xs text-slate-400 cursor-pointer sm:whitespace-nowrap">
                             <input
@@ -1588,7 +1591,7 @@ const JoinPage: React.FC = () => {
                              placeholder="Optional: e.g. Price varies by vehicle size. Sedans start at Ksh 13,000."
                              rows={2}
                              maxLength={150}
-                             className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none"
+                             className="w-full px-3 py-2 bg-slate-900 border border-blue-600 rounded-lg text-slate-500 text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none"
                            />
                            <p className="text-slate-500 text-xs mt-1">{(servicePrices[serviceName]?.notes || '').length}/150 characters</p>
                          </div>
@@ -1598,11 +1601,11 @@ const JoinPage: React.FC = () => {
                        <div className="mb-3">
                          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                            <div className="flex items-center gap-2 sm:w-32">
-                             <span className="text-slate-300 text-sm">{serviceName}</span>
+                             <span className="text-slate-400 text-sm">{serviceName}</span>
                              <button
                                type="button"
                                onClick={() => handleServiceToggle(serviceName)}
-                               className="flex-shrink-0 w-5 h-5 flex items-center justify-center rounded-full bg-slate-600 hover:bg-red-500 text-white text-xs transition-colors"
+                               className="flex-shrink-0 w-5 h-5 flex items-center justify-center rounded-full bg-blue-600 hover:bg-red-500 text-[#ffff] text-xs transition-colors"
                                title="Remove service"
                              >
                                ×
@@ -1619,7 +1622,7 @@ const JoinPage: React.FC = () => {
                                       [serviceName]: { ...servicePrices[serviceName], price: e.target.value }
                                     })}
                                     placeholder="Price (KSh)"
-                                    className="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm"
+                                    className="flex-1 px-3 py-2 bg-slate-900 border border-blue-600 rounded-lg text-slate-500 text-sm"
                                   />
                                    <label className="flex items-center gap-1 text-xs text-slate-400">
                                     <input
@@ -1637,13 +1640,14 @@ const JoinPage: React.FC = () => {
 
                                 {/* Category Selection - Required */}
                                 <div className="mt-3">
-                                  <label className="block text-sm text-slate-300 mb-1">
+                                  <label htmlFor={`service-category-${serviceName}`} className="block text-sm text-blue-500 mb-1">
                                     Service Category <span className="text-red-400">*</span>
                                   </label>
                                   <select
+                                    id={`service-category-${serviceName}`}
                                     value={selectedCategories[serviceName] || ''}
                                     onChange={(e) => handleCategoryChange(serviceName, e.target.value as ServiceCategory)}
-                                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                                    className="w-full px-3 py-2 bg-slate-900 border border-blue-600 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
                                     required
                                   >
                                     <option value="">Select a category</option>
@@ -1653,7 +1657,7 @@ const JoinPage: React.FC = () => {
                                     <option value="interior_detailing">Interior & Detailing (upholstery, seats, carpet, detailing, cleaning)</option>
                                   </select>
                                   {!selectedCategories[serviceName] && (
-                                    <p className="text-red-400 text-xs mt-1">Please select a category for this service</p>
+                                    <p className="text-red-500 text-xs mt-1">Please select a category for this service</p>
                                   )}
                                 </div>
 
@@ -1666,7 +1670,7 @@ const JoinPage: React.FC = () => {
                                   placeholder="Optional: e.g. Price varies by vehicle size. Sedans start at Ksh 13,000."
                                   rows={2}
                                   maxLength={150}
-                                  className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none"
+                                  className="w-full px-3 py-2 bg-slate-900 border border-blue-600 rounded-lg text-slate-500 text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none"
                                 />
                                 <p className="text-slate-500 text-xs mt-1">{(servicePrices[serviceName]?.notes || '').length}/150 characters</p>
                               </>
@@ -1681,19 +1685,19 @@ const JoinPage: React.FC = () => {
                       <>
                         <div className="mb-3 mt-1">
                           {(serviceVariants[serviceName] || []).map((variant, variantIndex) => (
-                            <div key={variantIndex} className="flex flex-col gap-2 p-3 bg-slate-700 rounded-lg mb-2 border border-slate-600">
+                            <div key={variantIndex} className="flex flex-col gap-2 p-3 bg-slate-900 rounded-lg mb-2 border border-blue-600">
                               <div className="flex items-center gap-2">
                                 <input
                                   type="text"
                                   value={variant.variant_name}
                                   onChange={(e) => handleUpdateVariant(serviceName, variantIndex, 'variant_name', e.target.value)}
                                   placeholder="Variant name (e.g. Basic, Premium)"
-                                  className="flex-1 min-w-0 px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg text-white text-sm"
+                                  className="flex-1 min-w-0 px-3 py-2 bg-slate-900 border border-blue-600 rounded-lg text-slate-500 text-sm"
                                 />
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveVariant(serviceName, variantIndex)}
-                                  className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-slate-600 hover:bg-red-500 text-white text-lg transition-colors"
+                                  className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-blue-600 hover:bg-red-500 text-[#ffff] text-lg transition-colors"
                                 >
                                   ×
                                 </button>
@@ -1703,7 +1707,7 @@ const JoinPage: React.FC = () => {
                                 value={variant.price}
                                 onChange={(e) => handleUpdateVariant(serviceName, variantIndex, 'price', e.target.value)}
                                 placeholder="Price (KSh)"
-                                className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg text-white text-sm"
+                                className="w-full px-3 py-2 bg-slate-900 border border-slate-500 rounded-lg text-slate-500 text-sm"
                               />
                               <label className="flex items-center gap-2 text-sm text-slate-400 cursor-pointer">
                                 <input
@@ -1719,7 +1723,7 @@ const JoinPage: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => handleAddVariant(serviceName)}
-                            className="text-blue-400 hover:text-blue-300 text-sm font-medium"
+                            className="text-blue-500 hover:text-blue-300 text-sm font-medium"
                           >
                             + Add Variant
                           </button>
@@ -1735,7 +1739,7 @@ const JoinPage: React.FC = () => {
                           placeholder="Optional: e.g. Price varies by vehicle size. Sedans start at Ksh 13,000."
                           rows={2}
                           maxLength={150}
-                          className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none"
+                          className="w-full px-3 py-2 bg-slate-900 border border-blue-600 rounded-lg text-slate-500 text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none"
                         />
                         <p className="text-slate-500 text-xs mt-1">{(servicePrices[serviceName]?.notes || '').length}/150 characters</p>
                       </>
@@ -1748,20 +1752,20 @@ const JoinPage: React.FC = () => {
 
             {/* Other Services */}
             <div className="mt-6 pt-4 border-t border-slate-700">
-              <label className="block text-sm text-slate-300 mb-2">Other Services</label>
+              <label className="block text-sm text-blue-500 mb-2">Other Services</label>
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={newOtherService}
                   onChange={(e) => setNewOtherService(e.target.value)}
                   placeholder="Add custom service"
-                  className="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm"
+                  className="flex-1 px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm"
                   onKeyPress={(e) => e.key === 'Enter' && handleAddOtherService()}
                 />
                 <button
                   type="button"
                   onClick={handleAddOtherService}
-                  className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm"
+                  className="px-3 py-2 bg-blue-600 text-[#ffff] rounded-lg text-sm"
                 >
                   Add
                 </button>
@@ -1769,7 +1773,7 @@ const JoinPage: React.FC = () => {
               {otherServices.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1">
                   {otherServices.map((service) => (
-                    <span key={service} className="inline-flex items-center gap-1 px-2 py-1 bg-slate-700 rounded text-xs text-slate-300">
+                    <span key={service} className="inline-flex items-center gap-1 px-2 py-1 bg-slate-900 rounded text-xs text-slate-300">
                       {service}
                       <button type="button" onClick={() => handleRemoveOtherService(service)} className="text-red-400 hover:text-red-300">×</button>
                     </span>
@@ -1783,7 +1787,7 @@ const JoinPage: React.FC = () => {
       case 'photos':
         return (
           <div className="space-y-4">
-            <h2 className="text-xl font-bold text-white mb-4">Portfolio Photos</h2>
+            <h2 className="text-xl font-bold text-blue-500 mb-4">Portfolio Photos</h2>
             <p className="text-slate-400 text-sm mb-6">Upload at least 2 photos showcasing your work</p>
             
             <div className="grid grid-cols-3 gap-3">
@@ -1806,8 +1810,8 @@ const JoinPage: React.FC = () => {
                       </button>
                     </div>
                   ) : (
-                    <label className="w-full h-full border-2 border-dashed border-slate-600 hover:border-blue-500 rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors bg-slate-800/50">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-slate-500 hover:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <label className="w-full h-full border-2 border-dashed border-blue-600 hover:border-blue-500 rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors bg-slate-900">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-blue-600 hover:text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                       </svg>
                       <span className="text-xs text-slate-500 mt-1">Slot {index + 1}</span>
@@ -1824,17 +1828,17 @@ const JoinPage: React.FC = () => {
               ))}
             </div>
             
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-blue-500">
               {getFilledSlotsCount()} of 6 slots filled {getFilledSlotsCount() >= 2 ? '(minimum requirement met)' : '(need at least 2)'}
             </p>
-            {uploading && <p className="text-blue-400 text-sm">Uploading...</p>}
+            {uploading && <p className="text-blue-600 text-sm">Uploading...</p>}
           </div>
         );
 
       case 'videos':
         return (
           <div className="space-y-4">
-            <h2 className="text-xl font-bold text-white mb-4">TikTok Videos</h2>
+            <h2 className="text-xl font-bold text-blue-500 mb-4">TikTok Videos</h2>
             <p className="text-slate-400 text-sm mb-6">Add TikTok videos showcasing your work (optional)</p>
             
             {Array.from({ length: 3 }).map((_, index) => {
@@ -1869,7 +1873,7 @@ const JoinPage: React.FC = () => {
                         }
                       }}
                       placeholder="Paste TikTok video URL here"
-                      className={`flex-1 px-3 py-2 bg-slate-700 border rounded-lg text-white text-sm focus:outline-none focus:border-blue-500 ${isDuplicate ? 'border-red-500' : 'border-slate-600'}`}
+                      className={`flex-1 px-3 py-2 bg-slate-900 border rounded-lg text-slate-500 text-sm focus:outline-none focus:border-blue-500 ${isDuplicate ? 'border-red-500' : 'border-slate-600'}`}
                     />
                     
                     {urlValue && (
@@ -1884,7 +1888,7 @@ const JoinPage: React.FC = () => {
                             setSlotInputs(newSlotInputs);
                           }
                         }}
-                        className={"shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-slate-600 hover:bg-red-500 text-white transition-colors " + (isValid && !isDuplicate ? "hidden sm:flex" : "flex")}
+                        className={"shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-blue-600 hover:bg-red-500 text-white transition-colors " + (isValid && !isDuplicate ? "hidden sm:flex" : "flex")}
                         title="Clear"
                       >
                         ×
@@ -1931,8 +1935,8 @@ const JoinPage: React.FC = () => {
                     </div>
                      </>
                     )}
-                      {hasInvalidUrl && <p className="text-red-400 text-xs">✗ Invalid TikTok URL - Please enter a valid TikTok link</p>}
-                     {isDuplicate && <p className="text-red-400 text-xs">✗ This link is already used - Please use a different URL</p>}
+                      {hasInvalidUrl && <p className="text-red-500 text-xs">✗ Invalid TikTok URL - Please enter a valid TikTok link</p>}
+                     {isDuplicate && <p className="text-red-500 text-xs">✗ This link is already used - Please use a different URL</p>}
                    </div>
                   )}
                   
@@ -1958,15 +1962,15 @@ const JoinPage: React.FC = () => {
       case 'pricing':
         return (
           <div className="space-y-4">
-            <h2 className="text-xl font-bold text-white mb-4">Pricing Notes</h2>
-            <p className="text-slate-400 text-sm mb-6">Add any additional pricing information (optional)</p>
+            <h2 className="text-xl font-bold text-blue-500 mb-4">Pricing Notes</h2>
+            <p className="text-slate-500 text-sm mb-6">Add any additional pricing information (optional)</p>
             
             <textarea
               value={profileForm.pricing_notes}
               onChange={(e) => setProfileForm({ ...profileForm, pricing_notes: e.target.value })}
               rows={4}
               placeholder="Any additional pricing information, discounts, or special offers..."
-              className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+              className="w-full px-4 py-3 bg-slate-900 border border-blue-600 rounded-lg text-slate-500 focus:outline-none focus:border-blue-500"
             />
           </div>
         );
@@ -1979,9 +1983,9 @@ const JoinPage: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-white mb-4">Profile Submitted!</h2>
-            <p className="text-slate-400 mb-2">Your profile has been created successfully.</p>
-            <p className="text-slate-400">It will be reviewed by an admin before going live.</p>
+            <h2 className="text-2xl font-bold text-blue-500 mb-4">Profile Submitted!</h2>
+            <p className="text-slate-500 mb-2">Your profile has been created successfully.</p>
+            <p className="text-blue-500">It is being reviewed before going live.</p>
           </div>
         );
 
@@ -2001,7 +2005,7 @@ const JoinPage: React.FC = () => {
           <h1 className="text-2xl font-black text-blue-500 uppercase tracking-tight mb-2">
             Become a Technician
           </h1>
-          <p className="text-slate-400">
+          <p className="text-slate-500">
             Complete your profile step by step to start receiving bookings
           </p>
         </div>
@@ -2022,7 +2026,7 @@ const JoinPage: React.FC = () => {
         {currentStep !== 'complete' && renderProgress()}
 
         {/* Step Content */}
-        <div className="bg-slate-900 border border-slate-700 p-6 rounded-xl mb-6">
+        <div className="bg-slate-900 border border-blue-600 p-6 rounded-xl mb-6">
           {renderStepContent()}
         </div>
 
@@ -2062,7 +2066,7 @@ const JoinPage: React.FC = () => {
         )}
 
         {currentStep !== 'complete' && (
-          <p className="mt-4 text-center text-sm text-slate-400">
+          <p className="mt-4 text-center text-sm text-blue-500">
             Your progress is saved as you go. You can come back to previous steps.
           </p>
         )}

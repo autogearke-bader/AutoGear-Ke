@@ -74,14 +74,17 @@ export const getPublicTechnicians = async (filters?: { area?: string; service?: 
   let query = supabase
     .from('technicians')
     .select(`
-      *,
+      id, first_name, last_name, business_name, slug, phone, email, bio, experience_years,
+      county, area, mobile_service, instagram, tiktok_link, youtube_link, pricing_notes,
+      status, user_id, profile_image, cover_photo, thumbnail_image, created_at,
+      latitude, longitude, google_maps_link,
       technician_services(
-        *,
-        service_variants(*)
+        id, technician_id, service_name, category, price, negotiable, notes,
+        service_variants(id, service_id, variant_name, price, is_negotiable)
       ),
-      technician_photos(*),
-      technician_videos(*),
-      technician_payments(*),
+      technician_photos(id, technician_id, photo_url, service, caption, alt_text, sort_order),
+      technician_videos(id, technician_id, platform, video_url, video_id, service, alt_text, sort_order, created_at, thumbnail_url),
+      technician_payments(id, method),
       avg_rating,
       review_count
     `)
@@ -233,14 +236,20 @@ export const getPublicTechnicianBySlug = async (slug: string) => {
   const { data, error } = await supabase
     .from('technicians')
     .select(`
-      *,
-      technician_services(*),
-      technician_photos(*),
-      technician_videos(*),
-      technician_payments(*),
+      id, first_name, last_name, business_name, slug, phone, email, bio, experience_years,
+      county, area, mobile_service, instagram, tiktok_link, youtube_link, pricing_notes,
+      status, user_id, profile_image, cover_photo, thumbnail_image, created_at,
+      latitude, longitude, google_maps_link,
+      technician_services(
+        id, technician_id, service_name, category, price, negotiable, notes,
+        service_variants(id, service_id, variant_name, price, is_negotiable)
+      ),
+      technician_photos(id, technician_id, photo_url, service, caption, alt_text, sort_order),
+      technician_videos(id, technician_id, platform, video_url, video_id, service, alt_text, sort_order, created_at, thumbnail_url),
+      technician_payments(id, method),
       avg_rating,
       review_count,
-      reviews(*)
+      reviews(id, technician_id, client_id, rating, comment, would_rebook, created_at)
     `)
     .eq('slug', slug)
     .eq('status', 'live')
@@ -258,7 +267,7 @@ export const getPublicTechnicianBySlug = async (slug: string) => {
 export const getTechnicianBusinessHours = async (technicianId: string) => {
   const { data, error } = await supabase
     .from('business_hours')
-    .select('*')
+    .select('id, technician_id, day_of_week, is_open, open_time, close_time, available_on_request')
     .eq('technician_id', technicianId)
     .order('day_of_week', { ascending: true });
 
@@ -282,7 +291,7 @@ export const getTechnicianBusinessHours = async (technicianId: string) => {
 export const getPublicArticles = async () => {
   const { data, error } = await supabase
     .from('articles')
-    .select('*')
+    .select('id, slug, title, images, content, excerpt, meta_description, keywords, is_published, created_at, updated_at')
     .eq('is_published', true)
     .order('created_at', { ascending: false });
 

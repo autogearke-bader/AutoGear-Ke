@@ -1,5 +1,5 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 
 // Lazy load heavy pages for better initial load performance
@@ -36,9 +36,7 @@ const App: React.FC = () => {
   return (
     <HelmetProvider>
       <ErrorBoundary>
-        <BrowserRouter>
-          <AppContent />
-        </BrowserRouter>
+        <AppContent />
       </ErrorBoundary>
     </HelmetProvider>
   );
@@ -161,10 +159,22 @@ const AppContent: React.FC = () => {
     };
 
     // ✅ REMOVED: onAuthStateChange from here — Layout.tsx handles it
-    // ✅ REMOVED: triggerProfileCompletion event listener — causes duplicate navigation
     // Only run once on mount — Layout.tsx handles ongoing auth state
     checkProfileCompletion();
   }, []); // ← empty deps, no navigate dependency needed
+
+  // Listen for triggerProfileCompletion event to handle immediate navigation
+  useEffect(() => {
+    const handleTriggerProfileCompletion = () => {
+      const pendingUserType = localStorage.getItem('pendingUserType');
+      if (pendingUserType === 'technician') {
+        localStorage.removeItem('pendingUserType');
+        navigate('/join');
+      }
+    };
+    window.addEventListener('triggerProfileCompletion', handleTriggerProfileCompletion);
+    return () => window.removeEventListener('triggerProfileCompletion', handleTriggerProfileCompletion);
+  }, [navigate]);
 
   // Show a loading skeleton until auth check completes (prevents blank screen on slow connections)
   if (checkingProfile) {

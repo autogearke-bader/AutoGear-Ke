@@ -5,13 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && cp public/_routes.json dist/_routes.json",
-    "build:only": "vite build",
+    "build": "vite build",
+    "build:only": "rmdir /s /q dist 2>nul & vite build",
     "preview": "vite preview",
     "test": "vitest --run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "sitemap": "node scripts/generate-sitemap.js"
+    "sitemap": "node scripts/generate-sitemap.js",
+    "clean": "rmdir /s /q dist 2>nul & rmdir /s /q node_modules\\.vite 2>nul",
+    "clean:build": "npm run clean & npm run build",
+    "analyze": "ANALYZE=true vite build"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.99.0",
@@ -37,6 +40,7 @@
     "@vitejs/plugin-react": "^5.0.0",
     "@vitest/ui": "^4.0.18",
     "fast-check": "^4.5.3",
+    "rollup-plugin-visualizer": "^7.0.1",
     "tailwindcss": "^4.1.18",
     "typescript": "~5.8.2",
     "vite": "^6.2.0",

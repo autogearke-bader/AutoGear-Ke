@@ -10,6 +10,7 @@ const TechnicianMenuPage: React.FC = () => {
   const [technician, setTechnician] = useState<Technician | null>(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
     const fetchTechnicianProfile = async () => {
@@ -30,11 +31,28 @@ const TechnicianMenuPage: React.FC = () => {
   }, []);
 
   const handleSignOut = async () => {
+    if (signingOut) return; // Prevent multiple clicks
+
+    setSigningOut(true);
     try {
+      // Check session health first
+      const { isSessionHealthy } = await import('../src/lib/auth');
+      const healthy = await isSessionHealthy();
+
+      if (!healthy) {
+        console.log('Session unhealthy, proceeding with sign-out anyway');
+      }
+
       await signOut();
       navigate('/');
     } catch (error) {
       console.error('Error signing out:', error);
+      // Even if sign-out fails, navigate away to force a clean state
+      // This ensures the button always works by clearing the UI state
+      console.log('Sign-out failed, but navigating away to reset state');
+      navigate('/');
+    } finally {
+      setSigningOut(false);
     }
   };
 
@@ -186,14 +204,24 @@ const TechnicianMenuPage: React.FC = () => {
 
       {/* Sign Out Button - Positioned at bottom */}
       <div className="p-4 mt-auto">
-        <button 
+        <button
           onClick={handleSignOut}
-          className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+          disabled={signingOut}
+          className="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed text-white font-bold py-4 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-          Sign Out
+          {signingOut ? (
+            <>
+              <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+              Signing Out...
+            </>
+          ) : (
+            <>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Sign Out
+            </>
+          )}
         </button>
       </div>
 

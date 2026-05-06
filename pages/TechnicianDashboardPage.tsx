@@ -44,7 +44,7 @@ import { supabase } from '../src/lib/supabase';
 import { BusinessHoursEditor } from '../src/components/BusinessHoursEditor';
 import { Avatar } from '../src/components/Avatar';
 import { profileFull, portfolioThumb } from '../src/lib/cloudinary';
-import { TechnicianMap } from '../src/components/TechnicianMap';
+
 
 type TabType = 'profile' | 'services' | 'bookings' | 'notifications' | 'settings' | 'technicians';
 

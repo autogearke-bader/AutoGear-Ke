@@ -468,6 +468,7 @@ const getCustomTitle = (service: string, locationName: string): string => {
     'ceramic-coating-nairobi': 'Professional Ceramic Coating Services in Nairobi',
     'ceramic-coating-westlands': 'Professional Ceramic Coating Services in Westlands, Nairobi',
     'ceramic-coating-kiambu-road': 'Professional Ceramic Coating Services on Kiambu Road',
+    'car-wrapping-ruiru': 'Professional Car Wrapping in Ruiru | Mekh',
   };
   return customTitles[key] || `${serviceName} in ${locationName} | Mekh`;
 };

@@ -5,7 +5,7 @@ import { Technician, TechnicianVideo, WINDOW_TINT_TYPES } from '../types';
 import { getPublicTechnicianBySlug, createWhatsAppLead, canClientReviewTechnician, submitReview, getTikTokThumbnail, getTechnicianBusinessHours } from '../src/lib/api';
 import { getSession } from '../src/lib/auth';
 import { supabase } from '../src/lib/supabase';
-import { TechnicianMap } from '../src/components/TechnicianMap';
+import LazyMap from '../src/components/LazyMap';
 import { BookingModal } from '../src/components/BookingModal';
 import { coverBanner, portfolioThumb, portfolioFull, profileFull, cardThumbnail } from '../src/lib/cloudinary';
 import { Avatar } from '../src/components/Avatar';
@@ -43,7 +43,7 @@ const TechnicianProfilePage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const [technician, setTechnician] = useState<Technician | null>(null);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -142,19 +142,7 @@ const TechnicianProfilePage: React.FC = () => {
           setTiktokThumbnails(thumbnails);
         }
 
-        // Fetch service variants
-        if (data?.technician_services) {
-          try {
-            const { data: variants } = await supabase
-              .from('service_variants')
-              .select('*')
-              .in('service_id', data.technician_services.map((s: { id: string }) => s.id))
-
-            data.service_variants = variants || [];
-          } catch (e) {
-            console.error('Failed to fetch service variants:', e);
-          }
-        }
+        // Service variants are now included in the main query join
 
         // Fetch business hours
         if (data?.id) {
@@ -249,7 +237,7 @@ const TechnicianProfilePage: React.FC = () => {
           .from('clients')
           .select('name, phone')
           .eq('user_id', session.user.id)
-          .single();
+          .maybeSingle();
         
         if (client) {
           // createWhatsAppLead only expects 2 args: technicianId and serviceName
@@ -886,11 +874,11 @@ const TechnicianProfilePage: React.FC = () => {
           <div className="max-w-4xl mx-auto">
             <h2 className="text-lg font-bold text-blue-500 mb-3">Location</h2>
             {technician.latitude && technician.longitude ? (
-              <TechnicianMap 
-                area={technician.area} 
-                county={technician.county} 
-                lat={technician.latitude} 
-                lng={technician.longitude} 
+              <LazyMap
+                area={technician.area}
+                county={technician.county}
+                lat={technician.latitude}
+                lng={technician.longitude}
               />
             ) : technician.google_maps_link ? (
               <a

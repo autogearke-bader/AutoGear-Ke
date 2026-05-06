@@ -3,6 +3,7 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 // Security: Define which environment variables are exposed to the client
 // Only variables starting with VITE_ are exposed to the client
@@ -48,6 +49,14 @@ export default defineConfig(({ mode }) => {
       plugins: [
         react(),
         tailwindcss(),
+        ...(process.env.ANALYZE === 'true' ? [
+          visualizer({
+            open: true,
+            gzipSize: true,
+            brotliSize: true,
+            filename: 'dist/bundle-analysis.html',
+          })
+        ] : []),
         VitePWA({
           registerType: 'prompt',
           includeAssets: [], // Images loaded via runtimeCaching instead
@@ -71,19 +80,19 @@ export default defineConfig(({ mode }) => {
                 '**/supabase/**',          // Never cache Supabase files
               ],
 
-              skipWaiting: false,
-              clientsClaim: false, // ← FIXED: was true — this was hijacking open tabs
+              skipWaiting: true, // Force new service worker to activate immediately
+              clientsClaim: true, // Take control of all clients immediately
               maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
               runtimeCaching: [
                 // Cache JS and CSS at runtime (served instantly after first visit)
                 {
                   urlPattern: /\/assets\/.+\.(js|css)$/i,
-                  handler: 'StaleWhileRevalidate', // ← FIXED: was CacheFirst — now revalidates in bg
+                  handler: 'NetworkFirst', // Always try network first for fresh content
                   options: {
-                    cacheName: 'static-assets',
+                    cacheName: 'static-assets-v5',
                     expiration: {
                       maxEntries: 60,
-                      maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+                      maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days (reduced from 30)
                     },
                     cacheableResponse: { statuses: [0, 200] },
                   },
@@ -238,45 +247,32 @@ export default defineConfig(({ mode }) => {
           '@': path.resolve(__dirname, '.'),
         }
       },
+      esbuild: {
+        drop: ['console', 'debugger'],
+        legalComments: 'none',
+      },
       build: {
-        outDir: 'dist',
-        emptyOutDir: true,
-        sourcemap: false,
-        assetsInlineLimit: 0,
-        // Security: Remove console logs and debug info in production
-        minify: 'terser',
-        terserOptions: {
-          compress: {
-            drop_console: true,
-            drop_debugger: true,
+        minify: 'esbuild',
+        rollupOptions: {
+          output: {
+            entryFileNames: 'assets/[name]-[hash].js',
+            chunkFileNames: 'assets/[name]-[hash].js',
+            assetFileNames: (assetInfo) => {
+              // Prevent hashing of favicon files — they need predictable URLs
+              const name = assetInfo.name;
+              if (name && (name.includes('favicon') || name === 'favicon.ico')) {
+                return '[name].[ext]'; // No hash for favicons
+              }
+              return 'assets/[name]-[hash].[ext]';
+            },
+            manualChunks: {
+              'vendor-react': ['react', 'react-dom'],
+              'vendor-supabase': ['@supabase/supabase-js'],
+              'vendor-router': ['react-router-dom'],
+              'vendor-helmet': ['react-helmet-async'],
+            },
           },
         },
-        rollupOptions: {
-           output: {
-              entryFileNames: 'assets/[name]-[hash].js',
-              chunkFileNames: 'assets/[name]-[hash].js',
-              assetFileNames: (assetInfo) => {
-                // Prevent hashing of favicon files — they need predictable URLs
-                const name = assetInfo.name;
-                if (name && (name.includes('favicon') || name === 'favicon.ico')) {
-                  return '[name].[ext]'; // No hash for favicons
-                }
-                return 'assets/[name]-[hash].[ext]';
-              },
-              manualChunks(id) {
-                if (id.includes('node_modules')) {
-                  if (id.includes('react-dom') || (id.includes('react') && !id.includes('react-router') && !id.includes('react-helmet'))) return 'vendor-react';
-                  if (id.includes('@supabase')) return 'vendor-supabase';
-                  if (id.includes('leaflet')) return 'vendor-leaflet';
-                  if (id.includes('react-router')) return 'vendor-router';
-                  if (id.includes('react-helmet')) return 'vendor-helmet';
-                  // Let quill/dompurify stay in AdminPage chunk — don't catch them here
-                  if (id.includes('quill') || id.includes('dompurify')) return undefined;
-                  return 'vendor-misc';
-                }
-              },
-           },
-         },
       },
       base: '/', // Use absolute paths for root deployment
     };

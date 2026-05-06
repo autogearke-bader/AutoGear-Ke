@@ -24,7 +24,7 @@ const ArticleDetailPage: React.FC = () => {
         .select('*')
         .eq('slug', slug)
         .eq('is_published', true)
-        .single();
+        .maybeSingle();
 
       if (err || !data) {
         setError('Article not found');

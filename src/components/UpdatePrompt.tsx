@@ -22,6 +22,25 @@ export const UpdatePrompt = () => {
     return () => window.removeEventListener('swUpdateAvailable', handler);
   }, []);
 
+  const handleUpdate = async () => {
+    // Clear all caches before reloading
+    if ('caches' in window) {
+      const cacheNames = await caches.keys();
+      await Promise.all(
+        cacheNames.map(cacheName => caches.delete(cacheName))
+      );
+      console.log('All caches cleared');
+    }
+    
+    // Unregister service worker and reload
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map(reg => reg.unregister()));
+    }
+    
+    window.location.reload();
+  };
+
   // ✅ Only render if running as PWA AND update is available
   if (!isPWA || !showPrompt) return null;
 
@@ -32,7 +51,7 @@ export const UpdatePrompt = () => {
         <p className="text-slate-400 text-xs">A new version of Mekh is ready</p>
       </div>
       <button
-        onClick={() => window.location.reload()}
+        onClick={handleUpdate}
         className="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-full"
       >
         Update

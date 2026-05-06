@@ -89,8 +89,42 @@ export const getAuthRequestLog = () => [...authRequestLog];
 // ── SHARED ──
 
 export const signOut = async () => {
-  const { error } = await supabase.auth.signOut();
-  if (error) throw error;
+  try {
+    // First check if there's an active session
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+    if (sessionError) {
+      console.warn('[SIGNOUT] Session check failed, proceeding with sign-out anyway:', sessionError);
+    }
+
+    // Always attempt sign-out, even if session check fails
+    // Supabase handles clearing invalid sessions gracefully
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      // Log the error but don't throw - we want to clear local state anyway
+      console.error('[SIGNOUT] Sign-out error:', error);
+
+      // Force clear local storage as fallback
+      try {
+        localStorage.removeItem('mekh-supabase-auth');
+        // Also try to clear any other potential auth keys
+        const keys = Object.keys(localStorage).filter(key => key.includes('supabase'));
+        keys.forEach(key => localStorage.removeItem(key));
+        console.log('[SIGNOUT] Cleared local storage as fallback');
+      } catch (storageError) {
+        console.error('[SIGNOUT] Failed to clear local storage:', storageError);
+      }
+
+      // Still throw the original error so callers can handle it
+      throw error;
+    }
+
+    console.log('[SIGNOUT] Successfully signed out');
+  } catch (error) {
+    console.error('[SIGNOUT] Sign-out failed:', error);
+    throw error;
+  }
 };
 
 export const getSession = async () => {
@@ -141,6 +175,42 @@ export const getCurrentUser = async () => {
 export const getUserIdFromSession = async (): Promise<string | null> => {
   const { data: { session } } = await supabase.auth.getSession();
   return session?.user?.id ?? null;
+};
+
+// Check if the current session is healthy (not expired and valid)
+export const isSessionHealthy = async (): Promise<boolean> => {
+  try {
+    const { data: { session }, error } = await supabase.auth.getSession();
+
+    if (error) {
+      console.warn('[SESSION] Session check error:', error);
+      return false;
+    }
+
+    if (!session) {
+      return false;
+    }
+
+    // Check if session is expired
+    const now = Math.floor(Date.now() / 1000);
+    const expiresAt = session.expires_at;
+
+    if (expiresAt && now > expiresAt) {
+      console.warn('[SESSION] Session expired');
+      return false;
+    }
+
+    // Check if access token exists and looks valid
+    if (!session.access_token) {
+      console.warn('[SESSION] No access token');
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('[SESSION] Health check failed:', error);
+    return false;
+  }
 };
 
 export const getMyTechnicianProfile = async () => {

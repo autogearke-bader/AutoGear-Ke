@@ -78,12 +78,7 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
     }
   };
 
-  const imageUrl = article.images?.[0]?.url
-    || (article.featuredImage
-      ? (article.featuredImage.startsWith('http') || article.featuredImage.startsWith('data:')
-        ? article.featuredImage
-        : `/article-images/${article.featuredImage}`)
-      : 'https://placehold.co/800x450/1e293b/94a3b8?text=No+Image');
+  const imageUrl = article.images?.[0]?.url || 'https://placehold.co/800x450/1e293b/94a3b8?text=No+Image';
 
   const tags = detectTags(article);
   const serviceSlug = detectServiceSlug(article);
@@ -111,7 +106,7 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
           <span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">
-            {formatDate(article.publishedAt || article.published_at || article.created_at)}
+            {formatDate(article.created_at)}
           </span>
         </div>
 

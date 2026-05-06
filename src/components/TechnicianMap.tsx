@@ -6,7 +6,7 @@
 import { useEffect, useRef, useId } from 'react';
 import { COUNTY_COORDINATES } from '../lib/location';
 
-interface TechnicianMapProps {
+export interface TechnicianMapProps {
   county: string;
   area: string;
   lat?: number;

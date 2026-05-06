@@ -10,6 +10,15 @@
 /sw.js
   Cache-Control: no-cache, no-store, must-revalidate
 
+/manifest.json
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/assets/mekh.png
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/assets/Blue logo.png
+  Cache-Control: no-cache, no-store, must-revalidate
+
 /
   Cache-Control: no-cache
 

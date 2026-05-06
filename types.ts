@@ -216,9 +216,9 @@ export const CAR_WRAP_TYPES = [
 
 
 export interface ArticleImage {
-  image_name: string;
+  alt: string;
   url?: string;
-  alt?: string;
+  src?: string;
 }
 
 
@@ -227,18 +227,14 @@ export interface Article {
   id: number;
   slug: string;
   title: string;
-  featured_image: string;
-  images?: ArticleImage[];
+  images: ArticleImage[];
   content: string;
   excerpt: string;
   meta_description: string;
   keywords: string;
   is_published: number;
-  published_at: string;
   created_at: string;
   updated_at: string;
-  featuredImage?: string;
-  publishedAt?: string;
   internal_links?: { title: string; url: string }[] | null;  // Add this for internal links
   author_bio?: string | null;  // Add this for author bio
   faqs?: { question: string; answer: string }[] | null;  // Add this for FAQs

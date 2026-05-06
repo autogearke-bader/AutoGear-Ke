@@ -151,9 +151,9 @@ const Header: React.FC<HeaderProps> = ({
           <Link to="/" className="text-xl font-black tracking-tighter text-white flex items-center group">
             <div className="relative mr-0 md:mr-4 logo-glow flex items-center justify-center">
               <img
-                src="/assets/mekh.png"
+                src="/assets/mekh.png?v=5"
                 alt= "Mekh Logo"
-                className="h-7 md:h-12 w-auto object-contain transform group-hover:rotate-12 transition-transform duration-500 ease-in-out"
+                className="h-10 md:h-12 w-auto object-contain transform group-hover:rotate-12 transition-transform duration-500 ease-in-out"
                 decoding="async"
                 fetchPriority="high"
                 onError={(e: React.SyntheticEvent<HTMLImageElement>) => {

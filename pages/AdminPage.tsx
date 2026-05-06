@@ -269,13 +269,25 @@ const AdminPage: React.FC = () => {
     return () => clearTimeout(t);
   }, [status]);
 
-  // Auto-refresh active users every 30 seconds when on stats tab
+  // Listen for active users changes in real-time when on stats tab
   useEffect(() => {
     if (activeTab !== 'stats') return;
-    const interval = setInterval(() => {
-      fetchActiveUsers();
-    }, 30000);
-    return () => clearInterval(interval);
+
+    const channel = supabase
+      .channel('active_sessions_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'active_sessions' },
+        (payload) => {
+          // Refetch active users count when sessions change
+          fetchActiveUsers();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [activeTab]);
 
   // ════════════════════════════════════════════════

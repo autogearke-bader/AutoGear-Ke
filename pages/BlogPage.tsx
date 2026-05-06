@@ -21,7 +21,7 @@ const BlogPage: React.FC = () => {
     const fetchData = async () => {
       const { data: articlesRes } = await supabase
         .from('articles')
-        .select('*')
+        .select('id, slug, title, images, content, excerpt, meta_description, keywords, is_published, created_at, updated_at')
         .eq('is_published', true)
         .order('created_at', { ascending: false });
 

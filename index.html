@@ -16,10 +16,12 @@
     
     <!-- Favicon - Using absolute paths to prevent Vite hashing -->
     <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
-    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
-    <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
-    <link rel="icon" type="image/png" sizes="64x64" href="/assets/favicon-64.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/32.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="/assets/48.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="/assets/64.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/180.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/assets/152.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="/assets/167.png">
 
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="/manifest.json">
@@ -54,7 +56,11 @@
     <meta property="og:url" content="https://mekh.app/" />
     <meta property="og:title" content="Find Automotive Technicians in Nairobi | Mekh" />
     <meta property="og:description" content="Find trusted, verified automotive technicians in Nairobi for any car service. Book on Mekh today." />
-    <meta property="og:image" content=".png" />
+    <meta property="og:image" content="https://mekh.app/assets/android-chrome-512x512.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content="Mekh - Automotive Services Marketplace" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -62,16 +68,24 @@
     <meta name="twitter:url" content="https://mekh.app/" />
     <meta name="twitter:title" content="Find Automotive Technicians near you in Nairobi | Mekh" />
     <meta name="twitter:description" content="Find trusted, verified automotive technicians in Nairobi for any car service. Book on Mekh today." />
-    <meta name="twitter:image" content="/assets/mekh.png" />
+    <meta name="twitter:image" content="https://mekh.app/assets/android-chrome-512x512.png" />
 
     <!-- Structured Data: Service Business -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "Service",
+      "@type": ["Service", "Organization"],
       "name": "Mekh",
-      "description": "Kenya's car service technician marketplace connecting clients with expert professionals for tinting, wrapping, PPF, ceramic coating, detailing & tuning.",
+      "alternateName": "Mekh App",
       "url": "https://mekh.app",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://mekh.app/assets/android-chrome-512x512.png",
+        "width": 512,
+        "height": 512
+      },
+      "image": "https://mekh.app/assets/android-chrome-512x512.png",
+      "description": "Kenya's car service technician marketplace connecting clients with expert professionals for tinting, wrapping, PPF, ceramic coating, detailing & tuning.",
       "areaServed": {
         "@type": "Country",
         "name": "Kenya"
