@@ -1028,7 +1028,7 @@ const ServiceLocationPage: React.FC = () => {
                   <Link
                     key={slug}
                     to={`/services/${service}/${slug}`}
-                    className="bg-white border-blue-700 hover:border-blue-600 text-slate-300 hover:text-blue-500 px-3 py-1.5 rounded-full text-sm transition-colors"
+                    className="bg-white border-blue-700 hover:border-blue-600 text-slate-500 hover:text-blue-300 px-3 py-1.5 rounded-full text-sm transition-colors"
                   >
                     {serviceName} in {name}
                   </Link>

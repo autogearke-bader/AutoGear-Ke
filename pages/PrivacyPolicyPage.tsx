@@ -7,6 +7,7 @@ const PrivacyPolicyPage: React.FC = () => {
       <Helmet>
         <title>Privacy Policy | How We Protect Your Data | Mekh</title>
         <meta name="description" content="Mekh Privacy Policy - Learn how we collect, use, and protect your data." />
+        <link rel="canonical" href="https://mekh.app/privacy" />
       </Helmet>
       
       <div className="min-h-screen bg-gray-50 text-gray-600 py-12 px-4">
@@ -292,6 +293,28 @@ const PrivacyPolicyPage: React.FC = () => {
                   <span className="font-semibold">WhatsApp:</span> <a href="https://wa.me/254738242743" className="text-blue-500 hover:underline">0738242743</a>
                 </p>
               </div>
+            </section>
+
+            {/* Continue Exploring Section */}
+            <section style={{ marginTop: '3rem', borderTop: '1px solid #e5e7eb', paddingTop: '2rem' }}>
+              <h3 className="text-xl font-bold text-blue-500 mb-4">Explore Mekh App Services</h3>
+              <ul className="space-y-2 text-gray-600">
+                <li>
+                  <a href="/services/car-wrapping/nairobi" className="text-blue-500 hover:underline">Car Wrapping in Nairobi</a>
+                </li>
+                <li>
+                  <a href="/services/car-wrapping/karen" className="text-blue-500 hover:underline">Car Wrapping in Karen</a>
+                </li>
+                <li>
+                  <a href="/services/window-tinting/karen" className="text-blue-500 hover:underline">Window Tinting in Karen</a>
+                </li>
+                <li>
+                  <a href="/terms" className="text-blue-500 hover:underline">Terms and Conditions</a>
+                </li>
+                <li>
+                  <a href="/" className="text-blue-500 hover:underline">Back to Home</a>
+                </li>
+              </ul>
             </section>
           </div>
         </div>

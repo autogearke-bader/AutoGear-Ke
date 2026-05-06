@@ -46,7 +46,7 @@ const BlogPage: React.FC = () => {
   return (
     <div className="min-h-screen w-full bg-slate-950">
       <Helmet>
-        <title>Mekh Insights |  Car Care Tips & Guides for Kenyan Drivers</title>
+        <title>Mekh Insights | Car Care Tips for Kenyan Drivers</title>
         {/* Dynamic meta description: use featured article or fallback to generic */}
         <meta name="description" content={featuredArticle?.meta_description || "Expert tips on car tinting, wrapping, PPF, ceramic coating, and detailing in Kenya. Your go-to source for car care advice from Mekh."} />
         <meta property="og:title"       content={featuredArticle?.title || "Mekh Insights |  Car Care Tips & Guides for Kenyan Drivers"} />
@@ -60,7 +60,7 @@ const BlogPage: React.FC = () => {
         <meta name="twitter:title"       content={featuredArticle?.title || "Mekh Insights |  Car Care Tips & Guides for Kenyan Drivers"} />
         <meta name="twitter:description" content={featuredArticle?.meta_description || featuredArticle?.excerpt || "Expert tips on car tinting, wrapping, PPF, ceramic coating, and detailing in Kenya."} />
         <meta name="twitter:image"       content={featuredArticle?.images?.[0]?.url ? cx(featuredArticle.images[0].url, 'w_1200,h_630,c_fill,q_auto,f_auto') : "https://mekh.app/assets/mekh.png"} />
-        <link rel="canonical" href="https://mekh.app/blogs" />
+        <link rel="canonical" href="https://mekh.app/blogs/" />
         <script type="application/ld+json">
           {JSON.stringify({
             '@context':   'https://schema.org',
@@ -70,6 +70,38 @@ const BlogPage: React.FC = () => {
             publisher:    { '@type': 'Organization', name: 'Mekh' },
             url:          'https://mekh.app/blogs',
             image:        featuredArticle?.images?.[0]?.url ? cx(featuredArticle.images[0].url, 'w_1200,q_auto,f_auto') : undefined,
+          })}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: [
+              {
+                '@type': 'Question',
+                name: 'What is car wrapping and how much does it cost in Nairobi?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Car wrapping is applying a vinyl film over a vehicle\'s paint to change colour or protect the surface. In Nairobi, a full wrap costs between KSh 35,000 and KSh 120,000 depending on vehicle size and vinyl brand.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'How long does window tinting last in Kenya?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Quality window tinting in Kenya lasts 5 to 10 years when professionally installed using a reputable film such as 3M or Llumar.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'How do I find a reliable car technician on Mekh?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Mekh is a marketplace connecting Kenyan car owners with verified auto technicians across Nairobi. Browse listings, compare reviews, and book a certified specialist directly through the app.',
+                },
+              },
+            ],
           })}
         </script>
       </Helmet>
@@ -170,6 +202,119 @@ const BlogPage: React.FC = () => {
                 ))}
             </div>
           )}
+        </div>
+      </section>
+
+      {/* ── Content Section ─────────────────────────────── */}
+      <section className="px-4 md:px-8 pb-16 border-t border-slate-800">
+        <div className="max-w-4xl mx-auto pt-12">
+          {/* Key Takeaways */}
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 mb-10">
+            <p className="text-blue-500 text-[11px] font-black uppercase tracking-widest mb-3">
+              Key Takeaways
+            </p>
+            <ul className="space-y-2 text-slate-300 text-sm list-none">
+              <li>✦ Covers car wrapping, tinting, PPF, ceramic coating, and detailing for Kenyan drivers.</li>
+              <li>✦ All guides are written with input from verified Mekh technicians.</li>
+              <li>✦ Helps you compare costs and make confident car care decisions.</li>
+              <li>✦ Mekh is Kenya's marketplace for booking trusted auto professionals.</li>
+            </ul>
+          </div>
+
+          {/* About Mekh Insights */}
+          <h2 className="text-xl md:text-2xl font-black text-blue-500 mb-4">
+            About Mekh Insights
+          </h2>
+          <p className="text-slate-400 text-sm md:text-base leading-relaxed mb-4">
+            Mekh Insights is a car care knowledge hub for Kenyan vehicle owners.
+            Every article covers real-world pricing, Nairobi road conditions, and
+            advice from technicians verified on the Mekh platform.
+          </p>
+          
+          {/* Quotable Statement */}
+          <p className="text-slate-300 text-sm font-medium border-l-2 border-blue-600 pl-4 my-6 italic">
+            "Mekh is Kenya's leading marketplace for connecting car owners with verified
+            auto service technicians across Nairobi."
+          </p>
+
+          {/* What services do Mekh technicians offer */}
+          <h3 className="text-lg font-bold text-blue-500 mt-8 mb-3">
+            What services do Mekh technicians offer?
+          </h3>
+          <p className="text-slate-400 text-sm leading-relaxed">
+            Mekh technicians specialise in services such as car wrapping, window tinting, PPF,
+            upholstery, ceramic coating, car diagnosis, auto detailing and many more services which are automotive related across Nairobi and surrounding areas.
+          </p>
+
+          {/* Key Car Care Terms Explained */}
+          <h3 className="text-lg font-bold text-blue-500 mt-8 mb-3">
+            Key Car Care Terms Explained
+          </h3>
+          <p className="text-slate-400 text-sm leading-relaxed mb-3">
+            <strong className="text-blue-500">Car wrapping</strong> is the process of
+            covering a vehicle's original paint with a vinyl film to change its colour
+            or protect the surface.
+          </p>
+          <p className="text-slate-400 text-sm leading-relaxed mb-3">
+            <strong className="text-blue-500">Window tinting</strong> is the application
+            of a thin laminate film to a car's glass to reduce heat, UV exposure, and glare.
+          </p>
+          <p className="text-slate-400 text-sm leading-relaxed">
+            <strong className="text-blue-500">Ceramic coating</strong> is a liquid polymer
+            that bonds to paintwork and creates a long-lasting hydrophobic shield against
+            dust, UV rays, and contaminants.
+          </p>
+
+          {/* FAQ Section */}
+          <h2 className="text-xl font-black text-blue-500 mt-12 mb-6">
+            Frequently Asked Questions
+          </h2>
+          {[
+            {
+              q: 'What is car wrapping and how much does it cost in Nairobi?',
+              a: 'A full car wrap in Nairobi costs between KSh 35,000 and KSh 120,000 depending on vehicle size and vinyl brand.',
+            },
+            {
+              q: 'How long does window tinting last in Kenya?',
+              a: 'Quality window tinting lasts 5–10 years when installed using a reputable film like 3M or Llumar.',
+            },
+            {
+              q: 'How do I find a reliable car technician on Mekh?',
+              a: 'Browse verified technicians, compare reviews, and book directly through the Mekh app.',
+            },
+          ].map((item, i) => (
+            <details key={i} className="group bg-slate-900 border border-slate-800 rounded-xl mb-3 overflow-hidden">
+              <summary className="flex justify-between items-center px-5 py-4 cursor-pointer list-none">
+                <h3 className="text-slate-500 font-semibold text-sm pr-4">{item.q}</h3>
+                <span className="text-blue-500 text-lg shrink-0 group-open:rotate-45 transition-transform">+</span>
+              </summary>
+              <p className="px-5 pb-4 text-slate-400 text-sm">{item.a}</p>
+            </details>
+          ))}
+
+          {/* Explore Our Services Links */}
+          <div className="mt-12 pt-8 border-t border-slate-800">
+            <p className="text-blue-600 text-xs uppercase tracking-widest mb-4">
+              Explore Our Services
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { label: 'Car Wrapping Nairobi', href: '/services/window-tinting/lavington' },
+                { label: 'Window Tinting Lavington', href: '/services/ceramic-coating/nairobi' },
+                { label: 'Ceramic Coating Nairobi', href: '/services/window-tinting/karen' },
+                { label: 'Become a Technician', href: '/join' },
+                { label: 'Home', href: '/' },
+              ].map(link => (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  className="px-3 py-1.5 rounded-full border border-blue-600 hover:border-blue-500 text-slate-500 hover:text-blue-400 text-xs transition-all"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
     </div>

@@ -1,6 +1,6 @@
 // Mekh PWA Service Worker
-const CACHE_NAME = 'mekh-v5';
-const RUNTIME_CACHE = 'mekh-runtime-v5';
+const CACHE_NAME = 'mekh-v6';
+const RUNTIME_CACHE = 'mekh-runtime-v6';
 
 // Assets to pre-cache for offline support
 const PRECACHE_ASSETS = [

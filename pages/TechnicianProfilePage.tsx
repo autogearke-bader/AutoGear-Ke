@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { Technician, TechnicianVideo, WINDOW_TINT_TYPES } from '../types';
+import { Technician, TechnicianVideo, ServiceVariant, WINDOW_TINT_TYPES } from '../types';
 import { getPublicTechnicianBySlug, createWhatsAppLead, canClientReviewTechnician, submitReview, getTikTokThumbnail, getTechnicianBusinessHours } from '../src/lib/api';
 import { getSession } from '../src/lib/auth';
 import { supabase } from '../src/lib/supabase';
@@ -44,6 +44,7 @@ const TechnicianProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [technician, setTechnician] = useState<Technician | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -776,7 +777,7 @@ const TechnicianProfilePage: React.FC = () => {
             <h2 className="text-lg font-bold text-blue-500 mb-3">Services <span className="text-xs font-normal text-slate-400 ml-2">The Pricing of a service depends on the vehicle size and the Model</span></h2>
             <ul className="space-y-2">
               {technician.technician_services.map((service) => {
-                const variants = technician.service_variants?.filter(v => v.service_id === service.id) || [];
+                const variants = service.service_variants || [];
 
                 return (
                   <li key={service.id} className="space-y-2">
@@ -808,7 +809,7 @@ const TechnicianProfilePage: React.FC = () => {
 
                     {variants.length > 0 && (
                       <ul className="ml-6 space-y-1">
-                        {variants.map((variant) => (
+                        {variants.map((variant: ServiceVariant) => (
                           <li key={variant.id} className="flex items-center gap-2 min-w-0">
                             <span className="text-blue-500 shrink-0">◦</span>
                             <span

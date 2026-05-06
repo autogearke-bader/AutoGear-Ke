@@ -59,6 +59,8 @@ interface Article {
   internal_links: { title: string; url: string }[];
   author_bio: string;
   faqs: { question: string; answer: string }[];
+  key_takeaways: string[];
+  definitions: { term: string; meaning: string }[];
 }
 
 interface Technician {
@@ -199,6 +201,8 @@ const AdminPage: React.FC = () => {
   const [articleInternalLinks, setArticleInternalLinks] = useState<{title: string, url: string}[]>([]);
   const [articleAuthorBio,     setArticleAuthorBio]     = useState('');
   const [articleFaqs,          setArticleFaqs]          = useState<{question: string, answer: string}[]>([]);
+  const [articleKeyTakeaways,  setArticleKeyTakeaways]  = useState<string[]>([]);
+  const [articleDefinitions,   setArticleDefinitions]   = useState<{term: string, meaning: string}[]>([]);
 
   // ════════════════════════════════════════════════
   // EFFECTS
@@ -800,6 +804,7 @@ const AdminPage: React.FC = () => {
     setArticleExcerpt('');     setArticleImages([]);
     setArticleMetaDesc(''); setAltTextError(null);
     setArticleIsPublished(true); setArticleInternalLinks([]); setArticleAuthorBio(''); setArticleFaqs([]);
+    setArticleKeyTakeaways([]); setArticleDefinitions([]);
   };
 
   const handleEditArticle = (a: Article) => {
@@ -807,6 +812,7 @@ const AdminPage: React.FC = () => {
     setArticleExcerpt(a.excerpt ?? ''); setArticleImages(a.images ?? []);
     setArticleMetaDesc(a.meta_description ?? ''); setAltTextError(null);
     setArticleIsPublished(a.is_published); setArticleInternalLinks(a.internal_links ?? []); setArticleAuthorBio(a.author_bio ?? ''); setArticleFaqs(a.faqs ?? []);
+    setArticleKeyTakeaways(a.key_takeaways ?? []); setArticleDefinitions(a.definitions ?? []);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -905,6 +911,8 @@ const AdminPage: React.FC = () => {
         internal_links:   cleanedLinks,
         author_bio:       articleAuthorBio.trim(),
         faqs:             articleFaqs,
+        key_takeaways:    articleKeyTakeaways.filter(t => t.trim()),
+        definitions:      articleDefinitions.filter(d => d.term.trim() && d.meaning.trim()),
         updated_at:       new Date().toISOString(),
       };
 
@@ -1668,6 +1676,91 @@ const AdminPage: React.FC = () => {
                       <div className="bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden">
                         <QuillEditor value={articleContent} onChange={setArticleContent} className="bg-slate-950" />
                       </div>
+                    </div>
+
+                    {/* Key Takeaways (Optional) */}
+                    <div className="pt-6 border-t border-slate-800">
+                      <label className="block text-[10px] text-slate-500 font-black uppercase tracking-widest mb-2">
+                        Key Takeaways <span className="text-slate-700 normal-case font-normal tracking-normal">· Optional</span>
+                      </label>
+                      <p className="text-[10px] text-slate-600 mb-3">Add key takeaway points for a TL;DR section at the top of the article.</p>
+                      {articleKeyTakeaways.map((takeaway, idx) => (
+                        <div key={idx} className="flex gap-2 mb-2">
+                          <input
+                            type="text"
+                            value={takeaway}
+                            onChange={e => {
+                              const newTakeaways = [...articleKeyTakeaways];
+                              newTakeaways[idx] = e.target.value;
+                              setArticleKeyTakeaways(newTakeaways);
+                            }}
+                            placeholder="e.g., Covers car wrapping, tinting, PPF, ceramic coating..."
+                            className="flex-1 bg-slate-950 border border-blue-800 rounded-lg px-3 py-2 text-slate-500 outline-none focus:border-blue-500 text-sm"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setArticleKeyTakeaways(articleKeyTakeaways.filter((_, i) => i !== idx))}
+                            className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => setArticleKeyTakeaways([...articleKeyTakeaways, ''])}
+                        className="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm"
+                      >
+                        + Add Takeaway
+                      </button>
+                    </div>
+
+                    {/* Definitions (Optional) */}
+                    <div>
+                      <label className="block text-[10px] text-slate-500 font-black uppercase tracking-widest mb-2">
+                        Key Terms & Definitions <span className="text-slate-700 normal-case font-normal tracking-normal">· Optional</span>
+                      </label>
+                      <p className="text-[10px] text-slate-600 mb-3">Define key terms to help readers and improve SEO (e.g., "Car wrapping is...").</p>
+                      {articleDefinitions.map((def, idx) => (
+                        <div key={idx} className="mb-4 border border-blue-800 rounded-lg p-3">
+                          <input
+                            type="text"
+                            value={def.term}
+                            onChange={e => {
+                              const newDefs = [...articleDefinitions];
+                              newDefs[idx].term = e.target.value;
+                              setArticleDefinitions(newDefs);
+                            }}
+                            placeholder="Term (e.g., Car wrapping)"
+                            className="w-full bg-slate-950 border border-blue-800 rounded-lg px-3 py-2 text-slate-500 outline-none focus:border-blue-500 mb-2"
+                          />
+                          <textarea
+                            value={def.meaning}
+                            onChange={e => {
+                              const newDefs = [...articleDefinitions];
+                              newDefs[idx].meaning = e.target.value;
+                              setArticleDefinitions(newDefs);
+                            }}
+                            placeholder="Definition (e.g., the process of covering a vehicle's original paint with a vinyl film...)"
+                            rows={2}
+                            className="w-full bg-slate-950 border border-blue-800 rounded-lg px-3 py-2 text-slate-500 outline-none focus:border-blue-500 resize-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setArticleDefinitions(articleDefinitions.filter((_, i) => i !== idx))}
+                            className="mt-2 px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-sm"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => setArticleDefinitions([...articleDefinitions, { term: '', meaning: '' }])}
+                        className="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm"
+                      >
+                        + Add Definition
+                      </button>
                     </div>
 
                     {/* SEO */}

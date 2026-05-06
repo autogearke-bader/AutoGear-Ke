@@ -6,6 +6,7 @@ export interface TechnicianService {
   price: number | null;
   negotiable: boolean;
   notes: string | null;
+  service_variants?: ServiceVariant[];
 }
 
 export interface ServiceVariant {
@@ -238,6 +239,8 @@ export interface Article {
   internal_links?: { title: string; url: string }[] | null;  // Add this for internal links
   author_bio?: string | null;  // Add this for author bio
   faqs?: { question: string; answer: string }[] | null;  // Add this for FAQs
+  key_takeaways?: string[] | null;  // Add this for key takeaways
+  definitions?: { term: string; meaning: string }[] | null;  // Add this for definitions
 }
 
 // Admin dashboard types

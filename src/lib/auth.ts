@@ -34,7 +34,10 @@ export const signUpTechnician = async (email: string, password: string) => {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { role: 'technician' } },
+    options: {
+      emailRedirectTo: `${window.location.origin}/auth/callback`,
+      data: { role: 'technician' }
+    },
   });
   if (error) throw error;
   return data;
@@ -58,6 +61,7 @@ export const signUpClient = async (
     email,
     password,
     options: {
+      emailRedirectTo: `${window.location.origin}/auth/callback`,
       data: {
         role: 'client',
         name,   // ← trigger reads these from user_metadata

@@ -190,7 +190,7 @@ export const BookingModal = ({
 
   // Get selected service object and its variants
   const selectedServiceObj = services.find(s => s.service_name === selectedService);
-  const serviceVariants = technician.service_variants?.filter(v => v.service_id === selectedServiceObj?.id) || [];
+  const serviceVariants = selectedServiceObj?.service_variants || [];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

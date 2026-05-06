@@ -89,7 +89,7 @@ export default defineConfig(({ mode }) => {
                   urlPattern: /\/assets\/.+\.(js|css)$/i,
                   handler: 'NetworkFirst', // Always try network first for fresh content
                   options: {
-                    cacheName: 'static-assets-v5',
+                    cacheName: 'static-assets-v6',
                     expiration: {
                       maxEntries: 60,
                       maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days (reduced from 30)

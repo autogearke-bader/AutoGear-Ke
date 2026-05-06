@@ -13,7 +13,7 @@ export interface TechnicianMapProps {
   lng?: number;
 }
 
-export const TechnicianMap = ({ county, area, lat, lng }: TechnicianMapProps) => {
+const TechnicianMap = ({ county, area, lat, lng }: TechnicianMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
   const initialized = useRef(false);
@@ -107,3 +107,5 @@ export const TechnicianMap = ({ county, area, lat, lng }: TechnicianMapProps) =>
     />
   );
 };
+
+export default TechnicianMap;

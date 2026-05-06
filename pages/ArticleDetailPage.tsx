@@ -80,6 +80,7 @@ const ArticleDetailPage: React.FC = () => {
         {heroImage && <meta property="og:image" content={cx(heroImage, 'w_1200,h_630,c_fill,q_auto,f_auto')} />}
         <meta property="og:url"  content={`https://mekh.app/blogs/${article.slug}`} />
         <meta property="og:type" content="article" />
+        {/* Script 1: BlogPosting */}
         <script type="application/ld+json">
           {JSON.stringify({
             '@context':     'https://schema.org',
@@ -90,21 +91,23 @@ const ArticleDetailPage: React.FC = () => {
             datePublished:  article.created_at,
             dateModified:   article.updated_at ?? article.created_at,
             author: { '@type': 'Organization', name: 'Mekh' },
-            ...(article.faqs && article.faqs.length > 0 ? {
-              mainEntity: {
-                '@type': 'FAQPage',
-                mainEntity: article.faqs.map(faq => ({
-                  '@type': 'Question',
-                  name: faq.question,
-                  acceptedAnswer: {
-                    '@type': 'Answer',
-                    text: faq.answer
-                  }
-                }))
-              }
-            } : {}),
           })}
         </script>
+
+        {/* Script 2: FAQPage — separate, only if article has FAQs */}
+        {article.faqs && article.faqs.length > 0 && (
+          <script type="application/ld+json">
+            {JSON.stringify({
+              '@context':  'https://schema.org',
+              '@type':     'FAQPage',
+              mainEntity:  article.faqs.map(faq => ({
+                '@type':        'Question',
+                name:           faq.question,
+                acceptedAnswer: { '@type': 'Answer', text: faq.answer },
+              })),
+            })}
+          </script>
+        )}
       </Helmet>
 
       {/* ── Hero image ────────────────────────────────── */}
@@ -177,6 +180,40 @@ const ArticleDetailPage: React.FC = () => {
           />
         </div>
       </section>
+
+      {/* ── TL;DR — Key Takeaways ─────────────────────── */}
+      {article.key_takeaways && article.key_takeaways.length > 0 && (
+        <section className="px-4 md:px-8 pb-10 bg-slate-950">
+          <div className="max-w-3xl mx-auto w-full">
+            <div className="bg-slate-900 border border-slate-700 rounded-2xl p-5 mb-8">
+              <p className="text-blue-500 text-[11px] font-black uppercase tracking-widest mb-3">
+                TL;DR — Key Takeaways
+              </p>
+              <ul className="space-y-2 list-none">
+                {article.key_takeaways.map((point, i) => (
+                  <li key={i} className="text-slate-300 text-sm">✦ {point}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Definitions — Key Terms ───────────────────── */}
+      {article.definitions && article.definitions.length > 0 && (
+        <section className="px-4 md:px-8 pb-10 bg-slate-950">
+          <div className="max-w-3xl mx-auto w-full">
+            <div className="mb-8">
+              <h2 className="text-base font-bold text-blue-500 mb-3">Key Terms</h2>
+              {article.definitions.map((def, i) => (
+                <p key={i} className="text-slate-400 text-sm mb-2">
+                  <strong className="text-blue-500">{def.term}</strong> is {def.meaning}
+                </p>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── Related Links ─────────────────────────────── */}
       {article.internal_links && article.internal_links.length >= 2 && (

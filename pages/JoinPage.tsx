@@ -1997,7 +1997,9 @@ const JoinPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-950 py-8 px-4">
       <Helmet>
-        <title>Complete Your Technician Profile | Mekh</title>
+        <title>Mekh Technician Sign Up – Car Services Nairobi</title>
+        <meta name="description" content="Join Mekh as a technician. Offer car wrapping, window tinting, ceramic coating, and more services in Nairobi." />
+        <link rel="canonical" href="https://mekh.app/join" />
       </Helmet>
 
       <div className="max-w-3xl mx-auto">
@@ -2069,6 +2071,22 @@ const JoinPage: React.FC = () => {
           <p className="mt-4 text-center text-sm text-blue-500">
             Your progress is saved as you go. You can come back to previous steps.
           </p>
+        )}
+
+        {/* Internal Links Section */}
+        {currentStep !== 'complete' && (
+          <section style={{ marginTop: '3rem', padding: '2rem', borderTop: '1px solid #1e293b', backgroundColor: '#ffff' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem', color: '#3b82f6' }}>
+              Learn more about Mekh
+            </h3>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+              <a href="/services/window-tinting/garden-estate" className="text-blue-500 hover:underline text-sm">Window Tinting in Garden Estate</a>
+              <a href="/services/ceramic-coating/kilimani" className="text-blue-500 hover:underline text-sm">Ceramic Coating in Kilimani</a>
+              <a href="/services/headlight-restoration/karen" className="text-blue-500 hover:underline text-sm">Headlight Restoration in Karen</a>
+              <a href="/contact" className="text-blue-500 hover:underline text-sm">Contact Support</a>
+              <a href="/" className="text-blue-500 hover:underline text-sm">Back to Home</a>
+            </div>
+          </section>
         )}
       </div>
     </div>
