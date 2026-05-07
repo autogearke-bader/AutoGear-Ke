@@ -83,10 +83,10 @@ const HomePage: React.FC = () => {
   }, []);
 
   // Fetch data
-  const [technicians, setTechnicians] = useState([]);
+  const [technicians, setTechnicians] = useState<Technician[]>([]);
   const [loadingTechnicians, setLoadingTechnicians] = useState(true);
 
-  const [articles, setArticles] = useState([]);
+  const [articles, setArticles] = useState<Article[]>([]);
   const [loadingArticles, setLoadingArticles] = useState(true);
 
   // Derived values from client data
@@ -505,11 +505,14 @@ const HomePage: React.FC = () => {
       // If area matches found, show those technicians
       filtered = areaMatches;
     } else {
-      // Otherwise, filter by service matches (business name or service names)
+      // Otherwise, filter by service matches (business name, service names, or service variants)
       filtered = liveTechs.filter(t =>
         t.business_name?.toLowerCase().includes(lowerQuery) ||
         t.technician_services?.some(s =>
-          s.service_name.toLowerCase().includes(lowerQuery)
+          s.service_name.toLowerCase().includes(lowerQuery) ||
+          s.service_variants?.some(v =>
+            v.variant_name.toLowerCase().includes(lowerQuery)
+          )
         )
       );
     }

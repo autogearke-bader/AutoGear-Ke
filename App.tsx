@@ -29,6 +29,7 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage.tsx'));
 import Layout from './components/Layout.tsx';
 import ErrorBoundary from './components/ErrorBoundary.tsx';
 import { UpdatePrompt } from './src/components/UpdatePrompt';
+import { OfflineFallback } from './src/components/OfflineFallback';
 import { getCurrentUser, isClientProfileComplete, isTechnicianProfileComplete } from './src/lib/auth';
 import { isClientOnboardingComplete } from './src/lib/api';
 import { supabase } from './src/lib/supabase.ts';
@@ -45,6 +46,8 @@ const App: React.FC = () => {
 
 const AppContent: React.FC = () => {
   const [checkingProfile, setCheckingProfile] = useState(true);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [chunkError, setChunkError] = useState(false);
   const navigate = useNavigate();
 
   // ── PWA state (must be declared before any useEffect or JSX that references them) ──
@@ -61,6 +64,47 @@ const AppContent: React.FC = () => {
     }
     setInstallPrompt(null);
   };
+
+  // ── Online/Offline detection ──
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOffline(false);
+      setChunkError(false);
+      // Reload if we were showing offline screen
+      if (isOffline) {
+        window.location.reload();
+      }
+    };
+    const handleOffline = () => setIsOffline(true);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [isOffline]);
+
+  // ── Handle chunk loading errors (offline dynamic imports) ──
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      const errorMessage = event.message || '';
+      // Check if it's a chunk loading error
+      if (
+        errorMessage.includes('Failed to fetch dynamically imported module') ||
+        errorMessage.includes('Importing a module script failed') ||
+        errorMessage.includes('error loading dynamically imported module')
+      ) {
+        event.preventDefault();
+        setChunkError(true);
+        setIsOffline(true);
+      }
+    };
+
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
 
   // ── PWA: capture install prompt ──
   useEffect(() => {
@@ -184,6 +228,11 @@ const AppContent: React.FC = () => {
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sky-500" />
       </div>
     );
+  }
+
+  // Show offline fallback if user is offline or chunk loading failed
+  if (isOffline || chunkError) {
+    return <OfflineFallback />;
   }
 
   return (

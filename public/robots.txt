@@ -95,7 +95,53 @@ Disallow:
 Allow: /
 
 # -----------------------------------------------------------------------------
-# SECTION 2: SENSITIVE DIRECTORIES - BLOCKED FOR ALL CRAWLERS
+# SECTION 2: AI BOTS - EXPLICITLY ALLOWED FOR TRAINING & CITATIONS
+# -----------------------------------------------------------------------------
+# Allow AI bots to crawl and cite content from the platform.
+# This helps AI assistants provide accurate information about automotive services.
+
+# GPTBot - OpenAI's web crawler for ChatGPT training
+User-agent: GPTBot
+Disallow:
+Allow: /
+
+# ChatGPT-User - ChatGPT's browsing feature
+User-agent: ChatGPT-User
+Disallow:
+Allow: /
+
+# Claude-Web - Anthropic's Claude web crawler
+User-agent: Claude-Web
+Disallow:
+Allow: /
+
+# ClaudeBot - Alternative name for Claude's crawler
+User-agent: ClaudeBot
+Disallow:
+Allow: /
+
+# PerplexityBot - Perplexity AI's web crawler
+User-agent: PerplexityBot
+Disallow:
+Allow: /
+
+# Google-Extended - Google's AI training crawler (Gemini/Bard)
+User-agent: Google-Extended
+Disallow:
+Allow: /
+
+# Anthropic-AI - Anthropic's general AI crawler
+User-agent: Anthropic-AI
+Disallow:
+Allow: /
+
+# Cohere-AI - Cohere's AI training crawler
+User-agent: Cohere-AI
+Disallow:
+Allow: /
+
+# -----------------------------------------------------------------------------
+# SECTION 3: SENSITIVE DIRECTORIES - BLOCKED FOR ALL CRAWLERS
 # -----------------------------------------------------------------------------
 # These paths contain sensitive information and should NEVER be indexed.
 
@@ -155,7 +201,7 @@ Disallow: /*.json
 
 
 # -----------------------------------------------------------------------------
-# SECTION 3: SENSITIVE ENDPOINTS - SECURITY BLOCKS
+# SECTION 4: SENSITIVE ENDPOINTS - SECURITY BLOCKS
 # -----------------------------------------------------------------------------
 # Block various endpoints that could expose sensitive information or
 # create security vulnerabilities if indexed.
@@ -188,7 +234,7 @@ Disallow: /.env.production
 Disallow: /.env.development
 
 # -----------------------------------------------------------------------------
-# SECTION 4: PUBLIC CONTENT - ALLOWED FOR INDEXING
+# SECTION 5: PUBLIC CONTENT - ALLOWED FOR INDEXING
 # -----------------------------------------------------------------------------
 # Explicitly allow public content that should be indexed for SEO.
 # These are the main public-facing pages of the application.
@@ -224,7 +270,7 @@ Allow: /sw.js
 Allow: /_headers
 
 # -----------------------------------------------------------------------------
-# SECTION 5: STATIC ASSETS - ALLOWED
+# SECTION 6: STATIC ASSETS - ALLOWED
 # -----------------------------------------------------------------------------
 # Allow all static assets (images, CSS, JS, fonts) for proper rendering
 
@@ -239,7 +285,7 @@ Allow: /assets/
 Allow: /assets/*
 
 # -----------------------------------------------------------------------------
-# SECTION 6: CRAWL-DELAY DIRECTIVE
+# SECTION 7: CRAWL-DELAY DIRECTIVE
 # -----------------------------------------------------------------------------
 # Crawl-delay specifies the delay between successive crawl requests.
 # This helps prevent server overload from aggressive crawlers.
@@ -252,7 +298,7 @@ Allow: /assets/*
 Crawl-delay: 1
 
 # -----------------------------------------------------------------------------
-# SECTION 7: SITEMAP LOCATION
+# SECTION 8: SITEMAP LOCATION
 # -----------------------------------------------------------------------------
 # Point to your XML sitemap for better SEO and crawl efficiency.
 # This helps search engines discover all URLs on your site.
@@ -266,7 +312,7 @@ Sitemap: https://mekh.app/sitemap.xml
 # Sitemap: https://yourdomain.com/sitemap-index.xml
 
 # -----------------------------------------------------------------------------
-# SECTION 8: ENVIRONMENT-SPECIFIC RULES
+# SECTION 9: ENVIRONMENT-SPECIFIC RULES
 # -----------------------------------------------------------------------------
 # These rules handle different deployment environments.
 # Uncomment and adjust based on your environment.
@@ -291,7 +337,7 @@ Sitemap: https://mekh.app/sitemap.xml
 # Allow: /$
 
 # -----------------------------------------------------------------------------
-# SECTION 9: ADVANCED ROBOTS.TXT DIRECTIVES
+# SECTION 10: ADVANCED ROBOTS.TXT DIRECTIVES
 # -----------------------------------------------------------------------------
 
 # Clean URLs - Help search engines understand clean URL structure
@@ -306,7 +352,7 @@ Sitemap: https://mekh.app/sitemap.xml
 # Disallow: /*gclid
 
 # -----------------------------------------------------------------------------
-# SECTION 10: HOST DIRECTIVE (Legacy, but still respected by some)
+# SECTION 11: HOST DIRECTIVE (Legacy, but still respected by some)
 # -----------------------------------------------------------------------------
 # Specifies the preferred domain for crawling.
 # Most modern crawlers use canonical URLs instead.
