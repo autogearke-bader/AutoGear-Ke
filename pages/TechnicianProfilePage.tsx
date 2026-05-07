@@ -774,7 +774,7 @@ const TechnicianProfilePage: React.FC = () => {
       {technician.technician_services && technician.technician_services.length > 0 && (
         <section className="px-4 md:px-8 pb-6">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-lg font-bold text-blue-500 mb-3">Services <span className="text-xs font-normal text-slate-400 ml-2">The Pricing of a service depends on the vehicle size and the Model</span></h2>
+            <h2 className="text-lg font-bold text-blue-500 mb-3">Services <span className="text-xs font-normal text-slate-400 ml-2">The Pricing of each service highly depends on the vehicle size and the Model</span></h2>
             <ul className="space-y-2">
               {technician.technician_services.map((service) => {
                 const variants = service.service_variants || [];
@@ -853,13 +853,13 @@ const TechnicianProfilePage: React.FC = () => {
               })}
             </ul>
             
-            {/* Link to service/location page */}
+            {/* Link to nearby technicians */}
             <div className="mt-4 pt-4 border-t border-slate-800">
               <Link 
-                to={`/${getServiceSlug(technician.technician_services[0]?.service_name || 'car-detailing')}/${getLocationSlug(technician.area || technician.county || 'nairobi')}`}
+                to={`/nearby/${technician.slug}`}
                 className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-300 text-sm font-medium transition-colors"
               >
-                View all {technician.technician_services[0]?.service_name || 'services'} in {technician.area || technician.county}
+                View other technicians near {technician.area}
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                 </svg>

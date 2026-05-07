@@ -232,7 +232,7 @@ export const getTechnicians = async () => {
  * Fetch a single live technician by slug (for public profile page).
  * Returns the technician with services, photos, payments, and reviews.
  */
-export const getPublicTechnicianBySlug = async (slug: string) => {
+export const getPublicTechnicianBySlug = async (slug: string): Promise<any> => {
   const { data, error } = await supabase
     .from('technicians')
     .select(`
@@ -249,7 +249,7 @@ export const getPublicTechnicianBySlug = async (slug: string) => {
       technician_payments(id, method),
       avg_rating,
       review_count,
-      reviews(id, technician_id, client_id, rating, comment, would_rebook, created_at)
+      reviews(id, technician_id, lead_id, client_id, client_name, rating, comment, would_rebook, is_visible, status, admin_notes, approved_by, updated_at, created_at)
     `)
     .eq('slug', slug)
     .eq('status', 'live')
